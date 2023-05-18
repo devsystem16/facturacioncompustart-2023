@@ -1,0 +1,34 @@
+.creditos-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+  }
+  
+  .creditos-table th,
+  .creditos-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .creditos-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .creditos-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .creditos-table tbody tr:hover {
+    background-color: #ebebeb;
+  }
+  
+  .creditos-table th.centered,
+  .creditos-table td.centered {
+    text-align: center;
+  }
+  .creditos-table th.centered-rigth,
+  .creditos-table td.centered-rigth {
+    text-align: right;
+  }
+ 

@@ -1,0 +1,8 @@
+
+
+#productoTabla:hover {
+    background-color: rgba(225, 227, 255, 0.17);;
+}
+#productoTabla:active {
+    background-color:  #3f51b529;
+}

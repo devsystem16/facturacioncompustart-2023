@@ -1,0 +1,47 @@
+{
+    "ATENCION AL PUBLICO": {
+      "cliente": false,
+      "fecha": false,
+       "serie": false,
+      "equipo": false,
+      "marca": false,
+      "modelo": false,
+      "falla": false,
+      "trabajo": false,
+      "abono": false,
+      "saldo": false,
+      "total": false,
+      "estadoEquipo": false,
+      "observacion": true
+    },
+    "ADMINISTRADOR": {
+      "cliente": true,
+      "fecha": true,
+      "serie": true,
+      "equipo": true,
+      "marca": true,
+      "modelo": true,
+      "falla": true,
+      "trabajo": true,
+      "abono": true,
+      "saldo": false,
+      "total": true,
+      "estadoEquipo": true,
+      "observacion": true
+    },
+    "TECNICO": {
+      "cliente": false,
+      "fecha": false,
+      "serie": false,
+      "equipo": false,
+      "marca": false,
+      "modelo": false,
+      "falla": false,
+      "trabajo": true,
+      "abono": false,
+      "saldo": false,
+      "total": false,
+      "estadoEquipo": false,
+      "observacion": true
+    }
+  }
