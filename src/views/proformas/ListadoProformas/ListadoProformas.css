@@ -1,0 +1,27 @@
+.tablaListadoProformas {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+  }
+  
+  .tablaListadoProformas th,
+  .tablaListadoProformas td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .tablaListadoProformas th {
+    background-image: linear-gradient(to right top, #3f51b5, #345eb8, #2f69b9, #3473b7, #3f7db5);
+    color: white;
+  }
+  
+  .tablaListadoProformas tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .tablaListadoProformas tbody tr:hover {
+    background-color: #ddd;
+  }
+  

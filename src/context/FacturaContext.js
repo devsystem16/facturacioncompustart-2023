@@ -6,6 +6,7 @@ import React, {
   useRef,
   useCallback
 } from 'react';
+
 import { ClienteContext } from './ClienteContext';
 import { CreditoContext } from './CreditoContext';
 import { EstadisticasContext } from './EstadisticasContext';
@@ -23,12 +24,15 @@ export const FacturaContext = createContext();
 const END_POINT = {
   guardarCredito: 'api/creditos',
   guardarFactura: 'api/facturas',
-  obtenerFactura: 'api/facturas/impresion/reimpresion/'
+  guardarProforma: 'api/proformas',
+  obtenerFactura: 'api/facturas/impresion/reimpresion/',
+  obtenerProformas: 'api/proformas'
 };
 
 const FacturaProvider = (props) => {
+  const now = new Date();
   const [factura, setFactura] = useState([]);
-
+  const [esProforma, setEsProforma] = useState(false);
   const [factura_id, setFactura_id] = useState(-1);
 
   const [fechaFactura, setFechaFactura] = useState('-');
@@ -52,11 +56,57 @@ const FacturaProvider = (props) => {
   const [permitirBotonCredito, setPermitirBotonCredito] = useState(true);
   const [numeroItems, SetNumeroItems] = useState(1);
   const [formasPago, setFormasPago] = useState({});
+  const [reloadProforma, setReloadProforma] = useState(true);
+  const [proformas, setProformas] = useState([]);
+  const [proformasTemp, setProformasTemp] = useState([]);
+
+  const setDefaultDataInvoice = (objeto) => {
+    const resultado = objeto.detalles_proforma.map((detalle) => {
+      const {
+        cantidad,
+        producto_id: id,
+        producto: {
+          nombre,
+          precio_publico,
+          precio_tecnico,
+          precio_distribuidor,
+          stock
+        }
+      } = detalle;
+
+      const totalBruto = cantidad * precio_publico;
+      const total = obtienePrecioBruto(totalBruto); // Calcula el total con base en alguna fórmula
+
+      return {
+        cantidad,
+        id,
+        nombre,
+        precio_publico,
+        precio_tecnico,
+        precio_distribuidor,
+        total,
+        totalBruto,
+        tipoPrecio: 'publico',
+        stock
+      };
+    });
+
+    setProductosFactura(resultado);
+    return objeto.cliente;
+  };
+
   const [totales, setTotales] = useState({
     subtotal: 0,
     iva: 0,
     total: 0
   });
+
+  const [fechaEmision, setFechaEmision] = useState(
+    date.format(now, 'YYYY-MM-DD')
+  );
+  const [fechaVencimiento, setFechaVencimiento] = useState(
+    date.format(now, 'YYYY-MM-DD')
+  );
 
   const [currentPrecio, setCurrentPrecio] = useState('publico');
 
@@ -469,7 +519,7 @@ const FacturaProvider = (props) => {
     return Number(numStr);
   }
   const calcularTotalesFactura = async () => {
-    console.log('calcularTotalesFactura', productosFactura);
+    console.log('calcularTotalesFactura...', productosFactura);
     var subtotal = 0;
     var iva = 0;
     var total = 0;
@@ -491,6 +541,43 @@ const FacturaProvider = (props) => {
     });
   };
 
+  const guardarComoProforma = async () => {
+    const detalles = productosFactura.map((detalle) => {
+      return {
+        producto_id: detalle.id,
+        cantidad: detalle.cantidad,
+        subtotal: detalle.totalBruto,
+        precio_tipo: detalle.tipoPrecio
+      };
+    });
+
+    var proforma = {
+      cabecera: {
+        cliente_id: currentCliente.id,
+        usuario_id: localStorage.getItem('user_id'),
+        forma_pago_id: 1,
+        fecha_emision: fechaEmision,
+        fecha_vencimiento: fechaVencimiento,
+
+        subtotal: totales.subtotal,
+        iva: totales.iva,
+        total: totales.total,
+        observacion: observacion,
+        estado: 'pendiente'
+      },
+      detalle: [...detalles]
+    };
+
+    //alert(JSON.stringify(proforma));
+
+    const response = await API.post(END_POINT.guardarProforma, proforma);
+    setReloadProforma(true);
+    return {
+      status: 200,
+      mensaje: 'Proforma Guardada',
+      codigoFac: response?.data?.proforma?.id
+    };
+  };
   const guardarComoCredito = async () => {
     const now = new Date();
 
@@ -523,6 +610,10 @@ const FacturaProvider = (props) => {
 
     if (currentCliente.cedula === '')
       return { status: 500, mensaje: 'Seleccione un cliente' };
+    if (esProforma) {
+      const responseProforma = await guardarComoProforma();
+      return responseProforma;
+    }
 
     var mensaje_res = 'Factura Guardada';
     var credito_id = -1;
@@ -600,9 +691,21 @@ const FacturaProvider = (props) => {
     setFactura(response.data);
     return { codigo: 200, mensaje: 'Ok', factura: response.data };
   };
+
+  const obtenerProformas = async () => {
+    const response = await API.get(END_POINT.obtenerProformas);
+    setProformas(response.data);
+    setProformasTemp(response.data);
+  };
+
   useEffect(() => {
     calcularTotalesFactura();
-  }, [productosFactura]);
+
+    if (reloadProforma) {
+      obtenerProformas();
+      setReloadProforma(false);
+    }
+  }, [productosFactura, reloadProforma]);
 
   return (
     <>
@@ -640,7 +743,20 @@ const FacturaProvider = (props) => {
           setCreditoFP,
           creditoFP,
           permitirBotonCredito,
-          setPermitirBotonCredito
+          setPermitirBotonCredito,
+          esProforma,
+          setEsProforma,
+          fechaEmision,
+          setFechaEmision,
+          fechaVencimiento,
+          setFechaVencimiento,
+          reloadProforma,
+          setReloadProforma,
+          proformas,
+          setProformas,
+          proformasTemp,
+          setProformasTemp,
+          setDefaultDataInvoice
         }}
       >
         {props.children}

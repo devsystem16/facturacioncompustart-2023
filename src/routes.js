@@ -18,6 +18,9 @@ import Ingreso from './views/Ingreso/ProductListView/index';
 import ListadoFacturas from '../src/components/ListadoFacturas/ListadoFacturas';
 import LayoutPedidos from '../src/components/LayoutPedidos/';
 import LayoutReportes from '../src/components/LayoutReportes';
+
+import Proformas from '../src/views/proformas';
+
 const routes = [
   {
     path: 'app',
@@ -30,10 +33,12 @@ const routes = [
       { path: 'products', element: <ProductListView /> },
       { path: 'settings', element: <SettingsView /> },
       { path: 'creditos', element: <Creditos /> },
+
       { path: 'ingreso', element: <Ingreso /> },
       { path: 'facturas', element: <ListadoFacturas /> },
       { path: 'pedidos', element: <LayoutPedidos /> },
       { path: 'reportes', element: <LayoutReportes /> },
+      { path: 'proformas', element: <Proformas /> },
       { path: '*', element: <Navigate to="/404" /> }
     ]
   },

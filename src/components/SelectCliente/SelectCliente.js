@@ -12,13 +12,6 @@ const SelectCliente = ({
   const { clientes, currentCliente, setCurrentCliente, cargarClientes } =
     useContext(ClienteContext);
 
-  // const fn_click = () => {
-  //   setCurrentCliente({
-  //     cedula: '',
-  //     nombres: '-SELECCIONE-'
-  //   });
-  // };
-
   const fn_concatenarNombreEnSelect = (concatenar, option) => {
     if (concatenar)
       return option.cedula === ''

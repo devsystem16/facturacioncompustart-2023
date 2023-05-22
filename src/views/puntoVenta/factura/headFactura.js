@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
@@ -30,10 +30,12 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function HeadFactura() {
-  const { currentCliente } = useContext(ClienteContext);
-  const { credito, setCredito, permitirBotonCredito } =
+export default function HeadFactura({ defaultCliente }) {
+  const { currentCliente, setCurrentCliente } = useContext(ClienteContext);
+  const { credito, setCredito, permitirBotonCredito, esProforma } =
     useContext(FacturaContext);
+
+  //
   const handleChange = (event) => {
     if (!permitirBotonCredito) {
       Swal.fire({
@@ -57,26 +59,48 @@ export default function HeadFactura() {
       '-' +
       today.getDate();
 
+  useEffect(() => {
+    // alert(JSON.stringify(defaultCliente?.cedula));
+
+    if (defaultCliente?.cedula !== undefined) {
+      setCurrentCliente(defaultCliente);
+    }
+  }, [defaultCliente]);
+
   return (
     <div>
       <Typography variant="subtitle1" gutterBottom>
-        Facturación
+        {esProforma ? 'Proforma' : 'Facturación'}
       </Typography>
-      <FormControlLabel
-        style={{ float: 'right', marginTop: '-40px' }}
-        control={
-          <Switch
-            checked={credito}
-            onChange={handleChange}
-            name="credito"
-            color="primary"
-          />
-        }
-        label=" ¿Es crédito?"
-      />
+
+      {!esProforma ? (
+        <FormControlLabel
+          style={{ float: 'right', marginTop: '-40px' }}
+          control={
+            <Switch
+              checked={credito}
+              onChange={handleChange}
+              name="credito"
+              color="primary"
+            />
+          }
+          label=" ¿Es crédito?"
+        />
+      ) : null}
+
       <Grid container spacing={0} style={{ fontSize: '12px' }}>
         <Grid item xs={6}>
-          <SelectCliente concatenarCedula={true}></SelectCliente>
+          {/* <SelectCliente concatenarCedula={true}></SelectCliente> */}
+
+          {defaultCliente?.cedula !== undefined ? (
+            <SelectCliente
+              defaultCliete={defaultCliente}
+              concatenarCedula={true}
+            ></SelectCliente>
+          ) : (
+            <SelectCliente concatenarCedula={true}></SelectCliente>
+          )}
+
           {/* <Paper className={classes.paper}> Cliente: Mychael Castro <br /> 
           Direccion: Quito- Cofavy 
           </Paper> */}

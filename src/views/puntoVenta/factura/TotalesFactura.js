@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 export default function RowFactura({ totales }) {
   const classes = useStyles();
 
-  const { observacion, setObservacion, formasPago, setFormasPago } =
+  const { observacion, setObservacion, formasPago, setFormasPago, esProforma } =
     useContext(FacturaContext);
 
   const asignarObs = (e) => {
@@ -70,14 +70,14 @@ export default function RowFactura({ totales }) {
             className={classes.paper}
             style={{ fontWeight: 'bold', fontSize: '14px' }}
           >
-            {totales.total > 0 ? (
+            {totales.total > 0 && !esProforma ? (
               <FormasPago
                 formasPago={formasPago}
                 setFormasPago={setFormasPago}
                 TotalFactura={`$ ${totales.total}`}
               ></FormasPago>
             ) : (
-              0
+              `$ ${totales.total}`
             )}
           </Paper>
         </div>
@@ -85,6 +85,7 @@ export default function RowFactura({ totales }) {
         <div style={{ gridColumnEnd: 'span 9' }}>
           <Paper className={classes.paperRight} style={{ textAlign: 'left' }}>
             <TextareaAutosize
+              value={observacion}
               defaultValue={observacion}
               onChange={asignarObs}
               style={{ width: '100%' }}

@@ -26,7 +26,8 @@ import {
   Airplay as Billing,
   Edit as EditIconF,
   Smartphone,
-  Clipboard as iconoFacturas
+  Clipboard as iconoFacturas,
+  FileText as proformaIcon
 } from 'react-feather';
 import NavItem from './NavItem';
 
@@ -133,6 +134,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
     if (nombreIcono === 'ShoppingBagIcon') return ShoppingBagIcon;
     if (nombreIcono === 'EditIconF') return EditIconF;
     if (nombreIcono === 'iconoFacturas') return iconoFacturas;
+    if (nombreIcono === 'proformaIcon') return proformaIcon;
   };
 
   useEffect(() => {

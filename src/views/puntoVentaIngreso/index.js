@@ -42,10 +42,6 @@ const PuntoVenta = () => {
   const { setCurrentCliente } = useContext(ClienteContext);
 
   React.useEffect(() => {
-    // setCurrentCliente({
-    //   cedula: '',
-    //   nombres: '-SELECCIONE-'
-    // });
     ObtenerProductos();
   }, []);
   return (

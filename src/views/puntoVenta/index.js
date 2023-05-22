@@ -3,8 +3,7 @@ import React, { useContext, useEffect } from 'react';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Factura from './factura';
-import AddIcon from '@material-ui/icons/AddBox';
-import { useNavigate } from 'react-router-dom';
+
 import ListadoProductos from './listadoProductos';
 import { ProductosContext } from '../../context/ProductosContext';
 import { ClienteContext } from '../../context/ClienteContext';
@@ -32,8 +31,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PuntoVenta = () => {
-  const navigate = useNavigate();
-
   const classes = useStyles();
   // Obtener los productos del context
   const {
@@ -72,7 +69,7 @@ const PuntoVenta = () => {
 
         <Grid item xs={12} sm={7}>
           <Paper className={classes.paper}>
-            <Factura />
+            <Factura esProforma={false} />
           </Paper>
         </Grid>
       </Grid>
