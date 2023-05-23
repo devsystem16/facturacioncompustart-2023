@@ -38,12 +38,27 @@ const BuscadorProducto = ({ className, ...rest }) => {
     deleteProducto
   } = useContext(ProductosContext);
 
-  const accionesBoton = () => {};
+  const filtrarProductos = (e) => {
+    const palabrasFiltro = e.target.value.toLowerCase().split(' ');
 
-  const filrarProductos = (e) => {
-    console.log(e.target.value);
-    // if (e.key === 'Enter') {
-    console.log(productos);
+    const results = productos.filter((producto) => {
+      const nombreProducto = producto.nombre.toLowerCase();
+      const codigoProducto =
+        producto.codigo_barra === null
+          ? ''
+          : producto.codigo_barra.toLowerCase();
+
+      return palabrasFiltro.every((palabra) => {
+        return (
+          nombreProducto.includes(palabra) || codigoProducto.includes(palabra)
+        );
+      });
+    });
+
+    setProductosTemp(results);
+  };
+
+  const filrarProductosold = (e) => {
     const results = productos.filter((producto) => {
       const itemData = producto.nombre.toUpperCase();
       const textData = e.target.value.toUpperCase();
@@ -60,7 +75,6 @@ const BuscadorProducto = ({ className, ...rest }) => {
     });
     console.log(results);
     setProductosTemp(results);
-    // }
   };
 
   const fn_nuevoProducto = () => {
@@ -116,7 +130,7 @@ const BuscadorProducto = ({ className, ...rest }) => {
           {isNew ? (
             <NuevoProducto />
           ) : (
-            <Buscador filrarProductos={filrarProductos} />
+            <Buscador filrarProductos={filtrarProductos} />
           )}
         </Card>
       </Box>

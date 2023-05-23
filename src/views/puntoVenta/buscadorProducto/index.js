@@ -8,6 +8,26 @@ const BuscadorProductos = ({ classes }) => {
   const { setProductosTemp, productos } = useContext(ProductosContext);
 
   const filtrarProductos = (e) => {
+    const palabrasFiltro = e.target.value.toLowerCase().split(' ');
+
+    const results = productos.filter((producto) => {
+      const nombreProducto = producto.nombre.toLowerCase();
+      const codigoProducto =
+        producto.codigo_barra === null
+          ? ''
+          : producto.codigo_barra.toLowerCase();
+
+      return palabrasFiltro.every((palabra) => {
+        return (
+          nombreProducto.includes(palabra) || codigoProducto.includes(palabra)
+        );
+      });
+    });
+
+    setProductosTemp(results);
+  };
+
+  const filtrarProductos22 = (e) => {
     // if (isEmpty(e.target.value)) {
     //   setProductosTemp(productos);
     // } else if (e.key === 'Enter') {

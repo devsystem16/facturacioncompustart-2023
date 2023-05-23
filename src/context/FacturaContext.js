@@ -3,7 +3,6 @@ import React, {
   useState,
   useEffect,
   useContext,
-  useRef,
   useCallback
 } from 'react';
 
@@ -13,7 +12,7 @@ import { EstadisticasContext } from './EstadisticasContext';
 import { ProductosContext } from './ProductosContext';
 
 import API from '../Environment/config';
-import axios from 'axios';
+
 import date from 'date-and-time';
 import alertify from 'alertifyjs';
 
@@ -26,7 +25,8 @@ const END_POINT = {
   guardarFactura: 'api/facturas',
   guardarProforma: 'api/proformas',
   obtenerFactura: 'api/facturas/impresion/reimpresion/',
-  obtenerProformas: 'api/proformas'
+  obtenerProformas: 'api/proformas',
+  eliminarProforma: 'api/proformas/eliminar/'
 };
 
 const FacturaProvider = (props) => {
@@ -60,6 +60,12 @@ const FacturaProvider = (props) => {
   const [proformas, setProformas] = useState([]);
   const [proformasTemp, setProformasTemp] = useState([]);
 
+  const eliminarProforma = async (proforma) => {
+    const response = await API.post(END_POINT.eliminarProforma + proforma.id);
+    setReloadProforma(true);
+    return response.data;
+  };
+
   const setDefaultDataInvoice = (objeto) => {
     const resultado = objeto.detalles_proforma.map((detalle) => {
       const {
@@ -90,7 +96,7 @@ const FacturaProvider = (props) => {
         stock
       };
     });
-
+    setObservacion(objeto.observacion);
     setProductosFactura(resultado);
     return objeto.cliente;
   };
@@ -756,7 +762,8 @@ const FacturaProvider = (props) => {
           setProformas,
           proformasTemp,
           setProformasTemp,
-          setDefaultDataInvoice
+          setDefaultDataInvoice,
+          eliminarProforma
         }}
       >
         {props.children}
