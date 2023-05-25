@@ -8,6 +8,7 @@ import { ClienteContext } from '../../context/ClienteContext';
 import RowFactura from './FacturaRow_imp';
 import TotalesFac from './TotalesFac';
 import logo from '../../assets/Factura.PNG';
+
 const useStyles = makeStyles((theme) => ({
   container: {
     display: 'grid',
@@ -27,18 +28,28 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Factura_imp = React.forwardRef((props, ref) => {
-  const { productosFactura, totales, factura_id, fechaFactura, credito } =
-    useContext(FacturaContext);
+  const {
+    productosFactura,
+    totales,
+    factura_id,
+    fechaFactura,
+    credito,
+    esProforma
+  } = useContext(FacturaContext);
   const { currentCliente } = useContext(ClienteContext);
 
   const classes = useStyles();
 
   return (
-    <div ref={ref} style={{ width: '50%', marginLeft: '19px' }}>
+    <div
+      ref={ref}
+      style={{ width: '50%', marginLeft: '19px', fontFamily: 'Arial' }}
+    >
       <img className="imagenImpresion" src={logo} />
       <Typography variant="subtitle1" gutterBottom>
         <center>
-          N° Control {factura_id} {credito && ' (credito)'}
+          N° Control {factura_id} {credito && ' (Crédito)'}
+          {esProforma && ' (Proforma)'}
         </center>
       </Typography>
 

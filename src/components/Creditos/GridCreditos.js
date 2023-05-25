@@ -156,16 +156,37 @@ export default function CollapsibleTable() {
     recargarListaCreditos
   );
 
+  // const filrarProductos2 = (text) => {
+  //   const results = creditos.filter((credito) => {
+  //     const itemData = credito.cliente.toUpperCase();
+  //     const textData = text.toUpperCase();
+
+  //     const itemData1 = credito?.factura?.id.toString();
+  //     const textData1 = text.toString();
+
+  //     return (
+  //       itemData1.indexOf(textData1) > -1 || itemData.indexOf(textData) > -1
+  //     );
+  //   });
+
+  //   _setRecargarListaCreditos(false);
+  //   _setCreditos(results);
+  // };
+
   const filrarProductos = (text) => {
+    const searchTerm = text.toUpperCase().split(' ');
+
     const results = creditos.filter((credito) => {
-      const itemData = credito.cliente.toUpperCase();
-      const textData = text.toUpperCase();
+      const nombres =
+        credito && credito?.cliente ? credito?.cliente.toUpperCase() : '';
+      const codigo =
+        credito && credito?.factura?.id
+          ? credito?.factura?.id.toString().toUpperCase()
+          : '';
 
-      const itemData1 = credito?.factura?.id.toString();
-      const textData1 = text.toString();
-
-      return (
-        itemData1.indexOf(textData1) > -1 || itemData.indexOf(textData) > -1
+      // Verificar si cada término de búsqueda está presente en alguno de los campos
+      return searchTerm.every(
+        (term) => nombres.includes(term) || codigo.includes(term)
       );
     });
 

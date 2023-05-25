@@ -37,7 +37,10 @@ const Factura_imp = React.forwardRef((props, ref) => {
   // return <h1 ref={ref}>Esto quiero imprimir {dataFactura.factura.fecha}</h1>;
   var factura = dataFactura.factura;
   return (
-    <div ref={ref} style={{ width: '50%', marginLeft: '19px' }}>
+    <div
+      ref={ref}
+      style={{ width: '50%', marginLeft: '19px', fontFamily: 'Arial' }}
+    >
       <img className="imagenImpresion" src={logo} />
       <Typography variant="subtitle1" gutterBottom>
         <center>

@@ -1,19 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+
 import Paper from '@material-ui/core/Paper';
-import Divider from '@material-ui/core/Divider';
+
 import Grid from '@material-ui/core/Grid';
 import alertify from 'alertifyjs';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import SvgIcon from '@material-ui/core/SvgIcon';
-import AddIcon from '@material-ui/icons/AddBox';
-import RemoveIcon from '@material-ui/icons/RemoveCircle';
-import MenuFactura from '../../../components/MenuFactura/MenuFactura';
+
 import { FacturaContext } from '../../../context/FacturaContext';
 
-import { ProductosContext } from '../../../context/ProductosContext';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+import { formatCurrencySimple } from '../../../Environment/utileria';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -44,20 +41,17 @@ const redondear = (valor) => {
   return Math.round(valor * 100) / 100;
 };
 const obtienePrecioBruto = (precioNeto) => {
-  return trunc(precioNeto / 1.12, 4);
+  return formatCurrencySimple(trunc(precioNeto / 1.12, 4));
 };
 export default function RowFactura({ producto }) {
   const classes = useStyles();
 
   const {
-    sumarStockProductoFactura,
-    sumarStockProductoFacturaCantidad,
-    restarStockProductoFactura,
     eliminarProductoFactura,
-    numeroItems,
+
     SetNumeroItems,
     actualizarStockProductosCantidad,
-    productos,
+
     productosFactura,
     calcularTotalesFactura,
     actualizarProductosFactura
@@ -189,7 +183,9 @@ export default function RowFactura({ producto }) {
           <Paper className={classes.paper}>{producto.precio_tecnico}</Paper>
         </Grid> */}
         <Grid item xs={2}>
-          <Paper className={classes.paper}> {producto.total}</Paper>
+          <Paper className={classes.paper}>
+            {formatCurrencySimple(producto.total)}
+          </Paper>
         </Grid>
       </Grid>
     </div>

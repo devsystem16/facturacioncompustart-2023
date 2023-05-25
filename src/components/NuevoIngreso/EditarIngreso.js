@@ -47,12 +47,12 @@ export default function EditarIngreso({ fn_cerrarModal }) {
   const classes = useStyles();
 
   const { currentCliente, setCurrentCliente } = useContext(ClienteContext);
-  const { currentTecnico } = useContext(TecnicoContext);
+  // const { currentTecnico } = useContext(TecnicoContext);
   const { setIsReload } = useContext(EstadisticasContext);
   const {
     actualizarIngreso,
 
-    setsINew,
+    // setsINew,
     setReload,
     state,
     datosImpresion,
@@ -82,15 +82,15 @@ export default function EditarIngreso({ fn_cerrarModal }) {
   const [saldo, setSaldo] = useState(0);
   const [abono, setAbono] = useState(0);
 
-  const verificarPermiso = (/*perfil, opcion*/) => {
-    console.log();
-    // var arr = [];
-    // Object.keys(Permisos).forEach(function (key) {
-    //   console.log(key);
-    //   arr.push(Permisos[key]);
-    // });
-    // console.log(arr);
-  };
+  // const verificarPermiso = (/*perfil, opcion*/) => {
+  //   console.log();
+  //   // var arr = [];
+  //   // Object.keys(Permisos).forEach(function (key) {
+  //   //   console.log(key);
+  //   //   arr.push(Permisos[key]);
+  //   // });
+  //   // console.log(arr);
+  // };
 
   useEffect(() => {
     console.log('redner Editar ingreso.');

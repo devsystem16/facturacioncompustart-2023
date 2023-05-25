@@ -6,6 +6,8 @@ import TextareaAutosize from '@material-ui/core/TextareaAutosize';
 import BotonGuardarFactura from '../../../components/BotonGuardarFactura';
 import { FacturaContext } from '../../../context/FacturaContext';
 import FormasPago from '../../puntoVenta/factura/FormasPago';
+import { formatCurrency } from '../../../Environment/utileria';
+
 const useStyles = makeStyles((theme) => ({
   container: {
     display: 'grid',
@@ -50,14 +52,19 @@ export default function RowFactura({ totales }) {
           <Paper className={classes.paperRight}>SUBTOTAL: </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
-          <Paper className={classes.paper}> $ {totales.subtotal}</Paper>
+          <Paper className={classes.paper}>
+            {formatCurrency(totales.subtotal)}
+          </Paper>
         </div>
 
         <div style={{ gridColumnEnd: 'span 8' }}>
           <Paper className={classes.paperRight}>IVA 12%: </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
-          <Paper className={classes.paper}> $ {totales.iva}</Paper>
+          <Paper className={classes.paper}>
+            {' '}
+            {formatCurrency(totales.iva)}
+          </Paper>
         </div>
 
         <div style={{ gridColumnEnd: 'span 8' }}>
@@ -72,7 +79,7 @@ export default function RowFactura({ totales }) {
               <FormasPago
                 formasPago={formasPago}
                 setFormasPago={setFormasPago}
-                TotalFactura={`$ ${totales.total}`}
+                TotalFactura={`${formatCurrency(totales.total)}`}
               ></FormasPago>
             ) : (
               0

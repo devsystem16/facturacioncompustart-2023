@@ -1,5 +1,5 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useContext, useEffect } from 'react';
+// import PropTypes from 'prop-types';
 import NuevoIngreso from '../../../components/NuevoIngreso/NuevoIngreso';
 import clsx from 'clsx';
 import {
@@ -74,33 +74,44 @@ const BuscadorIngresos = ({ className, ...rest }) => {
   // const [ordenImprimir, setOrdenImprimir] = useState(datosImpresion);
 
   const verIngreso = () => {
-    setOpenModalIngreso(true);
+    if (datosImpresion?.cliente !== undefined) setOpenModalIngreso(true);
   };
 
+  const preImprimir = () => {
+    if (datosImpresion?.cliente !== undefined) EventoImprimirReact();
+  };
+
+  // const filrarIngresos2 = (e) => {
+  //   const results = ordenes.filter((orden) => {
+  //     const itemData1 = orden.cliente.toUpperCase();
+  //     const textData1 = e.target.value.toUpperCase();
+
+  //     const itemData5 = orden.id.toString().toUpperCase();
+  //     const textData5 = e.target.value.toString().toUpperCase();
+  //     return (
+  //       itemData1.indexOf(textData1) > -1 ||
+  //       itemData5.toString().indexOf(textData5) > -1
+  //     );
+  //   });
+  //   setOrdenesTemp(results);
+  // };
+
   const filrarIngresos = (e) => {
+    console.log(e.target.value);
+    const searchTerm = e.target.value.toUpperCase().split(' ');
+
     const results = ordenes.filter((orden) => {
-      // const itemData = orden.equipo.toUpperCase();
-      // const textData = e.target.value.toUpperCase();
+      const nombres =
+        orden && orden?.cliente ? orden?.cliente.toUpperCase() : '';
+      const codigo =
+        orden && orden?.id ? orden?.id.toString().toUpperCase() : '';
 
-      const itemData1 = orden.cliente.toUpperCase();
-      const textData1 = e.target.value.toUpperCase();
-
-      // const itemData3 = orden.marca.toUpperCase();
-      // const textData3 = e.target.value.toUpperCase();
-
-      // const itemData4 = orden.modelo.toUpperCase();
-      // const textData4 = e.target.value.toUpperCase();
-
-      const itemData5 = orden.id.toString().toUpperCase();
-      const textData5 = e.target.value.toString().toUpperCase();
-      return (
-        // itemData.indexOf(textData) > -1 ||
-        itemData1.indexOf(textData1) > -1 ||
-        // itemData3.indexOf(textData3) > -1 ||
-        // itemData4.indexOf(textData4) > -1 ||
-        itemData5.toString().indexOf(textData5) > -1
+      // Verificar si cada término de búsqueda está presente en alguno de los campos
+      return searchTerm.every(
+        (term) => nombres.includes(term) || codigo.includes(term)
       );
     });
+
     setOrdenesTemp(results);
   };
 
@@ -142,7 +153,7 @@ const BuscadorIngresos = ({ className, ...rest }) => {
             color="secondary"
             className={classes.exportButton}
             startIcon={<PrintIcon />}
-            onClick={EventoImprimirReact}
+            onClick={preImprimir}
             disabled={disablebotones.imprimir}
           >
             Imprimir

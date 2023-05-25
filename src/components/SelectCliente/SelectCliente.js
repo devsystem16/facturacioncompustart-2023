@@ -26,13 +26,33 @@ const SelectCliente = ({
         <Autocomplete
           id="debug"
           value={currentCliente}
-          // value={defaultCliete === undefined ? undefined : defaultCliete}
           disabled={selectInactive}
           options={clientes}
           debug
-          // defaultValue={defaultCliete === undefined ? null : defaultCliete}
+          filterOptions={(options, state) => {
+            // Obtener el valor de búsqueda sin espacios y en minúsculas
+            const inputValue = state.inputValue
+              .toLowerCase()
+              .replace(/\s/g, ' ');
+
+            console.log('INPUT GPT', inputValue);
+
+            // Filtrar las opciones según el valor de búsqueda flexible
+            return options.filter((option) => {
+              const { nombres } = option;
+
+              // Convertir el nombre completo y el valor de búsqueda en minúsculas
+              const fullName = nombres.toLowerCase();
+              const searchValue = inputValue;
+
+              // Separar el valor de búsqueda en palabras individuales
+              const searchTerms = searchValue.split(' ');
+
+              // Verificar si todas las palabras de búsqueda están presentes en el nombre completo
+              return searchTerms.every((term) => fullName.includes(term));
+            });
+          }}
           onChange={(event, newValue) => {
-            console.log(newValue);
             if (newValue === null) return;
             setCurrentCliente(newValue);
           }}
@@ -69,6 +89,29 @@ const SelectCliente = ({
           getOptionLabel={(option) =>
             fn_concatenarNombreEnSelect(concatenarCedula, option)
           }
+          filterOptions={(options, state) => {
+            // Obtener el valor de búsqueda sin espacios y en minúsculas
+            const inputValue = state.inputValue
+              .toLowerCase()
+              .replace(/\s/g, ' ');
+
+            console.log('INPUT GPT', inputValue);
+
+            // Filtrar las opciones según el valor de búsqueda flexible
+            return options.filter((option) => {
+              const { nombres } = option;
+
+              // Convertir el nombre completo y el valor de búsqueda en minúsculas
+              const fullName = nombres.toLowerCase();
+              const searchValue = inputValue;
+
+              // Separar el valor de búsqueda en palabras individuales
+              const searchTerms = searchValue.split(' ');
+
+              // Verificar si todas las palabras de búsqueda están presentes en el nombre completo
+              return searchTerms.every((term) => fullName.includes(term));
+            });
+          }}
           style={{ width: 300 }}
           renderInput={(params) => (
             <TextField

@@ -587,7 +587,7 @@ const FacturaProvider = (props) => {
   const guardarComoCredito = async () => {
     const now = new Date();
 
-    var fechaCredito = date.format(now, 'YYYY-MM-DD');
+    var fechaCredito = date.format(now, 'YYYY-MM-DD HH:mm:ss');
     var detalle = [];
 
     const credito = {
@@ -618,6 +618,7 @@ const FacturaProvider = (props) => {
       return { status: 500, mensaje: 'Seleccione un cliente' };
     if (esProforma) {
       const responseProforma = await guardarComoProforma();
+      setFactura_id(responseProforma?.codigoFac);
       return responseProforma;
     }
 
@@ -645,7 +646,7 @@ const FacturaProvider = (props) => {
     });
     const now = new Date();
 
-    var fechaFactura = date.format(now, 'YYYY-MM-DD');
+    var fechaFactura = date.format(now, 'YYYY-MM-DD HH:mm:ss');
 
     var factura = {
       cabecera: {
@@ -670,6 +671,7 @@ const FacturaProvider = (props) => {
     }
 
     setFactura_id(response.data.factura.id); // New
+ 
     setFechaFactura(response.data.factura.fecha);
 
     setIsReload(true); // ReloadEstadisticas.

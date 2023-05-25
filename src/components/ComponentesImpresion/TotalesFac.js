@@ -4,7 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 
 import { FacturaContext } from '../../context/FacturaContext';
-
+import { formatCurrencySimple } from '../../Environment/utileria';
 const useStyles = makeStyles((theme) => ({
   container: {
     display: 'grid',
@@ -45,7 +45,9 @@ export default function TotalesFac({ totales }) {
           <Paper className={classes.paperRight}>SUBTOTAL 12% $: </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
-          <Paper className={classes.paper}> {totales.subtotal}</Paper>
+          <Paper className={classes.paper}>
+            {formatCurrencySimple(totales.subtotal)}
+          </Paper>
         </div>
 
         <div style={{ gridColumnEnd: 'span 8', height: '24px' }}>
@@ -66,21 +68,27 @@ export default function TotalesFac({ totales }) {
           <Paper className={classes.paperRight}>SUBTOTAL :$ </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
-          <Paper className={classes.paper}> {totales.subtotal}</Paper>
+          <Paper className={classes.paper}>
+            {formatCurrencySimple(totales.subtotal)}
+          </Paper>
         </div>
 
         <div style={{ gridColumnEnd: 'span 8' }}>
           <Paper className={classes.paperRight}>IVA 12%:$ </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
-          <Paper className={classes.paper}> {totales.iva}</Paper>
+          <Paper className={classes.paper}>
+            {formatCurrencySimple(totales.iva)}
+          </Paper>
         </div>
 
         <div style={{ gridColumnEnd: 'span 8' }}>
           <Paper className={classes.paperRight}>VALOR TOTAL:$ </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
-          <Paper className={classes.paper}> $ {totales.total}</Paper>
+          <Paper className={classes.paper}>
+            $ {formatCurrencySimple(totales.total)}
+          </Paper>
         </div>
 
         <div style={{ gridColumnEnd: 'span 9', marginTop: '3px' }}>

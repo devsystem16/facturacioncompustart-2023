@@ -47,47 +47,65 @@ const ClienteProvider = (props) => {
     alertify.success(response.data.mensaje, 2);
     cargarClientes();
   };
+
   const filtrar = (e) => {
     console.log(e.target.value);
+    const searchTerm = e.target.value.toUpperCase().split(' ');
+
     const results = clientes.filter((cliente) => {
-      const itemData =
+      const nombres =
         cliente && cliente.nombres ? cliente.nombres.toUpperCase() : '';
-      const textData = e.target.value.toUpperCase();
-
-      const itemData1 =
+      const cedula =
         cliente && cliente.cedula ? cliente.cedula.toUpperCase() : '';
-      const textData1 = e.target.value.toUpperCase();
-
-      const itemData2 =
+      const telefono =
         cliente && cliente.telefono ? cliente.telefono.toUpperCase() : '';
-      const textData2 = e.target.value.toUpperCase();
-
-      const itemData3 =
+      const correo =
         cliente && cliente.correo ? cliente.correo.toUpperCase() : '';
-      const textData3 = e.target.value.toUpperCase();
 
-      // const itemData = cliente.nombres.toUpperCase();
-      // const textData = e.target.value.toUpperCase();
-
-      // const itemData1 = cliente.cedula.toUpperCase();
-      // const textData1 = e.target.value.toUpperCase();
-
-      // const itemData2 = cliente.telefono.toUpperCase();
-      // const textData2 = e.target.value.toUpperCase();
-
-      // const itemData3 = cliente.correo.toUpperCase();
-      // const textData3 = e.target.value.toUpperCase();
-
-      return (
-        itemData.indexOf(textData) > -1 ||
-        itemData1.indexOf(textData1) > -1 ||
-        itemData2.indexOf(textData2) > -1 ||
-        itemData3.indexOf(textData3) > -1
+      // Verificar si cada término de búsqueda está presente en alguno de los campos
+      return searchTerm.every(
+        (term) =>
+          nombres.includes(term) ||
+          cedula.includes(term) ||
+          telefono.includes(term) ||
+          correo.includes(term)
       );
     });
 
     setClientesFiltro(results);
   };
+
+  // const filtrar = (e) => {
+  //   console.log(e.target.value);
+  //   const results = clientes.filter((cliente) => {
+  //     const searchTerm = e.target.value.toUpperCase().split(' ');
+
+  //     const itemData =
+  //       cliente && cliente.nombres ? cliente.nombres.toUpperCase() : '';
+  //     const textData = e.target.value.toUpperCase();
+
+  //     const itemData1 =
+  //       cliente && cliente.cedula ? cliente.cedula.toUpperCase() : '';
+  //     const textData1 = e.target.value.toUpperCase();
+
+  //     const itemData2 =
+  //       cliente && cliente.telefono ? cliente.telefono.toUpperCase() : '';
+  //     const textData2 = e.target.value.toUpperCase();
+
+  //     const itemData3 =
+  //       cliente && cliente.correo ? cliente.correo.toUpperCase() : '';
+  //     const textData3 = e.target.value.toUpperCase();
+
+  //     return (
+  //       itemData.indexOf(textData) > -1 ||
+  //       itemData1.indexOf(textData1) > -1 ||
+  //       itemData2.indexOf(textData2) > -1 ||
+  //       itemData3.indexOf(textData3) > -1
+  //     );
+  //   });
+
+  //   setClientesFiltro(results);
+  // };
 
   useEffect(() => {
     cargarClientes();

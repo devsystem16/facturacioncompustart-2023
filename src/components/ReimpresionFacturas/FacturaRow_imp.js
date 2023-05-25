@@ -1,41 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-
-import Paper from '@material-ui/core/Paper';
-
 import Grid from '@material-ui/core/Grid';
 
-import DeleteIcon from '@material-ui/icons/DeleteRounded';
-import SvgIcon from '@material-ui/core/SvgIcon';
-import AddIcon from '@material-ui/icons/AddBox';
-import RemoveIcon from '@material-ui/icons/RemoveCircle';
+import { formatCurrencySimple } from '../../Environment/utileria';
 
-import { FacturaContext } from '../../context/FacturaContext';
-
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(12, 1fr)',
-    gridGap: theme.spacing(3)
-  },
-  paper: {
-    padding: theme.spacing(0),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    whiteSpace: 'nowrap',
-    marginBottom: theme.spacing(0),
-    marginTop: theme.spacing(0)
-  },
-  divider: {
-    margin: theme.spacing(2, 0)
-  }
-}));
-
-const redondear = (valor) => {
-  return Math.round(valor * 100) / 100;
-};
+// const redondear = (valor) => {
+//   return Math.round(valor * 100) / 100;
+// };
 const obtienePrecioBruto = (precioNeto) => {
-  return trunc(precioNeto / 1.12, 4);
+  return formatCurrencySimple(trunc(precioNeto / 1.12, 4));
   // return redondear(precioNeto - precioNeto * 0.12);
 };
 function trunc(x, posiciones = 0) {
@@ -46,8 +19,6 @@ function trunc(x, posiciones = 0) {
   return Number(numStr);
 }
 export default function FacturaRow_imp({ producto }) {
-  const classes = useStyles();
-
   return (
     <div style={{ height: '24px' }} key={producto?.id + producto?.tipoPrecio}>
       <Grid

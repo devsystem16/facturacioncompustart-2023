@@ -3,7 +3,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import Paper from '@material-ui/core/Paper';
+import { formatCurrencySimple } from '../../Environment/utileria';
 const options = ['Precio Público', 'Precio Técnico', 'Precio Mayorista'];
 
 const ITEM_HEIGHT = 38;
@@ -24,6 +24,8 @@ export default function MenuFactura({ producto }) {
   };
   const obtienePrecioBruto = (precioNeto) => {
     return redondear(precioNeto - precioNeto * 0.12);
+    // return formatCurrencySimple(precioNeto - precioNeto * 0.12);
+    // return formatCurrencySimple(trunc(precioNeto / 1.12, 4));
   };
 
   const [precio, setPrecio] = useState(0);
