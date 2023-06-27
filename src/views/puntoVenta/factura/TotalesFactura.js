@@ -78,8 +78,7 @@ export default function RowFactura({ totales }) {
               <FormasPago
                 formasPago={formasPago}
                 setFormasPago={setFormasPago}
-                // TotalFactura={`$ ${totales.total}`}
-                TotalFactura={`  ${formatCurrency(totales.total)}`}
+                TotalFactura={`${formatCurrency(totales.total)}`}
               ></FormasPago>
             ) : (
               `$ ${totales.total}`

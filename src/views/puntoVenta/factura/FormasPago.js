@@ -16,19 +16,19 @@ import { FacturaContext } from '../../../context/FacturaContext';
 export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
   const [abrirFormasPago, setAbrirFormasPago] = useState(false);
   const [valorDeclarado, setValorDeclarado] = useState(0);
-  // const [  setHasError] = useState(false);
+
   const [ListformasPago, setListformasPago] = useState([]);
   const { setCredito, setCreditoFP, setPermitirBotonCredito } =
     useContext(FacturaContext);
 
   const setFormaPagoDefault = (listFormasPago) => {
     let fPago = listFormasPago.find((FPago) => FPago.default === 1);
-    setFormasPago({
-      [fPago.nombre]: {
-        id: fPago.id,
-        valor: TotalFactura.replace(/[^\d.]/g, '')
-      }
-    });
+    // setFormasPago({
+    //   [fPago.nombre]: {
+    //     id: fPago.id,
+    //     valor: TotalFactura.replace(/[^\d.]/g, '')
+    //   }
+    // });
   };
   const cargarFormasPago = async () => {
     const respuesta = await API.get('/api/forma-pagos');
@@ -147,7 +147,8 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
       bloquarBoton: false
     });
     setValorDeclarado(0);
-    setFormaPagoDefault(ListformasPago);
+    // setFormaPagoDefault(ListformasPago);
+    setFormasPago({});
     setAbrirFormasPago(false);
   };
 

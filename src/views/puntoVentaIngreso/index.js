@@ -1,12 +1,11 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Factura from './factura';
-import AddIcon from '@material-ui/icons/AddBox';
 import ListadoProductos from './listadoProductos';
 import { ProductosContext } from '../../context/ProductosContext';
-import { ClienteContext } from '../../context/ClienteContext';
+// import { ClienteContext } from '../../context/ClienteContext';
 
 import { makeStyles } from '@material-ui/core';
 
@@ -34,12 +33,12 @@ const PuntoVenta = () => {
   // Obtener los productos del context
   const {
     ObtenerProductos,
-    productos,
+
     setProductos,
     buscarProductos,
     productosTemp
   } = useContext(ProductosContext);
-  const { setCurrentCliente } = useContext(ClienteContext);
+  // const { setCurrentCliente } = useContext(ClienteContext);
 
   React.useEffect(() => {
     ObtenerProductos();

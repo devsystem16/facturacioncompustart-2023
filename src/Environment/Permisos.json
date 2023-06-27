@@ -13,7 +13,14 @@
       "total": false,
       "estadoEquipo": false,
       "observacion": true,
-      "anular factura": false
+      "anular factura": false,
+      "reimprimir-factura": true,
+      "anular-credito": false,
+      "abonar-credito": true,
+      "historialpagos-credito": true,
+      "registrar-retiros" : true ,
+      "eliminar-retiros" : false ,
+      "finalizar-periodo": false 
     },
     "ADMINISTRADOR": {
       "cliente": true,
@@ -29,7 +36,14 @@
       "total": true,
       "estadoEquipo": true,
       "observacion": true,
-      "anular factura": true
+      "anular factura": true,
+      "reimprimir-factura": true,
+      "anular-credito": true,
+      "abonar-credito": true,
+      "historialpagos-credito": true,
+      "registrar-retiros" : true ,
+      "eliminar-retiros" : true ,
+      "finalizar-periodo": true 
     },
     "TECNICO": {
       "cliente": false,
@@ -45,6 +59,13 @@
       "total": false,
       "estadoEquipo": false,
       "observacion": true,
-      "anular factura": false
+      "anular factura": false,
+      "reimprimir-factura": true,
+      "anular-credito": false,
+      "abonar-credito": true,
+      "historialpagos-credito": true,
+      "registrar-retiros" : false ,
+      "eliminar-retiros" : false ,
+      "finalizar-periodo": false 
     }
   }

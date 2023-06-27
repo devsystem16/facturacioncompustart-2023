@@ -39,17 +39,21 @@ const SelectCliente = ({
 
             // Filtrar las opciones según el valor de búsqueda flexible
             return options.filter((option) => {
-              const { nombres } = option;
+              const { cedula, nombres } = option;
 
               // Convertir el nombre completo y el valor de búsqueda en minúsculas
               const fullName = nombres.toLowerCase();
+              const fullcedula = cedula.toLowerCase();
+
               const searchValue = inputValue;
 
               // Separar el valor de búsqueda en palabras individuales
               const searchTerms = searchValue.split(' ');
 
               // Verificar si todas las palabras de búsqueda están presentes en el nombre completo
-              return searchTerms.every((term) => fullName.includes(term));
+              return searchTerms.every(
+                (term) => fullName.includes(term) || fullcedula.includes(term)
+              );
             });
           }}
           onChange={(event, newValue) => {
@@ -99,17 +103,21 @@ const SelectCliente = ({
 
             // Filtrar las opciones según el valor de búsqueda flexible
             return options.filter((option) => {
-              const { nombres } = option;
+              const { cedula, nombres } = option;
 
               // Convertir el nombre completo y el valor de búsqueda en minúsculas
               const fullName = nombres.toLowerCase();
+              const fullcedula = cedula.toLowerCase();
+
               const searchValue = inputValue;
 
               // Separar el valor de búsqueda en palabras individuales
               const searchTerms = searchValue.split(' ');
 
               // Verificar si todas las palabras de búsqueda están presentes en el nombre completo
-              return searchTerms.every((term) => fullName.includes(term));
+              return searchTerms.every(
+                (term) => fullName.includes(term) || fullcedula.includes(term)
+              );
             });
           }}
           style={{ width: 300 }}

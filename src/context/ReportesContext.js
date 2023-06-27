@@ -1,16 +1,6 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useRef
-} from 'react';
-import { ClienteContext } from './ClienteContext';
+import React, { createContext, useState, useEffect } from 'react';
 
-import date from 'date-and-time';
-import alertify from 'alertifyjs';
 import API from '../Environment/config';
-import { useReactToPrint } from 'react-to-print';
 
 export const ReportesContext = createContext();
 

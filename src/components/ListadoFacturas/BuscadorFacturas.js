@@ -1,11 +1,7 @@
 import React, { useState, useContext } from 'react';
 
-import Search from '@material-ui/icons/Search';
-import { isEmpty } from 'lodash';
 import {
   Box,
-  Button,
-  Card,
   CardContent,
   TextField,
   InputAdornment,
@@ -14,6 +10,8 @@ import {
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
 import { EstadisticasContext } from '../../../src/context/EstadisticasContext';
+import Loading from '../Loading/Loading';
+
 const useStyles = makeStyles((theme) => ({
   root: {},
   importButton: {
@@ -29,16 +27,25 @@ const BuscadorFacturas = () => {
   const { historicofacturas, cargarHistoricoFacturasFilter } =
     useContext(EstadisticasContext);
 
-  const filtrarFacturas = (e) => {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const filtrarFacturas = async (e) => {
     // if (!isEmpty(e.target.value)) {
     if (e.key === 'Enter') {
-      cargarHistoricoFacturasFilter(e.target.value);
+      setIsLoading(true);
+      const response = await cargarHistoricoFacturasFilter(e.target.value);
+      setIsLoading(false);
     }
     // }
   };
 
   return (
     <CardContent style={{ backgroundColor: 'white', textAlign: 'center' }}>
+      <Loading
+        text="Obteniendo.."
+        open={isLoading}
+        seOpen={setIsLoading}
+      ></Loading>
       <Box maxWidth={500}>
         <TextField
           fullWidth

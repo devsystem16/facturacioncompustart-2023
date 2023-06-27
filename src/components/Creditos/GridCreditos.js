@@ -13,17 +13,20 @@ import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import FacturaYPagos from './FacturaYPagos';
-import AddCircle from '@material-ui/icons/AddCircle';
+
 import ModalAbono from '../../components/CreditosTable/ModalAbono';
 import { CreditoContext } from '../../context/CreditoContext';
 import { TextField, InputAdornment, SvgIcon } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
-import alertify from 'alertifyjs';
+
 import Swal from 'sweetalert2';
 import DeleteForever from '@material-ui/icons/DeleteForever';
 import PagosIcon from '@material-ui/icons/ChromeReaderMode';
 import PayIcon from '@material-ui/icons/MonetizationOn';
 import ModalPagos from './ModalPagos';
+import { formatCurrencySimple } from '../../Environment/utileria';
+import Permisos from '../../Environment/Permisos.json';
+
 const useStyles = makeStyles({
   table: {
     minWidth: 650
@@ -107,25 +110,48 @@ function Row(props) {
         <TableCell align="right"> {credito.detalle}</TableCell>
         <TableCell align="right"> {credito.cliente}</TableCell>
         <TableCell align="right">{credito.telefono}</TableCell>
-        <TableCell align="right">{credito.total}</TableCell>
-        <TableCell align="right">{credito.abono}</TableCell>
-        <TableCell align="right"> {credito.saldo}</TableCell>
         <TableCell align="right">
-          <PayIcon
-            style={{ cursor: 'pointer' }}
-            fontSize="small"
-            onClick={() => abonarCredito(credito)}
-          />
-          <PagosIcon
-            title="Ver Abonos"
-            onClick={() => imprimirAbonos(credito)}
-            style={{ cursor: 'pointer' }}
-          />
-          <DeleteForever
+          {formatCurrencySimple(credito.total)}
+        </TableCell>
+        <TableCell align="right">
+          {formatCurrencySimple(credito.abono)}
+        </TableCell>
+        <TableCell align="right">
+          {' '}
+          {formatCurrencySimple(credito.saldo)}
+        </TableCell>
+        <TableCell align="right">
+          {Permisos[localStorage.getItem('tipo_usuario')]['abonar-credito'] && (
+            <PayIcon
+              style={{ cursor: 'pointer' }}
+              fontSize="small"
+              onClick={() => abonarCredito(credito)}
+            />
+          )}
+
+          {Permisos[localStorage.getItem('tipo_usuario')][
+            'historialpagos-credito'
+          ] && (
+            <PagosIcon
+              title="Ver Abonos"
+              onClick={() => imprimirAbonos(credito)}
+              style={{ cursor: 'pointer' }}
+            />
+          )}
+
+          {Permisos[localStorage.getItem('tipo_usuario')]['anular-credito'] && (
+            <DeleteForever
+              title="Anular Crédito"
+              onClick={() => eliminarCredito(credito)}
+              style={{ cursor: 'pointer' }}
+            />
+          )}
+
+          {/* <DeleteForever
             title="Anular Crédito"
             onClick={() => eliminarCredito(credito)}
             style={{ cursor: 'pointer' }}
-          />
+          /> */}
         </TableCell>
       </TableRow>
       <TableRow>

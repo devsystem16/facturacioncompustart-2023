@@ -24,13 +24,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ProductosTabla = ({ productos }) => {
+  const productosConStock = productos.filter((producto) => producto.stock > 0);
+
   return (
     <FixedSizeList
       height={500}
       width={'100%'}
-      itemCount={productos.length}
+      itemCount={productosConStock.length}
       itemSize={100}
-      itemData={productos}
+      itemData={productosConStock}
     >
       {Row}
     </FixedSizeList>

@@ -16,13 +16,14 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import PrintIcon from '@material-ui/icons/DeleteForever';
 import PrintIco from '@material-ui/icons/Print';
-import { Button } from '@material-ui/core';
+
 import BuscadorFacturas from './BuscadorFacturas';
 import { EstadisticasContext } from '../../../src/context/EstadisticasContext';
 import { FacturaContext } from '../../../src/context/FacturaContext';
 import Swal from 'sweetalert2';
 import Permisos from '../../Environment/Permisos.json';
 import SelectLimit from './SelectLimit';
+import { formatCurrencySimple } from '../../Environment/utileria';
 
 // impresion Facturas
 import { useReactToPrint } from 'react-to-print';
@@ -73,16 +74,6 @@ function Row(props) {
         } else {
           Swal.fire(response.mensaje, '', 'warning');
         }
-
-        // const response = await API.patch(
-        //   END_POINT.eliminar_orden + '/' + datosImpresion.orden.id,
-        //   { estado: 0 }
-        // );
-        // if (response.data === 1) {
-        //   setReload(true);
-        //   setIsReload(true);
-        //   Swal.fire('Eliminado', '', 'success');
-        // }
       }
     });
   };
@@ -103,24 +94,28 @@ function Row(props) {
           {row.cliente}
         </TableCell>
         <TableCell align="left">{row.fecha}</TableCell>
-        <TableCell align="right">$ {row.total}</TableCell>
+        <TableCell align="right">$ {formatCurrencySimple(row.total)}</TableCell>
         <TableCell align="right">{row.observacion}</TableCell>
         <TableCell align="right">{row.estado}</TableCell>
 
-        {Permisos[localStorage.getItem('tipo_usuario')]['anular factura'] && (
-          <TableCell align="right">
+        <TableCell align="right">
+          {Permisos[localStorage.getItem('tipo_usuario')][
+            'reimprimir-factura'
+          ] && (
             <PrintIco
               title="Reimprimir Factura"
               onClick={() => imprimirFactura(row.id, row.estado)}
               style={{ cursor: 'pointer' }}
             />
+          )}
+          {Permisos[localStorage.getItem('tipo_usuario')]['anular factura'] && (
             <PrintIcon
               title="Anular Factura"
               onClick={() => anularFactura(row.id, row.estado)}
               style={{ cursor: 'pointer' }}
             />
-          </TableCell>
-        )}
+          )}
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -147,7 +142,7 @@ function Row(props) {
                       <TableCell>{historyRow.producto}</TableCell>
                       <TableCell align="center">
                         {/* $ {trunc(historyRow.subtotal / 1.12, 4)} */}${' '}
-                        {historyRow.subtotal}
+                        {formatCurrencySimple(historyRow.subtotal)}
                       </TableCell>
                       <TableCell align="right">
                         {historyRow.precio_tipo}
@@ -165,8 +160,12 @@ function Row(props) {
 }
 
 export default function CollapsibleTable() {
-  const { historicofacturas, limite, setLimite } =
-    useContext(EstadisticasContext);
+  const {
+    historicofacturas,
+    limite,
+    setLimite,
+    cargarHistoricoFacturasFilter
+  } = useContext(EstadisticasContext);
   const { fn_obtenerFactura, factura } = useContext(FacturaContext);
 
   const [isPrinter, setIsPrinter] = useState({
@@ -182,14 +181,7 @@ export default function CollapsibleTable() {
   };
   const print = useReactToPrint({
     content: () => componentRef.current,
-    onAfterPrint: () => {
-      // setProductosFactura([]);
-      // setCredito(false);
-      // setCurrentCliente({
-      //   cedula: '',
-      //   nombres: '-SELECCIONE-'
-      // });
-    }
+    onAfterPrint: () => {}
   });
 
   const imprimirFactura = async (id, estado) => {
@@ -223,7 +215,11 @@ export default function CollapsibleTable() {
       <center>
         <h1>Historico de facturas</h1>
       </center>
-      <SelectLimit data={limite} setData={setLimite}></SelectLimit>
+      <SelectLimit
+        onChangeData={cargarHistoricoFacturasFilter}
+        data={limite}
+        setData={setLimite}
+      ></SelectLimit>
       <BuscadorFacturas></BuscadorFacturas>
 
       <TableContainer component={Paper}>
@@ -237,9 +233,7 @@ export default function CollapsibleTable() {
               <TableCell align="right">Total</TableCell>
               <TableCell align="right">Observación</TableCell>
               <TableCell align="right">Estatus</TableCell>
-              {Permisos[localStorage.getItem('tipo_usuario')][
-                'anular factura'
-              ] && <TableCell align="right">Acciones</TableCell>}
+              <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

@@ -11,25 +11,28 @@ import TecnicoProvider from './context/TecnicoContext';
 import CreditoProvider from './context/CreditoContext';
 import EstadisticasProvider from './context/EstadisticasContext';
 import LoginProvider from './context/LoginContext';
+import PeriodoProvider from './context/PeriodoContext';
 
 ReactDOM.render(
   <BrowserRouter>
     <LoginProvider>
-      <EstadisticasProvider>
-        <TecnicoProvider>
-          <ProductosProvider>
-            <ClienteProvider>
-              <IngresoProvider>
-                <CreditoProvider>
-                  <FacturaProvider>
-                    <App />
-                  </FacturaProvider>
-                </CreditoProvider>
-              </IngresoProvider>
-            </ClienteProvider>
-          </ProductosProvider>
-        </TecnicoProvider>
-      </EstadisticasProvider>
+      <PeriodoProvider>
+        <EstadisticasProvider>
+          <TecnicoProvider>
+            <ProductosProvider>
+              <ClienteProvider>
+                <IngresoProvider>
+                  <CreditoProvider>
+                    <FacturaProvider>
+                      <App />
+                    </FacturaProvider>
+                  </CreditoProvider>
+                </IngresoProvider>
+              </ClienteProvider>
+            </ProductosProvider>
+          </TecnicoProvider>
+        </EstadisticasProvider>
+      </PeriodoProvider>
     </LoginProvider>
   </BrowserRouter>,
   document.getElementById('root')

@@ -90,6 +90,7 @@ export default function RowFactura({ totales }) {
         <div style={{ gridColumnEnd: 'span 9' }}>
           <Paper className={classes.paperRight} style={{ textAlign: 'left' }}>
             <TextareaAutosize
+              value={observacion}
               defaultValue={observacion}
               onChange={asignarObs}
               style={{ width: '100%' }}

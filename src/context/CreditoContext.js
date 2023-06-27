@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+ 
 import { EstadisticasContext } from './EstadisticasContext';
+import { PeriodoContext } from './PeriodoContext';
 import API from '../Environment/config';
 
 const END_POINT = {
@@ -20,14 +21,15 @@ const CreditoProvider = (props) => {
   const [recargarFiltro, setRecargarFiltro] = useState(false);
 
   const { setIsReload } = useContext(EstadisticasContext);
-
+  const { periodo } = useContext(PeriodoContext);
   const guardarAbono = async (abono, formaPagoId = 1) => {
     setIsLoading(true);
 
     const respuesta = await API.post(END_POINT.guardarAbono, {
       credito_id: currentCredito.id,
       abono: abono,
-      forma_pago_id: formaPagoId
+      forma_pago_id: formaPagoId,
+      periodo_id: periodo.id
     });
 
     setIsReload(true);

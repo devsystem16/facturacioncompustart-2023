@@ -4,8 +4,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import Button from '@material-ui/core/Button';
-
+import Loading from '../Loading/Loading';
 const useStyles = makeStyles((theme) => ({
   button: {
     display: 'block',
@@ -17,13 +16,17 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function SelectLimit({ data, setData }) {
+export default function SelectLimit({ onChangeData, data, setData }) {
   const classes = useStyles();
-
   const [open, setOpen] = React.useState(false);
 
-  const handleChange = (event) => {
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleChange = async (event) => {
     setData(event.target.value);
+    setIsLoading(true);
+    const response = await onChangeData('', event.target.value);
+    setIsLoading(false);
   };
 
   const handleClose = () => {
@@ -36,6 +39,11 @@ export default function SelectLimit({ data, setData }) {
 
   return (
     <div>
+      <Loading
+        text="Obteniendo.."
+        open={isLoading}
+        seOpen={setIsLoading}
+      ></Loading>
       <FormControl className={classes.formControl}>
         <InputLabel id="demo-controlled-open-select-label">Limite</InputLabel>
         <Select
@@ -47,12 +55,13 @@ export default function SelectLimit({ data, setData }) {
           value={data}
           onChange={handleChange}
         >
-       
           <MenuItem value={10}>10</MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={30}>30</MenuItem>
           <MenuItem value={40}>40</MenuItem>
-          <MenuItem value={40}>50</MenuItem>
+          <MenuItem value={50}>50</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
+          <MenuItem value={200}>200</MenuItem>
         </Select>
       </FormControl>
     </div>

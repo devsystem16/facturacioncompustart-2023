@@ -7,7 +7,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-
+import { formatCurrencySimple } from '../../Environment/utileria';
 const TAX_RATE = 0.12;
 
 const useStyles = makeStyles({
@@ -46,6 +46,7 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
 export default function SpanningTable({ factura }) {
   const classes = useStyles();
   function trunc(x, posiciones = 0) {
+    return formatCurrencySimple(x);
     var s = x.toString();
     var l = s.length;
     var decimalLength = s.indexOf('.') + 1;

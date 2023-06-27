@@ -1,16 +1,17 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Box, Container, makeStyles } from '@material-ui/core';
 
 import Page from '../../components/Page';
+import { ComponentIniciarPeriodo } from '../../Environment/utileria';
+// import Results from './Results';
+// import Toolbar from './Toolbar';
 
-import Results from './Results';
-import Toolbar from './Toolbar';
+// import NuevoCredito from '../../components/NuevoCredito';
 
-import NuevoCredito from '../../components/NuevoCredito';
-import { ClienteContext } from '../../context/ClienteContext';
-import TablaCliente from '../../components/TablaClientes/TablaClientes';
-import CreditosTable from '../../components/CreditosTable';
-import CreditoProvider from '../../context/CreditoContext';
+import { PeriodoContext } from '../../context/PeriodoContext';
+// import TablaCliente from '../../components/TablaClientes/TablaClientes';
+// import CreditosTable from '../../components/CreditosTable';
+// import CreditoProvider from '../../context/CreditoContext';
 
 import GridCreditos from '../../components/Creditos/GridCreditos';
 
@@ -24,23 +25,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Creditos = () => {
-  const { isNewClient, clientes, setClientes } = useContext(ClienteContext);
+  const { periodoActivo } = useContext(PeriodoContext);
   const classes = useStyles();
 
-  return (
-    // <CreditoProvider>
-    <Page className={classes.root} title="Clientes">
-      <Container maxWidth={false}>
-        <h2>CREDITOS</h2>
-        {/* <NuevoCredito /> */}
+  if (!periodoActivo)
+    return <ComponentIniciarPeriodo></ComponentIniciarPeriodo>;
+  else
+    return (
+      // <CreditoProvider>
+      <Page className={classes.root} title="Clientes">
+        <Container maxWidth={false}>
+          <h2>CREDITOS</h2>
+          {/* <NuevoCredito /> */}
 
-        <Box mt={3}>
-          <GridCreditos></GridCreditos>
-          {/* <CreditosTable></CreditosTable> */}
-        </Box>
-      </Container>
-    </Page>
-  );
+          <Box mt={3}>
+            <GridCreditos></GridCreditos>
+            {/* <CreditosTable></CreditosTable> */}
+          </Box>
+        </Container>
+      </Page>
+    );
 };
 
 export default Creditos;

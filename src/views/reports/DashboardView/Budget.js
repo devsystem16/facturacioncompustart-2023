@@ -11,7 +11,7 @@ import {
   colors,
   makeStyles
 } from '@material-ui/core';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+
 import MoneyIcon from '@material-ui/icons/Money';
 import { EstadisticasContext } from '../../../context/EstadisticasContext';
 const useStyles = makeStyles((theme) => ({
@@ -20,8 +20,8 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     backgroundColor: colors.red[600],
-    height: 56,
-    width: 56
+    height: 36,
+    width: 36
   },
   differenceIcon: {
     color: colors.red[900]

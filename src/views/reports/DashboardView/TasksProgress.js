@@ -21,8 +21,8 @@ const useStyles = makeStyles(() => ({
   },
   avatar: {
     backgroundColor: colors.orange[600],
-    height: 56,
-    width: 56
+    height: 36,
+    width: 36
   }
 }));
 

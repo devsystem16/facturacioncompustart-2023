@@ -1,0 +1,56 @@
+/* table.css */
+.tablaComponent{
+  margin-top: 20px;;
+  text-align: left;
+}
+.tablaComponent>h2 {
+  text-align: center
+}
+.txt-filter{
+  /* margin-left: 30px; */
+  text-align: center; 
+}
+.table-container {
+    margin: 20px;
+    text-align: center;
+  }
+  
+  .table-container input[type="text"] {
+    padding: 5px;
+    margin-bottom: 10px;
+    width: 200px;
+  }
+  .table-container{
+    width: 98%;
+  }
+  .table-container table {
+
+    border-collapse: collapse;
+    background-color: #f7f7f7;
+    border-radius: 5px;
+  }
+  
+  .table-container thead th {
+    background-color: #3f51b5 ;
+    color: #fff;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .table-container thead th span {
+    margin-left: 5px;
+  }
+  
+  .table-container tbody td {
+    padding: 10px;
+    border-top: 1px solid #ccc;
+  }
+  
+  .table-container tbody tr:last-child td {
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .table-container tbody tr:hover {
+    background-color: #ebebeb;
+  }
+  

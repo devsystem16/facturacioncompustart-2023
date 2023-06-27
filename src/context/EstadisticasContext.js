@@ -54,10 +54,10 @@ const EstadisticasProvider = (props) => {
     return response.data;
   };
 
-  const cargarHistoricoFacturasFilter = async (filter) => {
+  const cargarHistoricoFacturasFilter = async (filter, limitePrm = 10) => {
     const response = await API.post(END_POINT.historicofacturas_filter, {
       filter: filter,
-      limite: limite
+      limite: limitePrm === undefined ? limite : limitePrm
     });
     setHistoricofacturas(response.data);
   };
@@ -74,7 +74,8 @@ const EstadisticasProvider = (props) => {
       clientes: response.data.clientes,
       totalVentas: response.data.totalVendido,
       desglose: response.data.desglose,
-      formasPago: responseFp.data
+      formasPago: responseFp.data.reporteFormasPago,
+      totalRetiros: responseFp.data.totalRetiros
     });
   };
 

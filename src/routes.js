@@ -20,6 +20,7 @@ import LayoutPedidos from '../src/components/LayoutPedidos/';
 import LayoutReportes from '../src/components/LayoutReportes';
 
 import Proformas from '../src/views/proformas';
+import IngresoEgreso from '../src/views/IngresoEgreso';
 
 const routes = [
   {
@@ -39,6 +40,8 @@ const routes = [
       { path: 'pedidos', element: <LayoutPedidos /> },
       { path: 'reportes', element: <LayoutReportes /> },
       { path: 'proformas', element: <Proformas /> },
+
+      { path: 'ingresoEgreso', element: <IngresoEgreso /> },
       { path: '*', element: <Navigate to="/404" /> }
     ]
   },

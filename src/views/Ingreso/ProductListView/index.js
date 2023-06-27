@@ -1,14 +1,17 @@
-import React, { useState, useContext } from 'react';
-import { Box, Container, Grid, makeStyles } from '@material-ui/core';
-import { Pagination } from '@material-ui/lab';
+import React, { useEffect, useContext } from 'react';
+import { Box, Container, makeStyles, Paper, Grid } from '@material-ui/core';
+// import { Pagination } from '@material-ui/lab';
 
 import Page from '../../../components/Page';
 
 import BuscadorIngresos from './BuscadorIngresos';
-import ProductCard from './ProductCard';
+// import ProductCard from './ProductCard';
 
-import { ProductosContext } from '../../../context/ProductosContext';
+// import { ProductosContext } from '../../../context/ProductosContext';
+import { PeriodoContext } from '../../../context/PeriodoContext';
 import TablaIngresos from '../../../components/TablaIngresos/TablaIngresos';
+
+import { ComponentIniciarPeriodo } from '../../../Environment/utileria';
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.dark,
@@ -23,9 +26,12 @@ const useStyles = makeStyles((theme) => ({
 
 const Ingreso = () => {
   const classes = useStyles();
+  const { periodoActivo } = useContext(PeriodoContext);
 
-  const { productos } = useContext(ProductosContext);
+  // useEffect(() => {}, []);
 
+  if (!periodoActivo)
+    return <ComponentIniciarPeriodo></ComponentIniciarPeriodo>;
   return (
     <Page className={classes.root} title="Clientes">
       <Container maxWidth={false}>

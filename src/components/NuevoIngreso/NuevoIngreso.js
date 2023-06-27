@@ -5,6 +5,9 @@ import InputMoneda from '../InputMoneda';
 import { ClienteContext } from '../../context/ClienteContext';
 import { TecnicoContext } from '../../context/TecnicoContext';
 import { IngresoContext } from '../../context/IngresoContext';
+
+import { PeriodoContext } from '../../context/PeriodoContext';
+
 import { EstadisticasContext } from '../../context/EstadisticasContext';
 import { FacturaContext } from '../../context/FacturaContext';
 
@@ -15,7 +18,7 @@ import Switch from '@material-ui/core/Switch';
 import EstadoIngreso from '../../components/EstadoIngreso';
 import alertify from 'alertifyjs';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import SelectProducto from '../selectProducto/SelectProducto';
+
 import ModalFacturaIgreso from './ModalFacturaIgreso';
 // public\css\bootstrap.min.css
 // import 'publiccss\bootstrap.min.css';
@@ -61,9 +64,14 @@ export default function NuevoIngreso() {
   const [fechaIngreso, setFechaIngreso] = useState(
     date.format(now, 'YYYY-MM-DD HH:mm:ss')
   );
-
-  const { guardarFactura, totales, setProductosFactura, setCredito } =
-    useContext(FacturaContext);
+  const { periodo } = useContext(PeriodoContext);
+  const {
+    guardarFactura,
+    totales,
+    setProductosFactura,
+    setCredito,
+    setObservacion
+  } = useContext(FacturaContext);
 
   const { setCurrentCliente, currentCliente } = useContext(ClienteContext);
 
@@ -101,7 +109,7 @@ export default function NuevoIngreso() {
   const [total, setTotal] = useState(0);
   const [saldo, setSaldo] = useState(0);
   const [abono, setAbono] = useState(0);
-  const [observacion, setObservacion] = useState('');
+  const [observacion, setObservacionLocal] = useState('');
 
   useEffect(() => {
     console.log('redner nuevo');
@@ -186,7 +194,8 @@ export default function NuevoIngreso() {
       last_user_update: usuario_id,
       user_update_work: usuario_id,
       abono_ordenes,
-      factura_relacionada: responseFactura
+      factura_relacionada: responseFactura,
+      periodo_id: periodo.id
     };
 
     const response = await guardarOrden(newOrden);
@@ -201,6 +210,7 @@ export default function NuevoIngreso() {
     setReload(true);
     setIsNew(false);
     setIsLoading(false);
+    setObservacion('');
   };
 
   const cancelar = () => {
@@ -386,7 +396,7 @@ export default function NuevoIngreso() {
             helperText=""
             fullWidth
             margin="normal"
-            onChange={(e) => setObservacion(e.target.value)}
+            onChange={(e) => setObservacionLocal(e.target.value)}
             InputLabelProps={{
               shrink: true
             }}

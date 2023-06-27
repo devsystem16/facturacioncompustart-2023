@@ -10,6 +10,7 @@ import { ClienteContext } from './ClienteContext';
 import { CreditoContext } from './CreditoContext';
 import { EstadisticasContext } from './EstadisticasContext';
 import { ProductosContext } from './ProductosContext';
+import { PeriodoContext } from './PeriodoContext';
 
 import API from '../Environment/config';
 
@@ -46,6 +47,7 @@ const FacturaProvider = (props) => {
     setProductosTemp,
     productosTemp2
   } = useContext(ProductosContext);
+  const { periodo } = useContext(PeriodoContext);
 
   const { setIsReload } = useContext(EstadisticasContext);
 
@@ -596,7 +598,8 @@ const FacturaProvider = (props) => {
         fecha: fechaCredito,
         detalle: observacion === '' ? 'CREDITO' : observacion,
         saldo: totales.total,
-        total: totales.total
+        total: totales.total,
+        periodo_id: periodo.id
       },
       detalle,
       formasPago: creditoFP ? formasPago : {}
@@ -658,7 +661,8 @@ const FacturaProvider = (props) => {
         observacion: observacion,
         es_credito: credito,
         credito_id: credito_id,
-        estado: credito ? 'credito' : 'cerrada'
+        estado: credito ? 'credito' : 'cerrada',
+        periodo_id: periodo.id
       },
       detalle: [...detalles],
       formasPago: formasPago
@@ -671,7 +675,7 @@ const FacturaProvider = (props) => {
     }
 
     setFactura_id(response.data.factura.id); // New
- 
+
     setFechaFactura(response.data.factura.fecha);
 
     setIsReload(true); // ReloadEstadisticas.
@@ -679,6 +683,7 @@ const FacturaProvider = (props) => {
     if (credito) {
       setRecargarListaCreditos(true);
     }
+    setFormasPago({});
     // setProductosFactura([]);
     // setObservacion('');
     // setCurrentCliente({
