@@ -619,11 +619,20 @@ const FacturaProvider = (props) => {
 
     if (currentCliente.cedula === '')
       return { status: 500, mensaje: 'Seleccione un cliente' };
+
     if (esProforma) {
       const responseProforma = await guardarComoProforma();
       setFactura_id(responseProforma?.codigoFac);
       return responseProforma;
     }
+
+    var ExisteFormaPago = Object.keys(formasPago).length > 0;
+
+    if (!ExisteFormaPago)
+      return {
+        status: 500,
+        mensaje: 'Seleccione la forma de pago para continuar.'
+      };
 
     var mensaje_res = 'Factura Guardada';
     var credito_id = -1;
