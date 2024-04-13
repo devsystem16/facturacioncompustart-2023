@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const BuscadorFacturas = () => {
+const BuscadorFacturas = ({limite =10}) => {
   const classes = useStyles();
   const { historicofacturas, cargarHistoricoFacturasFilter } =
     useContext(EstadisticasContext);
@@ -33,7 +33,7 @@ const BuscadorFacturas = () => {
     // if (!isEmpty(e.target.value)) {
     if (e.key === 'Enter') {
       setIsLoading(true);
-      const response = await cargarHistoricoFacturasFilter(e.target.value);
+      const response = await cargarHistoricoFacturasFilter(e.target.value, limite);
       setIsLoading(false);
     }
     // }

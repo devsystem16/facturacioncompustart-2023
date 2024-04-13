@@ -96,6 +96,8 @@ const IngresoProvider = (props) => {
       cliente = [{ ...objcliente }];
     }
 
+    
+
     setDatosImpresion({
       cliente: {
         nombres: cliente[0].nombres,
@@ -105,6 +107,8 @@ const IngresoProvider = (props) => {
       tecnico: {
         nombres: localStorage.getItem('nombres')
       },
+
+   
       orden: {
         id: orden.id,
         cliente_id: orden.cliente_id,

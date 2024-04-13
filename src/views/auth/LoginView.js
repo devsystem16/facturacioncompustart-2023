@@ -171,7 +171,7 @@ const LoginView = () => {
                       gutterBottom
                       variant="body2"
                     >
-                      Grupocompustar V 1.0.0.1
+                      Grupocompustar V 1.0.2.0
                     </Typography>
                   </center>
                 </Box>

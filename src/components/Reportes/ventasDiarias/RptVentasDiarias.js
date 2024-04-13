@@ -103,7 +103,7 @@ export default function VentasDiarias() {
                 {/* <TableCell align="right">{factura.tipo}</TableCell> */}
               </TableRow>
             ))}
-            <TableRow style={{ backgroundColor: '#e6e6e6' }} key="rowIngres01">
+            {/* <TableRow style={{ backgroundColor: '#e6e6e6' }} key="rowIngres01">
               <TableCell component="th" colSpan={5} scope="row">
                 <center>
                   <strong>Ingresos ({ventasDiarias.ordenes.length}) </strong>
@@ -120,9 +120,9 @@ export default function VentasDiarias() {
                   {obj.observacion === null ? '-' : obj.observacion}
                 </TableCell>
                 <TableCell align="right">$ {obj.totalAbono}</TableCell>
-                {/* <TableCell align="right">{obj.tipo}</TableCell> */}
+                
               </TableRow>
-            ))}
+            ))} */}
 
             <TableRow style={{ backgroundColor: '#e6e6e6' }} key="rowOrd01">
               <TableCell component="th" colSpan={5} scope="row">

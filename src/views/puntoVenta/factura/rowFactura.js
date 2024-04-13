@@ -39,8 +39,8 @@ const redondear = (valor) => {
   return Math.round(valor * 100) / 100;
 };
 const obtienePrecioBruto = (precioNeto) => {
-  return formatCurrencySimple(trunc(precioNeto / 1.12, 4));
-  // return trunc(precioNeto / 1.12, 4);
+  return formatCurrencySimple(trunc(precioNeto / 1.15, 4));
+  // return trunc(precioNeto / 1.15, 4);
 };
 export default function RowFactura({ producto }) {
   const classes = useStyles();

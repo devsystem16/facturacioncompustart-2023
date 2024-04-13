@@ -35,14 +35,14 @@ export default function TotalesFac({ totales }) {
   const classes = useStyles();
 
   const { observacion } = useContext(FacturaContext);
-
+ 
   return (
     <div>
       <Divider className={classes.divider} />
 
       <div className={classes.container}>
         <div style={{ gridColumnEnd: 'span 8', height: '24px' }}>
-          <Paper className={classes.paperRight}>SUBTOTAL 12% $: </Paper>
+          <Paper className={classes.paperRight}>SUBTOTAL 15% $: </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
           <Paper className={classes.paper}>
@@ -74,7 +74,7 @@ export default function TotalesFac({ totales }) {
         </div>
 
         <div style={{ gridColumnEnd: 'span 8' }}>
-          <Paper className={classes.paperRight}>IVA 12%:$ </Paper>
+          <Paper className={classes.paperRight}>IVA 15%:$ </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
           <Paper className={classes.paper}>

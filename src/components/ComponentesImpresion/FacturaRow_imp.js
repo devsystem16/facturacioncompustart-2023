@@ -11,7 +11,7 @@ function trunc(x, posiciones = 0) {
 }
 
 const obtienePrecioBruto = (precioNeto) => {
-  return formatCurrencySimple(trunc(precioNeto / 1.12, 4));
+  return formatCurrencySimple(trunc(precioNeto / 1.15, 4));
 };
 export default function FacturaRow_imp({ producto }) {
   return (
@@ -27,7 +27,7 @@ export default function FacturaRow_imp({ producto }) {
           {/* </Paper> */}
         </Grid>
         <Grid item xs={7} title={producto.nombre}>
-          {producto.nombre}
+          {producto.id +" - "+ producto.nombre}
         </Grid>
         <Grid item xs={2} style={{ backgroundColor: '#cef2e6' }}>
           {/* <Paper

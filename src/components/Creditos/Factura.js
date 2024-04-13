@@ -8,7 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { formatCurrencySimple } from '../../Environment/utileria';
-const TAX_RATE = 0.12;
+const TAX_RATE = 0.15;
 
 const useStyles = makeStyles({
   table: {
@@ -80,10 +80,10 @@ export default function SpanningTable({ factura }) {
               <TableCell>{row.producto}</TableCell>
               <TableCell align="right">{row.cantidad}</TableCell>
               <TableCell align="right">
-                {trunc(row.subtotal / row.cantidad / 1.12, 4)}
+                {trunc(row.subtotal / row.cantidad / 1.15, 4)}
               </TableCell>
               <TableCell align="right">
-                {ccyFormat(row.cantidad * (row.subtotal / row.cantidad / 1.12))}
+                {ccyFormat(row.cantidad * (row.subtotal / row.cantidad / 1.15))}
               </TableCell>
             </TableRow>
           ))}

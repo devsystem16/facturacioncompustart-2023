@@ -8,8 +8,8 @@ import { formatCurrencySimple } from '../../Environment/utileria';
 //   return Math.round(valor * 100) / 100;
 // };
 const obtienePrecioBruto = (precioNeto) => {
-  return formatCurrencySimple(trunc(precioNeto / 1.12, 4));
-  // return redondear(precioNeto - precioNeto * 0.12);
+  return formatCurrencySimple(trunc(precioNeto / 1.15, 4));
+  // return redondear(precioNeto - precioNeto * 0.15);
 };
 function trunc(x, posiciones = 0) {
   var s = x.toString();
@@ -34,7 +34,7 @@ export default function FacturaRow_imp({ producto }) {
         </Grid>
         <Grid item xs={7} title={producto?.producto}>
           {/* <Paper className={classes.paper}> */}
-          {producto?.producto}
+          { producto?.idProducto +" - " +    producto?.producto}
           {/* </Paper> */}
         </Grid>
         <Grid item xs={2} style={{ backgroundColor: '#cef2e6' }}>

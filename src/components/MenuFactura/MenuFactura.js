@@ -23,9 +23,9 @@ export default function MenuFactura({ producto }) {
     return Math.round(valor * 100) / 100;
   };
   const obtienePrecioBruto = (precioNeto) => {
-    return redondear(precioNeto - precioNeto * 0.12);
-    // return formatCurrencySimple(precioNeto - precioNeto * 0.12);
-    // return formatCurrencySimple(trunc(precioNeto / 1.12, 4));
+    return redondear(precioNeto - precioNeto * 0.15);
+    // return formatCurrencySimple(precioNeto - precioNeto * 0.15);
+    // return formatCurrencySimple(trunc(precioNeto / 1.15, 4));
   };
 
   const [precio, setPrecio] = useState(0);

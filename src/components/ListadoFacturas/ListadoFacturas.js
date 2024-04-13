@@ -139,9 +139,9 @@ function Row(props) {
                       <TableCell component="th" scope="row">
                         {historyRow.cantidad}
                       </TableCell>
-                      <TableCell>{historyRow.producto}</TableCell>
+                      <TableCell>{ historyRow?.idProducto +" - " +historyRow.producto}</TableCell>
                       <TableCell align="center">
-                        {/* $ {trunc(historyRow.subtotal / 1.12, 4)} */}${' '}
+                        {/* $ {trunc(historyRow.subtotal / 1.15, 4)} */}${' '}
                         {formatCurrencySimple(historyRow.subtotal)}
                       </TableCell>
                       <TableCell align="right">
@@ -186,6 +186,8 @@ export default function CollapsibleTable() {
 
   const imprimirFactura = async (id, estado) => {
     let response = await fn_obtenerFactura(id);
+
+ 
     setFactura_id(id);
 
     setIsPrinter({
@@ -220,7 +222,7 @@ export default function CollapsibleTable() {
         data={limite}
         setData={setLimite}
       ></SelectLimit>
-      <BuscadorFacturas></BuscadorFacturas>
+      <BuscadorFacturas limite={limite} ></BuscadorFacturas>
 
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table">

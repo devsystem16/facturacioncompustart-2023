@@ -20,7 +20,7 @@
       "historialpagos-credito": true,
       "registrar-retiros" : true ,
       "eliminar-retiros" : false ,
-      "finalizar-periodo": false 
+      "finalizar-periodo": true 
     },
     "ADMINISTRADOR": {
       "cliente": true,

@@ -29,7 +29,10 @@ const Factura_imp = React.forwardRef((props, ref) => {
   // const { factura } = useContext(FacturaContext);
   const classes = useStyles();
 
+
+
   const { dataFactura } = props;
+
   useEffect(() => {
     // Aqui funcion
   }, []);
@@ -96,7 +99,7 @@ const Factura_imp = React.forwardRef((props, ref) => {
         })}
       </div>
 
-      <TotalesFac key={1} totales={factura?.totales} />
+      <TotalesFac key={1} observacion={factura.observacion} totales={factura?.totales} impuesto = {factura?.impuesto} />
     </div>
   );
 });

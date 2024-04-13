@@ -60,7 +60,7 @@ export default function RowFactura({ totales }) {
         </div>
 
         <div style={{ gridColumnEnd: 'span 8' }}>
-          <Paper className={classes.paperRight}>IVA 12%: </Paper>
+          <Paper className={classes.paperRight}>IVA 15%: </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
           <Paper className={classes.paper}>{formatCurrency(totales.iva)}</Paper>

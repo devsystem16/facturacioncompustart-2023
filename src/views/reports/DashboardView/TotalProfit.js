@@ -18,7 +18,7 @@ import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 
 import { EstadisticasContext } from '../../../context/EstadisticasContext';
 import { PeriodoContext } from '../../../context/PeriodoContext';
-import { formatCurrency } from '../../../Environment/utileria';
+import { formatCurrency , formatCurrencySimple } from '../../../Environment/utileria';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,7 +54,7 @@ const TotalProfit = ({ className, ...rest }) => {
 
   const validarFormaPago = (formasPago) => {
     if (formasPago?.label !== undefined)
-      return `${formasPago?.label} $ ${formasPago.total} `;
+      return `${formasPago?.label} $ ${ formatCurrencySimple (formasPago.total)} `;
     else return '';
   };
 

@@ -23,7 +23,7 @@ export default function ModalAbono() {
 
   const [abono, setAbono] = useState(0);
 
-  const [formaPagoId, setFormaPagoId] = useState(null);
+  const [formaPagoId, setFormaPagoId] = useState(1);
   // const handleClickOpen = () => {
   //   SetIsOpenModalAbono(true);
   // };

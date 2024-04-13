@@ -124,7 +124,7 @@ const FacturaProvider = (props) => {
     return trunc(valor, 4);
   };
   const obtienePrecioBruto = (precioNeto) => {
-    return redondear(precioNeto / 1.12);
+    return redondear(precioNeto / 1.15);
   };
 
   const tieneStock = async (producto) => {
@@ -537,8 +537,8 @@ const FacturaProvider = (props) => {
       subTotalBruto = subTotalBruto + producto.totalBruto;
     });
 
-    //   iva = Math.round(subtotal * 0.12 * 100) / 100;
-    iva = trunc(subtotal * 0.12, 4);
+    //   iva = Math.round(subtotal * 0.15 * 100) / 100;
+    iva = trunc(subtotal * 0.15, 4);
 
     // total = Math.round((subtotal + iva) * 100) / 100;
     total = subTotalBruto;
@@ -626,13 +626,13 @@ const FacturaProvider = (props) => {
       return responseProforma;
     }
 
-    var ExisteFormaPago = Object.keys(formasPago).length > 0;
+    // var ExisteFormaPago = Object.keys(formasPago).length > 0;
 
-    if (!ExisteFormaPago)
-      return {
-        status: 500,
-        mensaje: 'Seleccione la forma de pago para continuar.'
-      };
+    // if (!ExisteFormaPago)
+    //   return {
+    //     status: 500,
+    //     mensaje: 'Seleccione la forma de pago para continuar.'
+    //   };
 
     var mensaje_res = 'Factura Guardada';
     var credito_id = -1;

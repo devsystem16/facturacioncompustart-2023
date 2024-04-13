@@ -32,10 +32,26 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function TotalesFac({ totales }) {
+function calcularImpuesto(impuesto) {
+  const impuestos = {
+    12: '12%',
+    15: '15%',
+    null: 'no definido'
+  };
+
+  return impuestos[impuesto] || 'valor inválido';
+}
+
+export default function TotalesFac({ totales , impuesto =null , observacion =""}) {
+
+
+  
   const classes = useStyles();
 
-  const { observacion } = useContext(FacturaContext);
+  // const { observacion } = useContext(FacturaContext);
+
+ 
+
   function trunc(x, posiciones = 0) {
     var s = x.toString();
     var l = s.length;
@@ -49,7 +65,7 @@ export default function TotalesFac({ totales }) {
 
       <div className={classes.container}>
         <div style={{ gridColumnEnd: 'span 8', height: '24px' }}>
-          <Paper className={classes.paperRight}>SUBTOTAL 12% $: </Paper>
+          <Paper className={classes.paperRight}>SUBTOTAL {calcularImpuesto(impuesto)} $: </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
           <Paper className={classes.paper}> {totales.subtotal}</Paper>
@@ -79,7 +95,7 @@ export default function TotalesFac({ totales }) {
         </div>
 
         <div style={{ gridColumnEnd: 'span 8' }}>
-          <Paper className={classes.paperRight}>IVA 12%:$ </Paper>
+          <Paper className={classes.paperRight}>IVA {calcularImpuesto(impuesto)}:$ </Paper>
         </div>
         <div style={{ gridColumnEnd: 'span 4' }}>
           <Paper className={classes.paper}>
