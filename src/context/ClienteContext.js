@@ -127,7 +127,8 @@ const ClienteProvider = (props) => {
         deleteCliente,
         eliminarCliente,
         buscarCliente,
-        cargarClientes
+        cargarClientes 
+     
       }}
     >
       {props.children}

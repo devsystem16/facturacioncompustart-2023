@@ -8,6 +8,11 @@ import {
   makeStyles
 } from '@material-ui/core';
 
+
+import { LoginContext } from '../../../context/LoginContext';
+
+
+
 const useStyles = makeStyles((theme) => ({
   item: {
     display: 'flex',
@@ -49,13 +54,20 @@ const NavItem = ({
 }) => {
   const classes = useStyles();
 
+
+    const {
+   edicionActiva
+    } = React.useContext(LoginContext);
+
+
   return (
-    <ListItem
+    <ListItem 
       className={clsx(classes.item, className)}
       disableGutters
       {...rest}
     >
       <Button
+        disabled={edicionActiva}
         activeClassName={classes.active}
         className={classes.button}
         component={RouterLink}

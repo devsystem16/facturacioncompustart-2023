@@ -1,38 +1,45 @@
 import React, { useContext, useState } from 'react';
-import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import axios from 'axios';
-import alertify from 'alertifyjs';
 import { ClienteContext } from '../../context/ClienteContext';
 import { EstadisticasContext } from '../../context/EstadisticasContext';
-
 import API from '../../Environment/config';
+import alertify from 'alertifyjs';
 
 import {
   Box,
   Button,
   Card,
   CardContent,
+  Grid,
   TextField,
-  InputAdornment,
-  SvgIcon,
-  makeStyles
+  Typography,
+  CircularProgress,
+  makeStyles,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Divider
 } from '@material-ui/core';
-import { Search as SearchIcon } from 'react-feather';
-import Input from '@material-ui/core/Input';
-import CircularProgress from '@material-ui/core/CircularProgress';
+
 const useStyles = makeStyles((theme) => ({
   root: {
-    '& > *': {
-      margin: theme.spacing(1)
-    }
+    marginTop: theme.spacing(3),
   },
-  importButton: {
-    marginRight: theme.spacing(1)
+  input: {
+    marginBottom: theme.spacing(2),
   },
-  exportButton: {
-    marginRight: theme.spacing(1)
-  }
+  suggestions: {
+    maxHeight: 400,
+    overflowY: 'auto',
+    padding: theme.spacing(2),
+  },
+  buttonGroup: {
+    marginTop: theme.spacing(2),
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: theme.spacing(1),
+  },
 }));
 
 const END_POINT = {
@@ -41,135 +48,188 @@ const END_POINT = {
 
 const NuevoCliente = ({ className, ...rest }) => {
   const classes = useStyles();
-  const { setIsNewClient, setClientes, clientes, setClientesFiltro } =
-    useContext(ClienteContext);
+  const { setIsNewClient, setClientes, clientes, setClientesFiltro } = useContext(ClienteContext);
   const { setIsReload } = useContext(EstadisticasContext);
 
-  const [cedula, setCedula] = useState('');
-  const [nombres, setNombres] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [observacion, setObservacion] = useState('');
+  const [form, setForm] = useState({
+    cedula: '',
+    nombres: '',
+    telefono: '',
+    direccion: '',
+    correo: '',
+    observacion: ''
+  });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [sugerencias, setSugerencias] = useState([]);
+
+  // Manejo de cambios
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // Manejo de Blur para filtrar clientes similares
+  const handleBlur = () => {
+    const termCedula = form.cedula.trim().toLowerCase();
+    const termNombre = form.nombres.trim().toLowerCase();
+
+    const matches = clientes.filter(
+      (c) =>
+        (termCedula && c.cedula.toLowerCase().includes(termCedula)) ||
+        (termNombre && c.nombres.toLowerCase().includes(termNombre))
+    );
+
+    setSugerencias(matches);
+  };
+
   const guardarCliente = async () => {
-    if (cedula === '') {
-      alertify.error('La cédula es obligatoria', 2);
-      return;
-    }
-    if (nombres === '') {
-      alertify.error('Los nombres son obligatorios', 2);
-      return;
-    }
+    if (!form.cedula) return alertify.error('La cédula es obligatoria', 2);
+    if (!form.nombres) return alertify.error('Los nombres son obligatorios', 2);
 
-    let telef = telefono,
-      direc = direccion,
-      corr = correo,
-      obs = observacion;
-
-    if (typeof telef === 'undefined' || telef === '') telef = '-';
-    if (typeof direc === 'undefined' || direc === '') direc = '-';
-    if (typeof corr === 'undefined' || corr === '') corr = '-';
-    if (typeof obs === 'undefined' || obs === '') obs = '-';
-
-    setIsLoading(true);
     const nuevoCliente = {
-      cedula,
-      nombres,
-      telefono: telef,
-      direccion: direc,
-      correo: corr,
-      observacion: obs
+      ...form,
+      telefono: form.telefono || '-',
+      direccion: form.direccion || '-',
+      correo: form.correo || '-',
+      observacion: form.observacion || '-'
     };
 
-    const respuesta = await API.post(END_POINT.nuevoCliente, nuevoCliente);
-    setIsLoading(false);
+    setIsLoading(true);
+    try {
+      const respuesta = await API.post(END_POINT.nuevoCliente, nuevoCliente);
+      setIsLoading(false);
 
-    if (respuesta.data.estado !== 201) {
-      alertify.error(respuesta.data.mensaje, 2);
-      return;
+      if (respuesta.data.estado !== 201) {
+        alertify.error(respuesta.data.mensaje, 2);
+        return;
+      }
+
+      setIsReload(true);
+      setClientes([respuesta.data.cliente, ...clientes]);
+      setClientesFiltro([respuesta.data.cliente, ...clientes]);
+      setForm({ cedula: '', nombres: '', telefono: '', direccion: '', correo: '', observacion: '' });
+      setIsNewClient(false);
+      setSugerencias([]);
+      alertify.success('Guardado correctamente', 2);
+    } catch (err) {
+      setIsLoading(false);
+      alertify.error('Error al guardar el cliente', 2);
+      console.error(err);
     }
-
-    setIsReload(true);
-    setCedula('');
-    setNombres('');
-    setTelefono('');
-    setDireccion('');
-    setCorreo('');
-    setObservacion('');
-    setClientes([respuesta.data.cliente, ...clientes]);
-    setClientesFiltro([respuesta.data.cliente, ...clientes]);
-    setIsNewClient(false);
-    alertify.success('Guardado correctamente', 2);
   };
 
   return (
     <div className={clsx(classes.root, className)} {...rest}>
-      <Box mt={3}>
-        <Card>
-          <CardContent className={classes.root}>
-            <h2> Nuevo cliente</h2>
-            <Input
-              defaultValue={cedula}
-              onChange={(e) => setCedula(e.target.value)}
-              placeholder="Cédula (Obligatorio)"
-              inputProps={{ 'aria-label': 'Cédula' }}
-            />
-            <Input
-              defaultValue={nombres}
-              onChange={(e) => setNombres(e.target.value)}
-              placeholder="Nombres (Obligatorio)"
-              inputProps={{ 'aria-label': 'Nombres' }}
-            />
-            <Input
-              defaultValue={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              placeholder="Teléfono"
-              inputProps={{ 'aria-label': 'Teléfono' }}
-            />
-            <br />
-            <Input
-              defaultValue={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-              placeholder="Dirección"
-              inputProps={{ 'aria-label': 'Dirección' }}
-            />
-            <Input
-              defaultValue={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              placeholder="Correo"
-              inputProps={{ 'aria-label': 'Correo' }}
-            />
+      <Grid container spacing={3}>
+        {/* Formulario */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>Nuevo Cliente</Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Cédula (Obligatorio)"
+                name="cedula"
+                value={form.cedula}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={classes.input}
+              />
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Nombres (Obligatorio)"
+                name="nombres"
+                value={form.nombres}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={classes.input}
+              />
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Teléfono"
+                name="telefono"
+                value={form.telefono}
+                onChange={handleChange}
+                className={classes.input}
+              />
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Dirección"
+                name="direccion"
+                value={form.direccion}
+                onChange={handleChange}
+                className={classes.input}
+              />
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Correo"
+                name="correo"
+                value={form.correo}
+                onChange={handleChange}
+                className={classes.input}
+              />
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Observación"
+                name="observacion"
+                value={form.observacion}
+                onChange={handleChange}
+                className={classes.input}
+              />
 
-            <Input
-              defaultValue={correo}
-              onChange={(e) => setObservacion(e.target.value)}
-              placeholder="Observación"
-              inputProps={{ 'aria-label': 'Observación' }}
-            />
-          </CardContent>
-          <Box display="flex" justifyContent="flex-end">
-            {isLoading ? <CircularProgress /> : null}
+              <div className={classes.buttonGroup}>
+                {isLoading && <CircularProgress size={24} />}
+                <Button
+                  variant="contained"
+                  style={{ backgroundColor: 'rgb(220, 0, 78)', color: 'white' }}
+                  onClick={() => setIsNewClient(false)}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  onClick={guardarCliente}
+                  disabled={isLoading}
+                >
+                  Guardar Cliente
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </Grid>
 
-            <Button
-              style={{ backgroundColor: 'rgb(220, 0, 78)', color: 'white' }}
-              variant="contained"
-              onClick={() => setIsNewClient(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={guardarCliente}
-              disabled={isLoading}
-            >
-              Guardar Cliente
-            </Button>
-          </Box>
-        </Card>
-      </Box>
+        {/* Sugerencias */}
+        <Grid item xs={12} md={6}>
+          <Paper className={classes.suggestions}>
+            <Typography variant="h6">Clientes Similares</Typography>
+            {sugerencias.length === 0 ? (
+              <Typography variant="body2">No se encontraron coincidencias</Typography>
+            ) : (
+              <List>
+                {sugerencias.map((cliente) => (
+                  <React.Fragment key={cliente.id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={`${cliente.nombres}`}
+                        secondary={`Cédula: ${cliente.cedula} | Teléfono: ${cliente.telefono}`}
+                      />
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
     </div>
   );
 };

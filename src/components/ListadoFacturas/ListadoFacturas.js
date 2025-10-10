@@ -25,6 +25,13 @@ import Permisos from '../../Environment/Permisos.json';
 import SelectLimit from './SelectLimit';
 import { formatCurrencySimple } from '../../Environment/utileria';
 
+
+import CreditCardIcon from '@material-ui/icons/CreditCard';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+
 // impresion Facturas
 import { useReactToPrint } from 'react-to-print';
 import Factura_imp from '../ReimpresionFacturas/Factura_imp';
@@ -36,6 +43,99 @@ const useRowStyles = makeStyles({
     }
   }
 });
+export default function CollapsibleTable() {
+  const {
+    historicofacturas,
+    limite,
+    setLimite,
+    cargarHistoricoFacturasFilter
+  } = useContext(EstadisticasContext);
+  const { fn_obtenerFactura, factura } = useContext(FacturaContext);
+
+  const [isPrinter, setIsPrinter] = useState({
+    loading: false,
+    datos: { id: 1111 }
+  });
+  const [factura_id, setFactura_id] = useState(false);
+  // IMPRESION
+
+  const componentRef = useRef();
+  const EventoImprimirReact = () => {
+    print();
+  };
+  const print = useReactToPrint({
+    content: () => componentRef.current,
+    onAfterPrint: () => {}
+  });
+
+  const imprimirFactura = async (id, estado) => {
+    let response = await fn_obtenerFactura(id);
+
+ 
+    setFactura_id(id);
+
+    setIsPrinter({
+      loading: true,
+      factura: response.factura
+    });
+
+    EventoImprimirReact();
+  };
+
+  // END IMPRESION
+  return (
+    <>
+      <div
+        style={{
+          display: 'none'
+        }}
+      >
+        {isPrinter.loading && (
+          <Factura_imp
+            ref={componentRef}
+            dataFactura={isPrinter.factura}
+          ></Factura_imp>
+        )}
+        {/* {factura?.id && <Factura_imp ref={componentRef}></Factura_imp>} */}
+      </div>
+      <center>
+        <h1>Historico de facturas</h1>
+      </center>
+      <SelectLimit
+        onChangeData={cargarHistoricoFacturasFilter}
+        data={limite}
+        setData={setLimite}
+      ></SelectLimit>
+      <BuscadorFacturas limite={limite} ></BuscadorFacturas>
+
+      <TableContainer component={Paper}>
+        <Table aria-label="collapsible table">
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>N° Fac</TableCell>
+              <TableCell>Cliente</TableCell>
+              <TableCell align="left">Fecha</TableCell>
+              <TableCell align="right">Total</TableCell>
+              <TableCell align="right">Observación</TableCell>
+              <TableCell align="right">Estatus</TableCell>
+              <TableCell align="right">Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {historicofacturas.map((row, index) => (
+              <Row
+                key={index}
+                row={row.factura}
+                imprimirFactura={imprimirFactura}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  );
+}
 
 function Row(props) {
   const { row, imprimirFactura } = props;
@@ -150,6 +250,70 @@ function Row(props) {
                     </TableRow>
                   ))}
                 </TableBody>
+ 
+
+              {/* <Typography variant="h6" gutterBottom component="div">
+                Formas de Pago
+              </Typography>
+                 <TableBody>
+                  {row.formasPago.map((formapago) => (
+                    <TableRow key={'fp' + formapago.id}>
+                      <TableCell component="th" scope="row">
+                        {formapago.descripcionFormaPago}
+                      </TableCell>
+                      <TableCell>  $ {formapago.valor} </TableCell>
+                      <TableCell align="center">
+                   
+                  
+                      </TableCell>
+                      <TableCell align="right">
+                  
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody> */}
+
+ <Typography variant="h6" gutterBottom component="div" sx={{ mt: 2 }}>
+  Formas de Pago
+</Typography>
+<TableBody>
+  {row.formasPago.map((fp) => {
+    // Selección de icono según tipo de pago
+    let Icon;
+    switch (fp.descripcionFormaPago?.toLowerCase()) {
+      case 'efectivo':
+        Icon = AttachMoneyIcon;
+        break;
+      case 'transferencia':
+        Icon = AccountBalanceIcon;
+        break;
+      case 'depósito':
+        Icon = ReceiptIcon;
+        break;
+      case 'tarjeta de crédito':
+        Icon = CreditCardIcon;
+        break;
+      case 'cheque':
+        Icon = AccountBalanceWalletIcon;
+        break;
+      default:
+        Icon = AttachMoneyIcon;
+    }
+
+    return (
+      <TableRow key={`fp${fp.id}`}>
+        <TableCell component="th" scope="row" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Icon fontSize="small" color="primary" />
+          {fp.descripcionFormaPago}
+        </TableCell>
+        <TableCell>${formatCurrencySimple(fp.valor)}</TableCell>
+        <TableCell align="center">{fp.numeroTransaccion || '-'}</TableCell>
+        <TableCell align="right">{fp.estado || '-'}</TableCell>
+      </TableRow>
+    );
+  })}
+</TableBody>
+
               </Table>
             </Box>
           </Collapse>
@@ -159,96 +323,3 @@ function Row(props) {
   );
 }
 
-export default function CollapsibleTable() {
-  const {
-    historicofacturas,
-    limite,
-    setLimite,
-    cargarHistoricoFacturasFilter
-  } = useContext(EstadisticasContext);
-  const { fn_obtenerFactura, factura } = useContext(FacturaContext);
-
-  const [isPrinter, setIsPrinter] = useState({
-    loading: false,
-    datos: { id: 1111 }
-  });
-  const [factura_id, setFactura_id] = useState(false);
-  // IMPRESION
-
-  const componentRef = useRef();
-  const EventoImprimirReact = () => {
-    print();
-  };
-  const print = useReactToPrint({
-    content: () => componentRef.current,
-    onAfterPrint: () => {}
-  });
-
-  const imprimirFactura = async (id, estado) => {
-    let response = await fn_obtenerFactura(id);
-
- 
-    setFactura_id(id);
-
-    setIsPrinter({
-      loading: true,
-      factura: response.factura
-    });
-
-    EventoImprimirReact();
-  };
-
-  // END IMPRESION
-  return (
-    <>
-      <div
-        style={{
-          display: 'none'
-        }}
-      >
-        {isPrinter.loading && (
-          <Factura_imp
-            ref={componentRef}
-            dataFactura={isPrinter.factura}
-          ></Factura_imp>
-        )}
-        {/* {factura?.id && <Factura_imp ref={componentRef}></Factura_imp>} */}
-      </div>
-      <center>
-        <h1>Historico de facturas</h1>
-      </center>
-      <SelectLimit
-        onChangeData={cargarHistoricoFacturasFilter}
-        data={limite}
-        setData={setLimite}
-      ></SelectLimit>
-      <BuscadorFacturas limite={limite} ></BuscadorFacturas>
-
-      <TableContainer component={Paper}>
-        <Table aria-label="collapsible table">
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>N° Fac</TableCell>
-              <TableCell>Cliente</TableCell>
-              <TableCell align="left">Fecha</TableCell>
-              <TableCell align="right">Total</TableCell>
-              <TableCell align="right">Observación</TableCell>
-              <TableCell align="right">Estatus</TableCell>
-              <TableCell align="right">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {historicofacturas.map((row, index) => (
-              <Row
-                key={index}
-                row={row.factura}
-                imprimirFactura={imprimirFactura}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </>
-  );
-}

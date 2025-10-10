@@ -39,7 +39,7 @@ const EstadisticasProvider = (props) => {
     if (isReload) {
       console.log('RELOAD ESTADISTICAS');
       cargarHistoricoFacturas();
-      cargarReporteDiario();
+        cargarReporteDiario();
       setIsReload(false);
     }
   }, [isReload]);

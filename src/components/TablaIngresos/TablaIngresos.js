@@ -14,6 +14,8 @@ import ModalTotal from '../../components/TablaIngresos/ModalTotal';
 import ModalVerIngreso from '../../components/ModalVerIngreso/ModalVerIngreso';
 
 import { IngresoContext } from '../../context/IngresoContext';
+import { LoginContext } from '../../context/LoginContext';
+
 
 export default function TablaIngresos() {
   const [tableIsLoading, setTableIsLoading] = React.useState(false);
@@ -29,7 +31,9 @@ export default function TablaIngresos() {
     setOrdenes,
     setDefinirFactura
   } = React.useContext(IngresoContext);
-
+  const {
+    setEdicionActiva
+  } = React.useContext(LoginContext);
   // const [reloadThis, setReloadThis] = React.useState(1);
 
   const verificarAccesosGRID = () => {
@@ -43,6 +47,19 @@ export default function TablaIngresos() {
 
   React.useEffect(() => {
     verificarAccesosGRID();
+
+
+    
+     const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        console.log('Se presionó Escape');
+        setEdicionActiva(false);
+        // Aquí puedes cancelar edición, cerrar modal, etc.
+      }
+    };
+document.addEventListener('keydown', handleKeyDown);
+
+
   }, []);
 
   const editarIngreso = (ingreso) => {
@@ -101,6 +118,8 @@ export default function TablaIngresos() {
 
         updateIngresoDB(IngresoNuevo, field);
         console.log('Ingreso Nuevo', IngresoNuevo);
+
+        setEdicionActiva(false)
         return IngresoNuevo;
       }
       return item;
@@ -175,7 +194,12 @@ export default function TablaIngresos() {
     }
     PrepararDatosImpresion(orden);
   };
-
+ const marcarCambios = (params, event) => {
+ 
+if(params.colDef.editable)
+    setEdicionActiva(true);
+ 
+  };
   const handleRowSelected = (selection) => {
     console.log(selection);
   };
@@ -200,6 +224,10 @@ export default function TablaIngresos() {
           onSelectionModelChange={(row) => {
             filaSeleccionada(row);
           }}
+ onCellDoubleClick={(params, event) => {
+   marcarCambios(params, event);
+  }}
+          // onCellDoubleClick={marcarCambios}
         />
       </div>
     </Card>

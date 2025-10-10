@@ -1,75 +1,61 @@
-import React, { useContext, useState } from 'react';
-import date from 'date-and-time';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import Factura from './factura';
+import React, { useContext, useEffect } from 'react';
+import { Grid, Paper, makeStyles, Container, Typography } from '@material-ui/core';
 import Swal from 'sweetalert2';
-import VerificarAperturaPeriodo from '../../Global/Funciones';
+import date from 'date-and-time';
 
+import Factura from './factura';
 import ListadoProductos from './listadoProductos';
+import NuevoPeriodo from '../../components/Periodo/NuevoPeriodo/NuevoPeriodo';
 import { ProductosContext } from '../../context/ProductosContext';
 import { ClienteContext } from '../../context/ClienteContext';
 import { PeriodoContext } from '../../context/PeriodoContext';
-import { Button, makeStyles } from '@material-ui/core';
 
-import NuevoPeriodo from '.././../components/Periodo/NuevoPeriodo/NuevoPeriodo';
 const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1
-  },
-  margin: {
-    margin: theme.spacing(1)
+    flexGrow: 1,
+    padding: theme.spacing(2),
   },
   paper: {
     padding: theme.spacing(2),
     textAlign: 'center',
-    color: theme.palette.text.secondary
-  },
-  paper2: {
-    padding: theme.spacing(1),
-    textAlign: 'left',
     color: theme.palette.text.secondary,
-    height: '35px'
-  }
+  },
 }));
 
 const PuntoVenta = () => {
   const classes = useStyles();
-  // Obtener los productos del context
-  const { ObtenerProductos, setProductos, buscarProductos, productosTemp } =
-    useContext(ProductosContext);
+  const { ObtenerProductos, setProductos, buscarProductos, productosTemp } = useContext(ProductosContext);
   const { setCurrentCliente } = useContext(ClienteContext);
   const { periodoActivo, verificarPeriodoActivo } = useContext(PeriodoContext);
 
-  React.useEffect(() => {
-    // verificarAperturaPeriodo();
-    setCurrentCliente({
-      cedula: '',
-      nombres: '-SELECCIONE-'
-    });
-    ObtenerProductos();
+  // Inicializa el punto de venta
+  useEffect(() => {
+    inicializarPuntoVenta();
   }, []);
 
-  const verificarAperturaPeriodo = async () => {
-    const periodo = await verificarPeriodoActivo();
+  const inicializarPuntoVenta = async () => {
+    setCurrentCliente({ cedula: '', nombres: '-SELECCIONE-' });
+    await ObtenerProductos();
+    await mostrarAlertaSiPeriodoAnteriorActivo();
+  };
 
-    const now = new Date(periodo.periodo.fecha_apertura);
-    if (periodo.estado === 'periodo-anterior-activo') {
-      Swal.fire(
-        'Está facturando con un periodo del: ' + date.format(now, 'YYYY-MM-DD')
-      );
+  const mostrarAlertaSiPeriodoAnteriorActivo = async () => {
+    const periodo = await verificarPeriodoActivo();
+    if (periodo?.estado === 'periodo-anterior-activo') {
+      const fecha = date.format(new Date(periodo.periodo.fecha_apertura), 'YYYY-MM-DD');
+      Swal.fire(`Está facturando con un periodo del: ${fecha}`);
     }
   };
-  return (
-    <div className={classes.root}>
-      <VerificarAperturaPeriodo></VerificarAperturaPeriodo>
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Paper className={classes.paper}>
-            <strong>Punto de venta</strong>
-          </Paper>
-        </Grid>
 
+  return (
+    <Container className={classes.root} maxWidth="lg">
+      <Paper className={classes.paper}>
+        <Typography variant="h5" color="textPrimary">
+          Punto de Venta
+        </Typography>
+      </Paper>
+
+      <Grid container spacing={2} style={{ marginTop: 8 }}>
         {periodoActivo ? (
           <>
             <Grid item xs={12} sm={5}>
@@ -77,10 +63,9 @@ const PuntoVenta = () => {
                 setProductos={setProductos}
                 buscarProductos={buscarProductos}
                 productos={productosTemp}
-                classes={classes}
+                  classes={classes}
               />
             </Grid>
-
             <Grid item xs={12} sm={7}>
               <Paper className={classes.paper}>
                 <Factura esProforma={false} />
@@ -88,34 +73,15 @@ const PuntoVenta = () => {
             </Grid>
           </>
         ) : (
-          <IniciarDia></IniciarDia>
-        )}
-      </Grid>
-    </div>
-  );
-};
-export default PuntoVenta;
-
-const IniciarDia = () => {
-  const classes = useStyles();
-
-  return (
-    <>
-      <div className={classes.root}>
-        <Grid container spacing={1}>
           <Grid item xs={12}>
             <Paper className={classes.paper}>
-              <NuevoPeriodo></NuevoPeriodo>
-              {/* <center>
-                <h1>INICIAR PERIODO</h1>
-                <Button variant="contained" color="secondary">
-                  CREAR PERIODO
-                </Button>
-              </center> */}
+              <NuevoPeriodo />
             </Paper>
           </Grid>
-        </Grid>
-      </div>
-    </>
+        )}
+      </Grid>
+    </Container>
   );
 };
+
+export default PuntoVenta;

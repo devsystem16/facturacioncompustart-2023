@@ -2,130 +2,135 @@ import * as React from 'react';
 import { DataGrid } from '@material-ui/data-grid';
 import { Card } from '@material-ui/core';
 import columns from './columns';
-import axios from 'axios';
 import API from '../../Environment/config';
-
+import { useNavigate } from 'react-router-dom';
 import { ClienteContext } from '../../context/ClienteContext';
-
-// import PerfectScrollbar from 'react-perfect-scrollbar';
+import { LoginContext } from '../../context/LoginContext';
 import alertify from 'alertifyjs';
 
 const END_POINT = {
   actualizarCliente: 'api/clientes'
 };
 
-export default function TablaClientes({}) {
+export default function TablaClientes() {
+  const navigate = useNavigate();
   const [tableIsLoading, setTableIsLoading] = React.useState(false);
+   const [existenCambios, setExistenCambios] = React.useState(false);
+
   const {
     clientes,
     clientesFiltro,
     setClientes,
     setDeleteCliente,
-    cargarClientes
+    cargarClientes ,
+ 
+    deleteCliente
   } = React.useContext(ClienteContext);
 
+
+  const {
+    setEdicionActiva
+  } = React.useContext(LoginContext);
+
+  // Cargar clientes al montar el componente
   React.useEffect(() => {
     cargarClientes();
+
+
+     const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        console.log('Se presionó Escape');
+        setEdicionActiva(false);
+        // Aquí puedes cancelar edición, cerrar modal, etc.
+      }
+    };
+document.addEventListener('keydown', handleKeyDown);
+
   }, []);
 
+
+ 
+
+
+  // Buscar cliente por ID
   const buscarClienteObjeto = (id) => {
     return clientes.find((clienteActual) => clienteActual.id === id);
   };
 
+  // Marcar que hay cambios
+  const marcarCambios = (params, event) => {
+ 
+if(params.colDef.editable)
+    setEdicionActiva(true);
+ 
+  };
+
+  // Editar cliente
   const editarCliente = (prm_cliente) => {
-    var cliente = buscarClienteObjeto(prm_cliente.id);
 
-    if (cliente.id) {
-      var field = prm_cliente.field;
-      var clienteNuevo = [];
 
-      const nuevoListado = clientes.map((item) => {
-        if (item.id === cliente.id) {
-          if (field === 'correo')
-            clienteNuevo = {
-              ...item,
-              correo: prm_cliente.value
-            };
-          if (field === 'cedula')
-            clienteNuevo = {
-              ...item,
-              cedula: prm_cliente.value
-            };
-          if (field === 'nombres')
-            clienteNuevo = {
-              ...item,
-              nombres: prm_cliente.value
-            };
+    
+    const cliente = buscarClienteObjeto(prm_cliente.id);
+    if (!cliente) return;
 
-          if (field === 'telefono')
-            clienteNuevo = {
-              ...item,
-              telefono: prm_cliente.value
-            };
-          if (field === 'direccion')
-            clienteNuevo = {
-              ...item,
-              direccion: prm_cliente.value
-            };
-          if (field === 'observacion')
-            clienteNuevo = {
-              ...item,
-              observacion: prm_cliente.value
-            };
+    const field = prm_cliente.field;
+    const clienteNuevo = { ...cliente, [field]: prm_cliente.value };
 
-          updateclientesDB(clienteNuevo);
+    // Actualizar en DB
+    updateclientesDB(clienteNuevo);
 
-          return clienteNuevo;
-        }
+    // Actualizar estado local
+    const nuevoListado = clientes.map((item) =>
+      item.id === cliente.id ? clienteNuevo : item
+    );
 
-        return item;
-      });
+    setClientes(nuevoListado);
+    setEdicionActiva(false); // reset cambios
+    
+  };
 
-      setClientes(nuevoListado);
+  // Actualizar cliente en API
+  const updateclientesDB = async (cliente) => {
+    try {
+      setTableIsLoading(true);
+      await API.patch(`${END_POINT.actualizarCliente}/${cliente.id}`, cliente);
+      alertify.success('Cliente actualizado correctamente', 2);
+    } catch (err) {
+      alertify.error('Error al actualizar el cliente', 2);
+      console.error(err);
+    } finally {
+      setTableIsLoading(false);
     }
   };
 
-  const updateclientesDB = async (cliente) => {
-    setTableIsLoading(true);
-
-    const result = await API.patch(
-      END_POINT.actualizarCliente + '/' + cliente.id,
-      cliente
-    );
-
-    setTableIsLoading(false);
-    alertify.success('Actualizado', 2);
-    console.log(result);
-  };
-
+  // Selección de fila
   const onRowSelectEvent = (parameters) => {
     if (parameters.length < 1) return;
-
-    var cliente = buscarClienteObjeto(parameters[0]);
-
+    const cliente = buscarClienteObjeto(parameters[0]);
     setDeleteCliente(cliente);
-    // alert(JSON.stringify(parameters.data));
   };
+
+
+   
+ 
+
+
   return (
     <Card>
       <div style={{ height: 360, width: '100%' }}>
         <DataGrid
           rows={clientesFiltro}
           columns={columns}
-          datasets="Commodity"
           checkboxSelection={false}
-          // onEditCellChangeCommitted={editarCliente}
-          onCellEditCommit={(params) => {
-            editarCliente(params);
-          }}
           pageSize={10}
-          disableSelectionOnClick={false}
           rowHeight={23}
           loading={tableIsLoading}
-          // onRowSelected={onRowSelectEvent}
-          onSelectionModelChange={(row) => {
-            onRowSelectEvent(row);
-          }}
+          disableSelectionOnClick={false}
+          onCellEditCommit={editarCliente}
+          onSelectionModelChange={onRowSelectEvent}
+           onCellDoubleClick={(params, event) => {
+            marcarCambios(params, event);
+            }}
         />
       </div>
     </Card>
