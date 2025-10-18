@@ -27,6 +27,7 @@ const END_POINT = {
   guardarProforma: 'api/proformas',
   obtenerFactura: 'api/facturas/impresion/reimpresion/',
   obtenerProformas: 'api/proformas',
+    obtenerProforma: 'api/proformas/obtener',
   eliminarProforma: 'api/proformas/eliminar/'
 };
 
@@ -60,6 +61,7 @@ const FacturaProvider = (props) => {
   const [formasPago, setFormasPago] = useState({});
   const [reloadProforma, setReloadProforma] = useState(true);
   const [proformas, setProformas] = useState([]);
+    const [proforma, setProforma] = useState(  []);
   const [proformasTemp, setProformasTemp] = useState([]);
 
   const eliminarProforma = async (proforma) => {
@@ -720,6 +722,18 @@ const FacturaProvider = (props) => {
     setProformasTemp(response.data);
   };
 
+
+
+const fn_obtenerProforma = async (idProforma) => {
+  const proforma = {
+     idProforma: idProforma
+  };
+
+  const response = await API.post(END_POINT.obtenerProforma , proforma );
+  setProforma(response.data);
+};
+
+
   useEffect(() => {
     calcularTotalesFactura();
 
@@ -733,6 +747,8 @@ const FacturaProvider = (props) => {
     <>
       <FacturaContext.Provider
         value={{
+          fn_obtenerProforma,
+          proforma, setProforma,
           productosFactura,
           setProductosFactura,
           agregarProductoFactura,

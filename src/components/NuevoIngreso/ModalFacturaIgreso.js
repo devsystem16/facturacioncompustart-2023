@@ -41,8 +41,8 @@ export default function MaxWidthDialog({ IsguardarFactura = false }) {
 
   const { guardarFactura, totales, setProductosFactura, setCredito } =
     useContext(FacturaContext);
-  const { actualizarIngreso, setReload } = React.useContext(IngresoContext);
-  const { setCurrentCliente, currentCliente } = useContext(ClienteContext);
+  const { actualizarIngreso, setReload, datosImpresion } = React.useContext(IngresoContext);
+  const { setCurrentCliente, clientesFiltro , currentCliente } = useContext(ClienteContext);
   const { setIsReload } = useContext(EstadisticasContext);
   const EventoImprimirReact = () => {
     print();
@@ -61,9 +61,25 @@ export default function MaxWidthDialog({ IsguardarFactura = false }) {
       });
     }
   });
-  const handleClickOpen = () => {
-    setOpen(true);
+  const  handleClickOpen =async () => {
+
+   var cliente = await findClienteById(datosImpresion.cliente.cedula);
+    setCurrentCliente({
+        id:cliente.id,
+        cedula:  cliente.cedula,
+        nombres:   cliente.nombres,
+        telefono: cliente.telefono
+      });
+
+
+       setOpen(true);
+   
+
   };
+
+  const    findClienteById =  async (cedula) => {
+    return clientesFiltro.find((cliente) => cliente.cedula === cedula);
+  }
 
   const SolohandleClose = async () => {
     setOpen(false);

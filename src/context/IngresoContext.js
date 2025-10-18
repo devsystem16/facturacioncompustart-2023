@@ -10,7 +10,6 @@ import { useReactToPrint } from 'react-to-print';
 import API from '../Environment/config';
 import Swal from 'sweetalert2';
 import { ClienteContext } from './ClienteContext';
-import { TecnicoContext } from './TecnicoContext';
 import { EstadisticasContext } from './EstadisticasContext';
 
 import ImpresionOrden from '../components/ImpresionOrden/ImpresionOrden';
@@ -26,6 +25,8 @@ const END_POINT = {
 };
 
 const IngresoProvider = (props) => {
+
+  
   const [ordenes, setOrdenes] = useState([]);
   const [ordenesTemp, setOrdenesTemp] = useState([]);
   const [isNew, setIsNew] = useState(false);

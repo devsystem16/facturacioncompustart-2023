@@ -71,8 +71,10 @@ export default function VentasDiarias() {
         >
           <TableHead>
             <TableRow>
+                <TableCell>N° Factura</TableCell>
               <TableCell>Cliente</TableCell>
               <TableCell align="right">Fecha</TableCell>
+                      <TableCell align="right">Forma Pago</TableCell>
               <TableCell align="right">Observación</TableCell>
               <TableCell align="right">Total</TableCell>
               {/* <TableCell align="right">Tipo</TableCell> */}
@@ -83,7 +85,7 @@ export default function VentasDiarias() {
               style={{ backgroundColor: '#e6e6e6' }}
               key="rowFacturas01"
             >
-              <TableCell component="th" colSpan={5} scope="row">
+              <TableCell component="th" colSpan={6} scope="row">
                 <center>
                   <strong>Facturas ({ventasDiarias.facturas.length})</strong>
                 </center>
@@ -92,10 +94,15 @@ export default function VentasDiarias() {
 
             {ventasDiarias.facturas.map((factura) => (
               <TableRow key={'rptF' + factura.idControl}>
+     <TableCell component="th" scope="row">
+                  {factura.idControl}
+                </TableCell>
+
                 <TableCell component="th" scope="row">
                   {factura.cliente}
                 </TableCell>
                 <TableCell align="right">{factura.fecha}</TableCell>
+                 <TableCell align="right">{factura.formasPagos}</TableCell>
                 <TableCell align="right">
                   {factura.observacion === null ? '-' : factura.observacion}
                 </TableCell>
@@ -103,36 +110,28 @@ export default function VentasDiarias() {
                 {/* <TableCell align="right">{factura.tipo}</TableCell> */}
               </TableRow>
             ))}
-            {/* <TableRow style={{ backgroundColor: '#e6e6e6' }} key="rowIngres01">
-              <TableCell component="th" colSpan={5} scope="row">
-                <center>
-                  <strong>Ingresos ({ventasDiarias.ordenes.length}) </strong>
-                </center>
-              </TableCell>
-            </TableRow>
-            {ventasDiarias.ordenes.map((obj) => (
-              <TableRow key={'rptF' + obj.idControl}>
-                <TableCell component="th" scope="row">
-                  {obj.cliente}
-                </TableCell>
-                <TableCell align="right">{obj.fecha}</TableCell>
-                <TableCell align="right">
-                  {obj.observacion === null ? '-' : obj.observacion}
-                </TableCell>
-                <TableCell align="right">$ {obj.totalAbono}</TableCell>
-                
-              </TableRow>
-            ))} */}
+            
+
+
+
 
             <TableRow style={{ backgroundColor: '#e6e6e6' }} key="rowOrd01">
-              <TableCell component="th" colSpan={5} scope="row">
+              <TableCell component="th" colSpan={6} scope="row">
                 <center>
                   <strong>Créditos ({ventasDiarias.creditos.length}) </strong>
                 </center>
               </TableCell>
             </TableRow>
+
+            
             {ventasDiarias.creditos.map((obj) => (
               <TableRow key={'rptF' + obj.idControl}>
+
+                <TableCell component="th" scope="row">
+                  {obj.idControl}
+                </TableCell>
+
+
                 <TableCell component="th" scope="row">
                   {obj.cliente}
                 </TableCell>

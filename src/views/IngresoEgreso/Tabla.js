@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './tabla.css';
 import TextField from '@material-ui/core/TextField';
+import DeleteIcon from '@material-ui/icons/Delete';
 import API from '../../Environment/config';
 import Permisos from '../../Environment/Permisos.json';
-
-import DeleteIcon from '@material-ui/icons/Delete';
 import Loading from '../../components/Loading/Loading';
 import { formatCurrency } from '../../Environment/utileria';
 import { PeriodoContext } from '../../context/PeriodoContext';
@@ -13,38 +12,25 @@ const Table = ({ titulo = 'Listado', denominaciones, setDenominaciones }) => {
   const { totalRetiros, setTotalRetiros } = useContext(PeriodoContext);
 
   const [filter, setFilter] = useState('');
-  const [sortConfig, setSortConfig] = useState({
-    key: '',
-    direction: ''
-  });
+  const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const data = [
-    { id: 1, name: 'John Doe', age: 30, city: 'New York' },
-    { id: 2, name: 'Jane Smith', age: 25, city: 'London' },
-    { id: 3, name: 'Bob Johnson', age: 40, city: 'Paris' }
-  ];
 
-  const calularTotal = (array) => {
-    let sumaValorRetiro = 0;
-    array.forEach((item) => {
-      sumaValorRetiro += item.valorRetiro;
-    });
+  // Calcula el total de retiros
+  const calcularTotal = (array) => {
+    const sumaValorRetiro = array.reduce((acc, item) => acc + item.valorRetiro, 0);
     setTotalRetiros(formatCurrency(sumaValorRetiro));
   };
+
   useEffect(() => {
-    calularTotal(denominaciones);
+    calcularTotal(denominaciones);
   }, [denominaciones]);
 
-  const filteredData = data.filter(
-    (row) =>
-      row.name.toLowerCase().includes(filter.toLowerCase()) ||
-      row.city.toLowerCase().includes(filter.toLowerCase())
-  );
-
+  // Manejo de filtro
   const handleFilterChange = (event) => {
     setFilter(event.target.value);
   };
 
+  // Manejo de ordenamiento
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -53,101 +39,93 @@ const Table = ({ titulo = 'Listado', denominaciones, setDenominaciones }) => {
     setSortConfig({ key, direction });
   };
 
-  const sortedData = filteredData.sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
+  // Filtra y ordena las denominaciones
+  const filteredData = denominaciones.filter((row) =>
+    row.concepto?.toLowerCase().includes(filter.toLowerCase()) ||
+    row.observacion?.toLowerCase().includes(filter.toLowerCase()) ||
+    row.valorRetiro?.toString().includes(filter)
+  );
+
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
     return 0;
   });
 
+  // Eliminar un retiro
   const eliminar = async (idRetiro) => {
     setIsLoading(true);
-    const response = await API.post('/api/retiros/eliminar/retiro/' + idRetiro);
-
-    setDenominaciones(response.data.data);
-    calularTotal(response.data.data);
-    setIsLoading(false);
+    try {
+      const response = await API.post(`/api/retiros/eliminar/retiro/${idRetiro}`);
+      setDenominaciones(response.data.data);
+      calcularTotal(response.data.data);
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="tablaComponent">
-      <Loading
-        text="Eliminando..."
-        open={isLoading}
-        setOpen={setIsLoading}
-      ></Loading>
-      <h2> {titulo} </h2>
+      <Loading text="Eliminando..." open={isLoading} setOpen={setIsLoading} />
+      <h2>{titulo}</h2>
+
       <TextField
         className="txt-filter"
         style={{ textAlign: 'left' }}
-        id="standard-basic"
         label="Buscar"
         type="text"
         value={filter}
         onChange={handleFilterChange}
-        // placeholder="Filter table"
       />
 
       <table className="table-container">
         <thead>
           <tr>
             <th onClick={() => handleSort('id')}>
-              ID{' '}
-              {sortConfig.key === 'id' && (
-                <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
-              )}
+              ID {sortConfig.key === 'id' && <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>}
             </th>
-            <th onClick={() => handleSort('name')}>
-              Valor Retiro{' '}
-              {sortConfig.key === 'name' && (
-                <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
-              )}
+            <th onClick={() => handleSort('valorRetiro')}>
+              Valor Retiro {sortConfig.key === 'valorRetiro' && <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>}
             </th>
-            <th onClick={() => handleSort('age')}>
-              Por Concepto de{' '}
-              {sortConfig.key === 'age' && (
-                <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
-              )}
+            <th onClick={() => handleSort('concepto')}>
+              Por Concepto de {sortConfig.key === 'concepto' && <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>}
             </th>
-            <th onClick={() => handleSort('city')}>
-              Observaciones{' '}
-              {sortConfig.key === 'city' && (
-                <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>
-              )}
+            <th onClick={() => handleSort('observacion')}>
+              Observaciones {sortConfig.key === 'observacion' && <span>{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>}
             </th>
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody>
-          {denominaciones.map((retiros) => {
-            return (
-              <tr key={retiros.id}>
-                <td>{retiros.id}</td>
-                <td>{formatCurrency(retiros.valorRetiro)}</td>
-                <td>{retiros.concepto}</td>
-                <td>{retiros.observacion}</td>
-                <td>
-                  {Permisos[localStorage.getItem('tipo_usuario')][
-                    'eliminar-retiros'
-                  ] && (
-                    <DeleteIcon
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => eliminar(retiros.id)}
-                    ></DeleteIcon>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
 
-          <tr key="KK01">
-            <td colSpan={'2'} style={{ textAlign: 'center' }}>
-              <h2> Total: {totalRetiros}</h2>
+        <tbody>
+          {sortedData.map((retiro) => (
+            <tr key={retiro.id}>
+              <td>{retiro.id}</td>
+              <td>{formatCurrency(retiro.valorRetiro)}</td>
+              <td>{retiro.concepto}</td>
+              <td>{retiro.observacion}</td>
+              <td>
+                {Permisos[localStorage.getItem('tipo_usuario')]['eliminar-retiros'] && (
+                  <DeleteIcon
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => eliminar(retiro.id)}
+                  />
+                )}
+              </td>
+            </tr>
+          ))}
+
+          <tr key="total">
+            <td colSpan={2} style={{ textAlign: 'center' }}>
+              <h2>Total: {totalRetiros}</h2>
             </td>
-            <td colspan="3"> </td>
+            <td colSpan={3}></td>
           </tr>
         </tbody>
       </table>

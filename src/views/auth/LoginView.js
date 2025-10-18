@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 const LoginView = () => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const { login, setCredenciales, setUserloggin } = useContext(LoginContext);
+  const { login, setCredenciales, setUserloggin, setPestaniaActiva } = useContext(LoginContext);
 
   /** Limpia cualquier sesión activa previa */
   const clearSession = useCallback(() => {
@@ -69,7 +69,14 @@ const LoginView = () => {
         localStorage.setItem(key, value);
       });
 
-      // Redirección según tipo de usuario
+      if(response.tipo === 'ADMINISTRADOR') {
+setPestaniaActiva( 'Dashboard');
+      }else {
+        setPestaniaActiva('');
+      }
+
+
+      // Redirección según tipo de  'dashboard');usuario
       navigate(response.tipo === 'ADMINISTRADOR' ? '/app/dashboard' : '/app', {
         replace: true,
       });

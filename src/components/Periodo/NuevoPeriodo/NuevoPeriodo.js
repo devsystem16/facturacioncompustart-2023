@@ -3,6 +3,10 @@ import { TextField, Button } from '@material-ui/core';
 import date from 'date-and-time';
 import { PeriodoContext } from '../../../context/PeriodoContext';
 import { EstadisticasContext } from '../../../context/EstadisticasContext';
+import { LoginContext } from '../../../context/LoginContext';
+
+
+
 import Swal from 'sweetalert2';
 import Loading from '../../../components/Loading/Loading';
 
@@ -15,6 +19,12 @@ const RegistroPeriodoForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const currentDate = date.format(new Date(), 'YYYY-MM-DD'); //  HH:mm:ss
   const { setPeriodoActivo, crearPeriodo } = useContext(PeriodoContext);
+    const {
+  
+    setPestaniaActiva
+  } = useContext(LoginContext);
+
+
   const { setIsReload } = useContext(EstadisticasContext);
   const handleGuardarClick = async () => {
     if (fondoAsignado <= 0) {
@@ -44,6 +54,7 @@ const RegistroPeriodoForm = () => {
       return;
     }
 
+    setPestaniaActiva('Punto de Venta');
     Swal.fire(response.message, '', 'success');
     setIsReload(true);
     setPeriodoActivo(true);

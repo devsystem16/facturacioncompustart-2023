@@ -26,6 +26,7 @@ const SelectCliente = ({
         <Autocomplete
           id="debug"
           value={currentCliente}
+     
           disabled={selectInactive}
           options={clientes}
           debug
@@ -124,7 +125,7 @@ const SelectCliente = ({
           renderInput={(params) => (
             <TextField
               {...params}
-              style={{ width: ancho }}
+              style={{ width: ancho  }}
               label="Seleccione Cliente"
               variant="outlined"
             />

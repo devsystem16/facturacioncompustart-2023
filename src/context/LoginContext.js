@@ -18,6 +18,7 @@ const END_POINT = {
 const LoginProvider = (props) => {
   const [isReload, setIsReload] = useState(true);
   const [edicionActiva, setEdicionActiva] = useState(false);
+  const [pestaniaActiva, setPestaniaActiva] = useState('Dashboard');
   const [items, setItems] = useState([
     // {
     //   href: '/app/dashboard',
@@ -107,7 +108,8 @@ const LoginProvider = (props) => {
           userloggin,
           setUserloggin,
           items,
-          edicionActiva, setEdicionActiva
+          edicionActiva, setEdicionActiva,
+          pestaniaActiva, setPestaniaActiva
         }}
       >
         {props.children}
