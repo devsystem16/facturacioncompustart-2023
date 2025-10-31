@@ -75,7 +75,7 @@ const TotalProfit = ({ className, ...rest }) => {
               variant="h3"
               style={{ paddingBottom: '10px' }}
             >
-              $ {reporte.totalVentas}
+                {formatCurrency(reporte.totalVentas) }
             </Typography>
           </Grid>
           <Grid item>

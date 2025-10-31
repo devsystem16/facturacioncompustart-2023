@@ -9,7 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { CreditoContext } from '../../context/CreditoContext';
 import SelectJS from '../../components/SelectJS';
-
+import alertify from 'alertifyjs';
 import NumberFormatCustom from '../../components/ValidationCurrency/ValidationCurrency';
 
 export default function ModalAbono() {
@@ -22,6 +22,7 @@ export default function ModalAbono() {
   } = useContext(CreditoContext);
 
   const [abono, setAbono] = useState(0);
+  const [enabledBoton , setEnabledBoton] = useState(true);
 
   const [formaPagoId, setFormaPagoId] = useState(1);
   // const handleClickOpen = () => {
@@ -31,8 +32,15 @@ export default function ModalAbono() {
   const handleClose = () => {
     SetIsOpenModalAbono(false);
   };
-  const guardarAbonoCredito = () => {
-    guardarAbono(abono, formaPagoId);
+  const guardarAbonoCredito  = async() => {
+
+    if(abono <=0 ){
+          alertify.error('El abono debe ser mayor a 0');
+      return;
+    }
+     setEnabledBoton(false)
+   const  data = await  guardarAbono(abono, formaPagoId);
+     setEnabledBoton(true)
   };
 
   return (
@@ -73,7 +81,7 @@ export default function ModalAbono() {
           <Button onClick={handleClose} color="primary">
             Cancelar
           </Button>
-          <Button onClick={guardarAbonoCredito} color="primary">
+          <Button disabled={!enabledBoton}  onClick={guardarAbonoCredito} color="primary">
             Guardar
           </Button>
         </DialogActions>

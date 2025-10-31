@@ -42,7 +42,7 @@ const useRowStyles = makeStyles({
 });
 
 function Row(props) {
-  const { credito } = props;
+  const { credito  } = props;
   const [open, setOpen] = React.useState(false);
   const classes = useRowStyles();
 
@@ -84,6 +84,7 @@ function Row(props) {
         open={AbrirModalPagos}
         setOpen={setAbrirModalPagos}
         credito={credito}
+ 
       ></ModalPagos>
 
       <TableRow className={classes.root}>
@@ -106,9 +107,8 @@ function Row(props) {
         <TableCell component="th" scope="row">
           {credito.fecha}
         </TableCell>
-
+       <TableCell align="right"> {credito.cliente}</TableCell>
         <TableCell align="right"> {credito.detalle}</TableCell>
-        <TableCell align="right"> {credito.cliente}</TableCell>
         <TableCell align="right">{credito.telefono}</TableCell>
         <TableCell align="right">
           {formatCurrencySimple(credito.total)}
@@ -181,23 +181,7 @@ export default function CollapsibleTable() {
   const [_recargarListaCreditos, _setRecargarListaCreditos] = useState(
     recargarListaCreditos
   );
-
-  // const filrarProductos2 = (text) => {
-  //   const results = creditos.filter((credito) => {
-  //     const itemData = credito.cliente.toUpperCase();
-  //     const textData = text.toUpperCase();
-
-  //     const itemData1 = credito?.factura?.id.toString();
-  //     const textData1 = text.toString();
-
-  //     return (
-  //       itemData1.indexOf(textData1) > -1 || itemData.indexOf(textData) > -1
-  //     );
-  //   });
-
-  //   _setRecargarListaCreditos(false);
-  //   _setCreditos(results);
-  // };
+ 
 
   const filrarProductos = (text) => {
     const searchTerm = text.toUpperCase().split(' ');
@@ -260,8 +244,8 @@ export default function CollapsibleTable() {
               Fact. referencia
             </TableCell>
             <TableCell>Fecha crédito</TableCell>
-            <TableCell align="right">Descripción</TableCell>
             <TableCell align="right">Cliente</TableCell>
+            <TableCell align="right">Descripción</TableCell>
             <TableCell align="right">Teléfono</TableCell>
             <TableCell align="right">Total</TableCell>
             <TableCell align="right">Abono</TableCell>
@@ -273,7 +257,7 @@ export default function CollapsibleTable() {
         </TableHead>
         <TableBody>
           {_creditos.map((credito) => (
-            <Row key={'___' + credito.id} credito={credito} />
+            <Row     key={'___' + credito.id} credito={credito} />
           ))}
         </TableBody>
       </Table>

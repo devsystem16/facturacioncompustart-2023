@@ -41,6 +41,25 @@ const CreditoProvider = (props) => {
     console.log(respuesta.data);
   };
 
+
+  const actualizarFormaPagoDetalleCredito = async (id, formaPagoId) => {
+    const response = await API.put(`api/detalle-creditos/${id}/forma-pago`, {
+      forma_pago_id: formaPagoId
+    });
+
+
+      setIsReload(true);
+
+    setRecargarListaCreditos(true);
+    setRecargarFiltro(true);
+    setIsLoading(false);
+ 
+
+
+      return response.data;
+  }
+
+
   const obtenerCreditos = async () => {
     const response = await API.get(END_POINT.obtenerCreditos);
     setCreditos(response.data);
@@ -78,7 +97,8 @@ const CreditoProvider = (props) => {
         setIsLoading,
         recargarFiltro,
         setRecargarFiltro,
-        eliminarCreditos
+        eliminarCreditos,
+        actualizarFormaPagoDetalleCredito
       }}
     >
       {props.children}

@@ -87,13 +87,13 @@ export default [
     field: 'marca',
     headerName: 'Marca',
     width: 140,
-    editable: false
+    editable: true
   },
   {
     field: 'modelo',
     headerName: 'Modelo',
     width: 160,
-    editable: false
+    editable: true
   },
 
   {
@@ -101,7 +101,7 @@ export default [
     headerName: 'Serie',
     width: 200,
     visible: true,
-    editable: false,
+    editable: true,
     renderCell: (cellValues) => {
       return (
         <Tooltip title={cellValues.formattedValue}>

@@ -14,7 +14,8 @@ const useStyles = makeStyles((theme) => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: '90%'
+    minWidth: '90%',
+    width: '100%'
   }
 }));
 
@@ -22,7 +23,9 @@ export default function SelectJS({
   path_api,
   value,
   setValue,
-  title = '*Seleccione*'
+  title = '*Seleccione*',
+  margenes = 16,
+  defaultValue = -1
 }) {
   const classes = useStyles();
   const [age, setAge] = React.useState('');
@@ -50,8 +53,19 @@ export default function SelectJS({
   const loadData = async () => {
     const response = await API.get(path_api);
     const datoDefault = findDefault(response?.data);
-    setValue(datoDefault.id);
+ 
+     let valorDefecto = datoDefault?.id ?? null;
+
+
+
+   if (typeof defaultValue !== 'undefined' && defaultValue !== -1 && defaultValue !== null) {
+      valorDefecto = defaultValue;
+    }
+
+
+    setValue(valorDefecto);
     setDatos(response.data);
+
   };
 
   useEffect(() => {
@@ -64,7 +78,7 @@ export default function SelectJS({
         <InputLabel id="demo-controlled-open-select-label">{title} </InputLabel>
         <Select
           labelId="demo-controlled-open-select-label"
-          style={{ paddingTop: '16px' }}
+           style={{ marginTop: margenes , paddingTop: margenes}}
           id="demo-controlled-open-select"
           open={open}
           onClose={handleClose}

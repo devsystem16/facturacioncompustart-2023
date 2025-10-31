@@ -31,4 +31,42 @@
   .creditos-table td.centered-rigth {
     text-align: right;
   }
+ /* Ocultar columna de acción cuando se imprime */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+
  
+/* Contenedor común de la celda forma de pago */
+.forma-pago-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+/* Ícono de editar oculto por defecto */
+.edit-icon {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Muestra el ícono de editar al pasar el mouse */
+.forma-pago-wrapper:hover .edit-icon {
+  opacity: 1;
+}
+
+/* Ícono de guardar */
+.save-icon {
+  margin-left: 8px;
+  color: green;
+}
+
+/* Ajuste general de la celda */
+.forma-pago-cell {
+  position: relative;
+  padding-right: 10px;
+}

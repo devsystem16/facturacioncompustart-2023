@@ -115,6 +115,11 @@ document.addEventListener('keydown', handleKeyDown);
             ...item,
             observacion: ingreso?.value
           };
+             if (field === 'serie')
+          IngresoNuevo = {
+            ...item,
+            serie: ingreso?.value
+          };
 
         updateIngresoDB(IngresoNuevo, field);
         console.log('Ingreso Nuevo', IngresoNuevo);
