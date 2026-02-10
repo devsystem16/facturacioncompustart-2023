@@ -65,13 +65,13 @@ export default function CollapsibleTable() {
   };
   const print = useReactToPrint({
     content: () => componentRef.current,
-    onAfterPrint: () => {}
+    onAfterPrint: () => { }
   });
 
   const imprimirFactura = async (id, estado) => {
     let response = await fn_obtenerFactura(id);
 
- 
+
     setFactura_id(id);
 
     setIsPrinter({
@@ -154,10 +154,20 @@ function Row(props) {
   }
 
   const anularFactura = (id, estado) => {
-    if (estado !== 'cerrada') {
-      Swal.fire('No permitido.', '', 'warning');
-      return;
-    }
+    // if (estado !== 'cerrada') {
+    //   Swal.fire('No permitido.', '', 'warning');
+    //   return;
+    // }
+
+
+
+    // if (estado === 'credito')
+    //   if (localStorage.getItem('tipo_usuario') !== 'ADMINISTRADOR') {
+    //     Swal.fire("No tiene permisos suficientes para realizar esta acción.", '', 'warning');
+    //     return;
+    //   }
+
+
 
     Swal.fire({
       title: '¿Está seguro de Anular la Factura?',
@@ -202,12 +212,12 @@ function Row(props) {
           {Permisos[localStorage.getItem('tipo_usuario')][
             'reimprimir-factura'
           ] && (
-            <PrintIco
-              title="Reimprimir Factura"
-              onClick={() => imprimirFactura(row.id, row.estado)}
-              style={{ cursor: 'pointer' }}
-            />
-          )}
+              <PrintIco
+                title="Reimprimir Factura"
+                onClick={() => imprimirFactura(row.id, row.estado)}
+                style={{ cursor: 'pointer' }}
+              />
+            )}
           {Permisos[localStorage.getItem('tipo_usuario')]['anular factura'] && (
             <PrintIcon
               title="Anular Factura"
@@ -228,6 +238,7 @@ function Row(props) {
                 <TableHead>
                   <TableRow>
                     <TableCell>Cant.</TableCell>
+                    <TableCell>Código</TableCell>
                     <TableCell>Producto</TableCell>
                     <TableCell align="center">Total Item ($)</TableCell>
                     <TableCell align="right">Tipo Precio</TableCell>
@@ -239,7 +250,11 @@ function Row(props) {
                       <TableCell component="th" scope="row">
                         {historyRow.cantidad}
                       </TableCell>
-                      <TableCell>{ historyRow?.idProducto +" - " +historyRow.producto}</TableCell>
+
+                      <TableCell component="th" scope="row">
+                        {historyRow.codigo_barra}
+                      </TableCell>
+                      <TableCell>{historyRow?.idProducto + " - " + historyRow.producto}</TableCell>
                       <TableCell align="center">
                         {/* $ {trunc(historyRow.subtotal / 1.15, 4)} */}${' '}
                         {formatCurrencySimple(historyRow.subtotal)}
@@ -250,9 +265,9 @@ function Row(props) {
                     </TableRow>
                   ))}
                 </TableBody>
- 
 
-              {/* <Typography variant="h6" gutterBottom component="div">
+
+                {/* <Typography variant="h6" gutterBottom component="div">
                 Formas de Pago
               </Typography>
                  <TableBody>
@@ -273,46 +288,46 @@ function Row(props) {
                   ))}
                 </TableBody> */}
 
- <Typography variant="h6" gutterBottom component="div" sx={{ mt: 2 }}>
-  Formas de Pago
-</Typography>
-<TableBody>
-  {row.formasPago.map((fp) => {
-    // Selección de icono según tipo de pago
-    let Icon;
-    switch (fp.descripcionFormaPago?.toLowerCase()) {
-      case 'efectivo':
-        Icon = AttachMoneyIcon;
-        break;
-      case 'transferencia':
-        Icon = AccountBalanceIcon;
-        break;
-      case 'depósito':
-        Icon = ReceiptIcon;
-        break;
-      case 'tarjeta de crédito':
-        Icon = CreditCardIcon;
-        break;
-      case 'cheque':
-        Icon = AccountBalanceWalletIcon;
-        break;
-      default:
-        Icon = AttachMoneyIcon;
-    }
+                <Typography variant="h6" gutterBottom component="div" sx={{ mt: 2 }}>
+                  Formas de Pago
+                </Typography>
+                <TableBody>
+                  {row.formasPago.map((fp) => {
+                    // Selección de icono según tipo de pago
+                    let Icon;
+                    switch (fp.descripcionFormaPago?.toLowerCase()) {
+                      case 'efectivo':
+                        Icon = AttachMoneyIcon;
+                        break;
+                      case 'transferencia':
+                        Icon = AccountBalanceIcon;
+                        break;
+                      case 'depósito':
+                        Icon = ReceiptIcon;
+                        break;
+                      case 'tarjeta de crédito':
+                        Icon = CreditCardIcon;
+                        break;
+                      case 'cheque':
+                        Icon = AccountBalanceWalletIcon;
+                        break;
+                      default:
+                        Icon = AttachMoneyIcon;
+                    }
 
-    return (
-      <TableRow key={`fp${fp.id}`}>
-        <TableCell component="th" scope="row" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Icon fontSize="small" color="primary" />
-          {fp.descripcionFormaPago}
-        </TableCell>
-        <TableCell>${formatCurrencySimple(fp.valor)}</TableCell>
-        <TableCell align="center">{fp.numeroTransaccion || '-'}</TableCell>
-        <TableCell align="right">{fp.estado || '-'}</TableCell>
-      </TableRow>
-    );
-  })}
-</TableBody>
+                    return (
+                      <TableRow key={`fp${fp.id}`}>
+                        <TableCell component="th" scope="row" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Icon fontSize="small" color="primary" />
+                          {fp.descripcionFormaPago}
+                        </TableCell>
+                        <TableCell>${formatCurrencySimple(fp.valor)}</TableCell>
+                        <TableCell align="center">{fp.numeroTransaccion || '-'}</TableCell>
+                        <TableCell align="right">{fp.estado || '-'}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
 
               </Table>
             </Box>

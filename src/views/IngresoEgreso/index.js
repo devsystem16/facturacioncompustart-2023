@@ -4,6 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import FormularioIngreso from './Formulario';
 import Tabla from './Tabla';
+import TablaHistorico from './TablaHistorico';
 import moment from 'moment';
 import API from '../../Environment/config';
 import { PeriodoContext } from '../../context/PeriodoContext';
@@ -62,6 +63,9 @@ export default function IngresoEgreso() {
                 setDenominaciones={setDenominaciones}
                 denominaciones={denominaciones}
               ></Tabla>
+              {localStorage.getItem('tipo_usuario') === 'ADMINISTRADOR' && (
+                <TablaHistorico />
+              )}
             </Paper>
           </Grid>
         </Grid>

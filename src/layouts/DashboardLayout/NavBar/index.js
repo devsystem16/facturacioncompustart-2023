@@ -135,6 +135,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
     if (nombreIcono === 'EditIconF') return EditIconF;
     if (nombreIcono === 'iconoFacturas') return iconoFacturas;
     if (nombreIcono === 'proformaIcon') return proformaIcon;
+    if (nombreIcono === 'SettingsIcon') return SettingsIcon;
   };
 
   useEffect(() => {
@@ -214,7 +215,7 @@ NavBar.propTypes = {
 };
 
 NavBar.defaultProps = {
-  onMobileClose: () => {},
+  onMobileClose: () => { },
   openMobile: false
 };
 

@@ -5,6 +5,7 @@ import Page from '../../../components/Page';
 
 import Notifications from './Notifications';
 import Password from './Password';
+import FacturacionElectronica from './FacturacionElectronica';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,6 +23,9 @@ const SettingsView = () => {
     <Page className={classes.root} title="Settings">
       <Container maxWidth="lg">
         <Notifications />
+        <Box mt={3}>
+          <FacturacionElectronica />
+        </Box>
         <Box mt={3}>
           <Password />
         </Box>

@@ -82,8 +82,21 @@ const LoginProvider = (props) => {
     const response = await API.get(
       END_POINT.obtenerAccesos + '/' + tipoUsuario
     );
+    // valido para activar configuraciones
+    // setItems([
+    //   ...response.data,
+    //   {
+    //     href: '/app/settings',
+    //     icon: 'SettingsIcon',
+    //     title: 'Configuraciones'
+    //   }
+    // ]);
 
-    setItems(response.data);
+    setItems([
+      ...response.data
+    ]);
+
+
   };
   const login = async (usuario) => {
     const response = await API.post(END_POINT.login, usuario);

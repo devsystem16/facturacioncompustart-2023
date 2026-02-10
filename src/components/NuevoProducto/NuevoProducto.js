@@ -3,27 +3,25 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import InputMoneda from '../../components/InputMoneda';
 import { ProductosContext } from '../../context/ProductosContext';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Grid, Typography, Divider } from '@material-ui/core';
 import alertify from 'alertifyjs';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex',
-    flexWrap: 'wrap'
+    flexGrow: 1,
+    padding: theme.spacing(2)
   },
-  textField1: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: '36ch'
-  },
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: '25ch'
+  sectionTitle: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(1),
+    color: '#555',
+    fontWeight: 500
   },
   btn: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1)
+    marginLeft: theme.spacing(1)
+  },
+  inputFull: {
+    width: '100%'
   }
 }));
 
@@ -98,91 +96,124 @@ export default function NuevoProducto() {
   };
 
   return (
-    <>
-      <div className={classes.root}>
-        <div>
+    <div className={classes.root}>
+      <Grid container spacing={3}>
+        {/* Sección: Información General */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle1" className={classes.sectionTitle}>
+            Información General
+          </Typography>
+          <Divider />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Nombre producto"
-            id="margin-none"
-            defaultValue=""
+            variant="outlined"
+            fullWidth
+            value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className={classes.textField1}
-            helperText="Describa un nombre para el producto"
+            helperText="Nombre oficial del producto"
           />
+        </Grid>
+        <Grid item xs={12} sm={6}>
           <TextField
-            id="standard-full-width"
+            label="Cod. Proveedor"
+            variant="outlined"
+            fullWidth
+            value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            label="Descripción"
-            style={{ margin: 8, width: '90%' }}
-            placeholder=""
-            multiline
-            helperText="Describa una descripción breve del producto"
-            //   fullWidth
-            margin="normal"
-            InputLabelProps={{
-              shrink: true
-            }}
+            placeholder="Código del proveedor"
+            helperText="Código o referencia del proveedor"
+            InputLabelProps={{ shrink: true }}
           />
+        </Grid>
 
+        {/* Sección: Precios */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle1" className={classes.sectionTitle}>
+            Precios
+          </Typography>
+          <Divider />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
           <InputMoneda
             label="P. Compra"
-            helperText="Precio al que se adquirió el producto"
+            helperText="Costo adquisición"
             onChangeText={setPrecio_compra}
           />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
           <InputMoneda
             label="P. Público"
-            helperText="Precio al que se venderá al público."
+            helperText="Venta público"
             onChangeText={setPrecio_plublico}
           />
-
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
           <InputMoneda
             label="P. Técnico"
-            helperText="Precio para los técnicos del local."
+            helperText="Venta técnico"
             onChangeText={setPrecio_tecnico}
           />
-
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
           <InputMoneda
             label="P. Mayorista"
-            helperText="Precio para ventas al mayoreo"
+            helperText="Venta mayoreo"
             onChangeText={setPrecioDistribuidor}
           />
-        </div>
-        <div>
-          <TextField
-            id="filled-full-width"
-            label="Código de barras |||"
-            style={{ margin: 4, width: '425px' }}
-            placeholder=""
-            helperText="Código de barra que identificará el producto al facturar"
-            fullWidth
-            margin="normal"
-            onChange={(e) => setCodigoBarra(e.target.value)}
-            InputLabelProps={{
-              shrink: true
-            }}
-            variant="filled"
-          />
-          <TextField
-            label="Stock"
-            id="margin-none"
-            defaultValue=""
-            type="number"
-            onChange={(e) => setStock(e.target.value)}
-            className={classes.textField}
-            helperText="Cantidad de productos disponibles"
-          />
-        </div>
+        </Grid>
 
-        <div></div>
-      </div>
-      <Box display="flex" justifyContent="flex-end">
-        <Button variant="contained" className={classes.btn} onClick={cancelar}>
-          Cancelar
-        </Button>
-        <Button color="primary" variant="contained" onClick={guardar}>
-          Guardar
-        </Button>
-      </Box>
-    </>
+        {/* Sección: Inventario */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle1" className={classes.sectionTitle}>
+            Inventario
+          </Typography>
+          <Divider />
+        </Grid>
+
+        <Grid item xs={12} md={8}>
+          <TextField
+            label="Código de barras"
+            variant="filled"
+            fullWidth
+            value={codigo_barra}
+            onChange={(e) => setCodigoBarra(e.target.value)}
+            helperText="Escanee o ingrese el código de barras"
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            label="Stock Inicial"
+            type="number"
+            variant="outlined"
+            fullWidth
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            helperText="Cantidad disponible"
+          />
+        </Grid>
+
+        {/* Botones de Acción */}
+        <Grid item xs={12}>
+          <Box mt={2} display="flex" justifyContent="flex-end">
+            <Button variant="outlined" className={classes.btn} onClick={cancelar}>
+              Cancelar
+            </Button>
+            <Button
+              color="primary"
+              variant="contained"
+              className={classes.btn}
+              onClick={guardar}
+            >
+              Guardar Producto
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
+    </div>
   );
 }

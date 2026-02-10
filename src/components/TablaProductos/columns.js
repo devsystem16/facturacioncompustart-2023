@@ -6,20 +6,22 @@ export default [
   {
     field: 'id',
     headerName: 'ID',
-    width: 90,
-    visible: false
+    width: 89,
+    visible: true
   },
   {
     field: 'stock',
     headerName: 'Stock',
     // type: 'number',
-    width: 115,
+    flex: 0.6,
+    minWidth: 80,
     editable: true
   },
   {
     field: 'nombre',
     headerName: 'Nombre',
-    width: 420,
+    flex: 1.5,
+    minWidth: 200,
     editable: true,
 
     renderCell: (cellValues) => {
@@ -27,10 +29,10 @@ export default [
         <Tooltip title={cellValues.formattedValue}>
           <span
             className="table-cell-trucate"
-            // style={{
-            //   backgroundColor: 'red',
-            //   wordWrap: 'break-word'
-            // }}
+          // style={{
+          //   backgroundColor: 'red',
+          //   wordWrap: 'break-word'
+          // }}
           >
             {cellValues.formattedValue}
           </span>
@@ -41,52 +43,62 @@ export default [
   {
     field: 'precio_publico',
     headerName: 'P. Público',
-    width: 140,
-    editable: true
+    flex: 0.8,
+    minWidth: 100,
+    editable: true,
+    valueFormatter: (params) => Number(params.value).toFixed(2)
   },
   {
     field: 'precio_tecnico',
     headerName: 'P. Técnico',
-    width: 160,
-    editable: true
+    flex: 0.8,
+    minWidth: 100,
+    editable: true,
+    valueFormatter: (params) => Number(params.value).toFixed(2)
   },
 
   {
     field: 'precio_distribuidor',
     headerName: 'P. Mayorista',
     // type: 'number',
-    width: 170,
-    editable: true
+    flex: 0.8,
+    minWidth: 100,
+    editable: true,
+    valueFormatter: (params) => Number(params.value).toFixed(2)
   },
   {
     field: 'precio_compra',
     headerName: 'P. compra',
     // type: 'number',
-    width: 140,
-    editable: true
+    flex: 0.8,
+    minWidth: 100,
+    editable: true,
+    valueFormatter: (params) => Number(params.value).toFixed(2)
   },
 
   {
     field: 'codigo_barra',
     headerName: 'Cod. Barra',
     // type: 'number',
-    width: 315,
+    flex: 1,
+    minWidth: 130,
     editable: true
   },
   {
     field: 'descripcion',
-    headerName: 'Descripción',
-    width: 200,
+    headerName: 'Cod. Proveedor',
+    flex: 1.2,
+    minWidth: 150,
     editable: true,
     renderCell: (cellValues) => {
       return (
         <Tooltip title={cellValues.formattedValue}>
           <span
             className="table-cell-trucate"
-            // style={{
-            //   backgroundColor: 'red',
-            //   wordWrap: 'break-word'
-            // }}
+          // style={{
+          //   backgroundColor: 'red',
+          //   wordWrap: 'break-word'
+          // }}
           >
             {cellValues.formattedValue}
           </span>

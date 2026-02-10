@@ -127,19 +127,20 @@ export default function TablaProductos() {
 
   return (
     <Card>
-      <div style={{ height: 360, width: '100%' }}>
+      <div style={{ width: '100%' }}>
         <DataGrid
           rows={productosTemp}
           columns={columns}
           checkboxSelection={false}
           datasets="Commodity"
+          autoHeight
           // onEditCellChangeCommitted={editarProducto}
           onCellEditCommit={(params) => {
             editarProducto(params);
           }}
           pageSize={10}
           disableSelectionOnClick={false}
-          rowHeight={23}
+          rowHeight={40}
           // onRowSelected={onRowSelectEvent}
 
           onSelectionModelChange={(row) => {

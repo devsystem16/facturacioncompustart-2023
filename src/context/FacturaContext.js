@@ -678,7 +678,7 @@ const FacturaProvider = (props) => {
       detalle: [...detalles],
       formasPago: formasPago
     };
-    alert(JSON.stringify(factura));
+    // alert(JSON.stringify(factura));
     const response = await API.post(END_POINT.guardarFactura, factura);
 
     if (response.data.estado !== 200) {
