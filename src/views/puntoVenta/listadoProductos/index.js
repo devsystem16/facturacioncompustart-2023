@@ -1,36 +1,35 @@
-import React, { useState, useContext } from 'react';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import CabeceraTabla from './cabeceraTabla';
-import ProductosTabla from './productosTabla';
+import React from 'react';
+import { Box, Typography, Divider, colors } from '@material-ui/core';
 import BuscadorProducto from '../buscadorProducto';
-
+import ProductosTabla from './productosTabla';
 import TipoPrecio from '../../../components/TipoPrecio';
-const ListadoProductos = ({
-  classes,
-  productos,
-  setProductos,
-  buscarProductos
-}) => {
+
+const ListadoProductos = ({ productos }) => {
   return (
-    <>
-      <BuscadorProducto
-        buscarProductos={buscarProductos}
-        productos={productos}
-        classes={classes}
-        setProductos={setProductos}
-      />
+    <Box display="flex" flexDirection="column" height="100%">
+      {/* Header */}
+      <Box p={2} pb={1}>
+        <Typography
+          variant="subtitle1"
+          style={{ fontWeight: 600, color: colors.grey[800], marginBottom: 8 }}
+        >
+          Productos Disponibles
+        </Typography>
+        <BuscadorProducto />
+      </Box>
 
-      <Grid item xs={12}>
-        <Paper className={classes.paper}>
-          <strong>Seleccione Productos</strong>
-          <TipoPrecio></TipoPrecio>
-        </Paper>
-      </Grid>
+      {/* Tipo precio */}
+      <Box px={2} pb={1}>
+        <TipoPrecio />
+      </Box>
 
-      {/* <CabeceraTabla classes={classes} /> */}
-      <ProductosTabla productos={productos} classes={classes} />
-    </>
+      <Divider />
+
+      {/* Lista virtualizada */}
+      <Box flexGrow={1} px={1} pt={1}>
+        <ProductosTabla productos={productos} />
+      </Box>
+    </Box>
   );
 };
 

@@ -1,59 +1,81 @@
 import React, { useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-// import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-// import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import alertify from 'alertifyjs';
+import { makeStyles, Grid, Box, IconButton, Typography, colors } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
-import SvgIcon from '@material-ui/core/SvgIcon';
+import alertify from 'alertifyjs';
 
 import { FacturaContext } from '../../../context/FacturaContext';
 import { formatCurrencySimple } from '../../../Environment/utileria';
+
 const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(12, 1fr)',
-    gridGap: theme.spacing(3)
+  row: {
+    borderBottom: '1px solid #f0f0f0',
+    padding: '4px 0',
+    '&:hover': {
+      backgroundColor: '#fafbff'
+    }
   },
-  paper: {
-    padding: theme.spacing(1),
+  cell: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 12,
+    minHeight: 32
+  },
+  cantidadInput: {
+    width: 50,
+    height: 26,
+    fontSize: 12,
     textAlign: 'center',
-    color: theme.palette.text.secondary,
-    whiteSpace: 'nowrap',
-    marginBottom: theme.spacing(1)
+    border: '1px solid #ddd',
+    borderRadius: 4,
+    outline: 'none',
+    '&:focus': {
+      borderColor: '#3f51b5'
+    }
   },
-  divider: {
-    margin: theme.spacing(2, 0)
+  nombreProducto: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: colors.grey[800],
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  precioCell: {
+    fontSize: 12,
+    fontWeight: 500,
+    color: colors.grey[700],
+    textAlign: 'center',
+    backgroundColor: '#f0faf5',
+    borderRadius: 4,
+    padding: '4px 6px'
+  },
+  totalCell: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: colors.grey[900],
+    textAlign: 'center'
   }
 }));
 
 function trunc(x, posiciones = 0) {
   var s = x.toString();
-  var l = s.length;
   var decimalLength = s.indexOf('.') + 1;
   var numStr = s.substr(0, decimalLength + posiciones);
   return Number(numStr);
 }
-const redondear = (valor) => {
-  return Math.round(valor * 100) / 100;
-};
+
 const obtienePrecioBruto = (precioNeto) => {
   return formatCurrencySimple(trunc(precioNeto / 1.15, 4));
-  // return trunc(precioNeto / 1.15, 4);
 };
+
 export default function RowFactura({ producto }) {
   const classes = useStyles();
 
   const {
-    // sumarStockProductoFactura,
-    // sumarStockProductoFacturaCantidad,
-    // restarStockProductoFactura,
     eliminarProductoFactura,
-    // numeroItems,
     SetNumeroItems,
     actualizarStockProductosCantidad,
-    // productos,
     productosFactura,
     calcularTotalesFactura,
     actualizarProductosFactura
@@ -74,24 +96,20 @@ export default function RowFactura({ producto }) {
     actualizarStockProductosCantidad(producto, cont);
     calcularTotalesFactura(productosFactura);
   };
+
   const cambiarCantidad = (cantidad, e, producto) => {
     const esValido = e.target.validity.valid;
-
     if (!esValido) return;
-
     if (cantidad == 0) {
       alertify.error('La cantidad no puede ser 0', 2);
       return;
     }
-
     if (cantidad > producto.stock) {
       alertify.error('La cantidad supera el Stock del producto', 2);
       return;
     }
-
     setCantidad(cantidad);
     fn_onBlur(producto, cantidad);
-
     SetNumeroItems(cantidad);
   };
 
@@ -102,92 +120,72 @@ export default function RowFactura({ producto }) {
         cont = parseInt(cont) + parseInt(items.cantidad);
       }
     });
-
     eliminarProductoFactura(producto, cont);
   };
 
-  function HomeIcon(props) {
-    return (
-      <SvgIcon {...props}>
-        <path d="fa fa-plus-circle" />
-      </SvgIcon>
-    );
-  }
-
   return (
-    <div style={{ height: '24px' }} key={producto.id + producto.tipoPrecio}>
-      <Grid container spacing={0} margin={0} style={{ fontSize: '11px' }}>
+    <div className={classes.row} key={producto.id + producto.tipoPrecio}>
+      <Grid container spacing={0} alignItems="center">
+        {/* Delete */}
         <Grid item xs={1}>
-          <Paper className={classes.paper}>
-            <DeleteIcon
-              style={{ cursor: 'pointer' }}
+          <Box className={classes.cell}>
+            <IconButton
+              size="small"
               onClick={() => eliminar(producto)}
-              color="action"
-              fontSize={'inherit'}
-            />
-          </Paper>
+              style={{ padding: 4 }}
+            >
+              <DeleteIcon fontSize="small" style={{ color: colors.red[400] }} />
+            </IconButton>
+          </Box>
         </Grid>
 
+        {/* Cantidad */}
         <Grid item xs={2}>
-          <Paper className={classes.paper}>
-            {/* <AddIcon
-              style={{ cursor: 'pointer' }}
-              onClick={() => sumarStockProductoFactura(producto, 1)}
-              color="action"
-              fontSize={'inherit'}
-            /> */}
+          <Box className={classes.cell}>
             <input
               type="text"
               onBlur={(e) => fn_onBlur(producto, e.target.value)}
               onChange={(e) => cambiarCantidad(e.target.value, e, producto)}
-              // onChange={(e) => setCantidad(e.target.value)}
               value={cantidad}
               pattern="[0-9]{0,13}"
-              style={{
-                width: '70px',
-                height: '14px',
-                fontSize: '10px',
-                textAlign: 'center'
-              }}
+              className={classes.cantidadInput}
             />
-            {/* <strong>{producto.cantidad} </strong> */}
-
-            {/* <RemoveIcon
-              style={{ cursor: 'pointer' }}
-              onClick={() => restarStockProductoFactura(producto)}
-              color="action"
-              fontSize={'inherit'}
-            /> */}
-          </Paper>
-        </Grid>
-        <Grid item xs={5} title={producto.nombre}>
-          <Paper className={classes.paper}>{producto.nombre}</Paper>
-        </Grid>
-        <Grid item xs={2} style={{ backgroundColor: '#cef2e6' }}>
-          <Paper
-            style={{ backgroundColor: '#cef2e6' }}
-            className={classes.paper}
-          >
-            {producto.tipoPrecio === 'publico'
-              ? obtienePrecioBruto(producto.precio_publico)
-              : ''}
-            {producto.tipoPrecio === 'tecnico'
-              ? obtienePrecioBruto(producto.precio_tecnico)
-              : ''}
-            {producto.tipoPrecio === 'mayorista'
-              ? obtienePrecioBruto(producto.precio_distribuidor)
-              : ''}
-            {/* <MenuFactura producto={producto}></MenuFactura> */}
-          </Paper>
+          </Box>
         </Grid>
 
-        {/* <Grid item xs={2}>
-          <Paper className={classes.paper}>{producto.precio_tecnico}</Paper>
-        </Grid> */}
+        {/* Nombre */}
+        <Grid item xs={5}>
+          <Box pl={1} title={producto.nombre}>
+            <Typography className={classes.nombreProducto}>
+              {producto.nombre}
+            </Typography>
+          </Box>
+        </Grid>
+
+        {/* Precio unitario */}
         <Grid item xs={2}>
-          <Paper className={classes.paper}>
-            {formatCurrencySimple(producto.total)}
-          </Paper>
+          <Box className={classes.cell}>
+            <span className={classes.precioCell}>
+              {producto.tipoPrecio === 'publico'
+                ? obtienePrecioBruto(producto.precio_publico)
+                : ''}
+              {producto.tipoPrecio === 'tecnico'
+                ? obtienePrecioBruto(producto.precio_tecnico)
+                : ''}
+              {producto.tipoPrecio === 'mayorista'
+                ? obtienePrecioBruto(producto.precio_distribuidor)
+                : ''}
+            </span>
+          </Box>
+        </Grid>
+
+        {/* Total */}
+        <Grid item xs={2}>
+          <Box className={classes.cell}>
+            <span className={classes.totalCell}>
+              ${formatCurrencySimple(producto.total)}
+            </span>
+          </Box>
         </Grid>
       </Grid>
     </div>

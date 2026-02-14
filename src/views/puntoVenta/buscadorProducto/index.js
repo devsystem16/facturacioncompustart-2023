@@ -1,10 +1,20 @@
 import React, { useContext } from 'react';
-import { Paper, TextField, InputAdornment, SvgIcon } from '@material-ui/core';
+import { TextField, InputAdornment, SvgIcon, makeStyles } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
 import { ProductosContext } from '../../../context/ProductosContext';
-import { isEmpty } from 'lodash';
 
-const BuscadorProductos = ({ classes }) => {
+const useStyles = makeStyles((theme) => ({
+  searchInput: {
+    backgroundColor: '#f5f6fa',
+    borderRadius: 8,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 8
+    }
+  }
+}));
+
+const BuscadorProductos = () => {
+  const classes = useStyles();
   const { setProductosTemp, productos } = useContext(ProductosContext);
 
   const filtrarProductos = (e) => {
@@ -27,46 +37,24 @@ const BuscadorProductos = ({ classes }) => {
     setProductosTemp(results);
   };
 
-  const filtrarProductos22 = (e) => {
-    // if (isEmpty(e.target.value)) {
-    //   setProductosTemp(productos);
-    // } else if (e.key === 'Enter') {
-    const results = productos.filter((producto) => {
-      const itemData = producto.nombre.toUpperCase();
-      const textData = e.target.value.toUpperCase();
-
-      const itemData1 =
-        producto.codigo_barra === null
-          ? ''.toString()
-          : producto.codigo_barra.toString();
-      const textData1 = e.target.value.toString();
-
-      return (
-        itemData.indexOf(textData) > -1 || itemData1.indexOf(textData1) > -1
-      );
-    });
-    setProductosTemp(results);
-    // }
-  };
-
   return (
-    <Paper className={classes.paper}>
-      <TextField
-        fullWidth
-        onChange={filtrarProductos}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SvgIcon fontSize="inherit" color="action">
-                <SearchIcon />
-              </SvgIcon>
-            </InputAdornment>
-          )
-        }}
-        placeholder="Buscar Producto"
-        variant="outlined"
-      />
-    </Paper>
+    <TextField
+      fullWidth
+      onChange={filtrarProductos}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SvgIcon fontSize="small" color="action">
+              <SearchIcon />
+            </SvgIcon>
+          </InputAdornment>
+        )
+      }}
+      placeholder="Buscar por nombre o código..."
+      variant="outlined"
+      size="small"
+      className={classes.searchInput}
+    />
   );
 };
 

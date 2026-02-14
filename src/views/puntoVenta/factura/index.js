@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Box } from '@material-ui/core';
 
 import HeadFactura from './headFactura';
 import RowFactura from './rowFactura';
@@ -12,13 +13,11 @@ const Factura = ({ esProforma = false }) => {
 
   const { productosFactura, totales, setEsProforma, setDefaultDataInvoice } =
     useContext(FacturaContext);
-  // setEsProforma(esProforma);
 
   useEffect(() => {
     const objeto = location.state?.proforma;
     if (objeto) {
       const cliente = setDefaultDataInvoice(objeto);
-
       setCLi({
         id: cliente.id,
         cedula: cliente.cedula,
@@ -26,7 +25,6 @@ const Factura = ({ esProforma = false }) => {
         telefono: cliente.telefono
       });
     }
-
     setEsProforma(esProforma);
   }, []);
 
@@ -34,16 +32,21 @@ const Factura = ({ esProforma = false }) => {
     <div>
       <HeadFactura defaultCliente={cli} />
 
-      <div style={{ minHeight: '90px' }}>
-        {productosFactura.map((producto) => {
-          return (
-            <RowFactura
-              key={producto.id + producto.tipoPrecio}
-              producto={producto}
-            />
-          );
-        })}
-      </div>
+      <Box
+        style={{
+          minHeight: 100,
+          maxHeight: 320,
+          overflowY: 'auto',
+          overflowX: 'hidden'
+        }}
+      >
+        {productosFactura.map((producto) => (
+          <RowFactura
+            key={producto.id + producto.tipoPrecio}
+            producto={producto}
+          />
+        ))}
+      </Box>
 
       <TotalesFactura key={1} totales={totales} />
     </div>
