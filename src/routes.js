@@ -23,6 +23,7 @@ import Proformas from '../src/views/proformas';
 import IngresoEgreso from '../src/views/IngresoEgreso';
 import Gastos from '../src/views/gastos';
 import LayoutReportesAvanzados from '../src/components/LayoutReportesAvanzados';
+import Usuarios from '../src/views/usuarios';
 
 const routes = [
   {
@@ -46,6 +47,7 @@ const routes = [
       { path: 'ingresoEgreso', element: <IngresoEgreso /> },
       { path: 'gastos', element: <Gastos /> },
       { path: 'reportes-avanzados', element: <LayoutReportesAvanzados /> },
+      { path: 'usuarios', element: <Usuarios /> },
       { path: '*', element: <Navigate to="/404" /> }
     ]
   },
