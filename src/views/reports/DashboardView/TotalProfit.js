@@ -18,7 +18,7 @@ import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 
 import { EstadisticasContext } from '../../../context/EstadisticasContext';
 import { PeriodoContext } from '../../../context/PeriodoContext';
-import { formatCurrency , formatCurrencySimple } from '../../../Environment/utileria';
+import { formatCurrency, formatCurrencySimple } from '../../../Environment/utileria';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,7 +54,7 @@ const TotalProfit = ({ className, ...rest }) => {
 
   const validarFormaPago = (formasPago) => {
     if (formasPago?.label !== undefined)
-      return `${formasPago?.label} $ ${ formatCurrencySimple (formasPago.total)} `;
+      return `${formasPago?.label} $ ${formatCurrencySimple(formasPago.total)} `;
     else return '';
   };
 
@@ -75,7 +75,7 @@ const TotalProfit = ({ className, ...rest }) => {
               variant="h3"
               style={{ paddingBottom: '10px' }}
             >
-                {formatCurrency(reporte.totalVentas) }
+              {formatCurrency(reporte.totalVentas)}
             </Typography>
           </Grid>
           <Grid item>
@@ -100,7 +100,7 @@ const TotalProfit = ({ className, ...rest }) => {
         <Box mt={0} display="flex" alignItems="center">
           <ArrowDownwardIcon className={classes.IconRetiro} />
           <Typography className={classes.textoRetiro} variant="body2">
-            {periodoActivo ? totalRetiros : 0} Gastos
+            {periodoActivo ? totalRetiros : 0} Gastos,
           </Typography>
         </Box>
         Efectivo a entregar:
