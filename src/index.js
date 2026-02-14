@@ -9,6 +9,7 @@ import ClienteProvider from './context/ClienteContext';
 import IngresoProvider from './context/IngresoContext';
 import TecnicoProvider from './context/TecnicoContext';
 import CreditoProvider from './context/CreditoContext';
+import GastosProvider from './context/GastosContext';
 import EstadisticasProvider from './context/EstadisticasContext';
 import LoginProvider from './context/LoginContext';
 import PeriodoProvider from './context/PeriodoContext';
@@ -23,9 +24,11 @@ ReactDOM.render(
               <ClienteProvider>
                 <IngresoProvider>
                   <CreditoProvider>
-                    <FacturaProvider>
-                      <App />
-                    </FacturaProvider>
+                    <GastosProvider>
+                      <FacturaProvider>
+                        <App />
+                      </FacturaProvider>
+                    </GastosProvider>
                   </CreditoProvider>
                 </IngresoProvider>
               </ClienteProvider>

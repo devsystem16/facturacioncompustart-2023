@@ -27,7 +27,9 @@ import {
   Edit as EditIconF,
   Smartphone,
   Clipboard as iconoFacturas,
-  FileText as proformaIcon
+  FileText as proformaIcon,
+  DollarSign,
+  PieChart
 } from 'react-feather';
 import NavItem from './NavItem';
 
@@ -135,6 +137,8 @@ const NavBar = ({ onMobileClose, openMobile }) => {
     if (nombreIcono === 'EditIconF') return EditIconF;
     if (nombreIcono === 'iconoFacturas') return iconoFacturas;
     if (nombreIcono === 'proformaIcon') return proformaIcon;
+    if (nombreIcono === 'DollarSign') return DollarSign;
+    if (nombreIcono === 'PieChart') return PieChart;
     if (nombreIcono === 'SettingsIcon') return SettingsIcon;
   };
 
