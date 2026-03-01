@@ -85,22 +85,15 @@ export default [
     editable: true
   },
   {
-    field: 'descripcion',
-    headerName: 'Cod. Proveedor',
+    field: 'proveedor_nombre',
+    headerName: 'Proveedor',
     flex: 1.2,
     minWidth: 150,
-    editable: true,
     renderCell: (cellValues) => {
       return (
-        <Tooltip title={cellValues.formattedValue}>
-          <span
-            className="table-cell-trucate"
-          // style={{
-          //   backgroundColor: 'red',
-          //   wordWrap: 'break-word'
-          // }}
-          >
-            {cellValues.formattedValue}
+        <Tooltip title={cellValues.formattedValue || ''}>
+          <span className="table-cell-trucate">
+            {cellValues.formattedValue || '-'}
           </span>
         </Tooltip>
       );

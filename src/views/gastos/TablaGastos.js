@@ -14,15 +14,19 @@ import {
 } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import Swal from 'sweetalert2';
 import alertify from 'alertifyjs';
+import API from '../../Environment/config';
 import moment from 'moment';
 import { formatCurrency } from '../../Environment/utileria';
 import { GastosContext } from '../../context/GastosContext';
+import { LoginContext } from '../../context/LoginContext';
 
 const TablaGastos = ({ setGastoEditar }) => {
   const { gastos, totalGastos, eliminarGasto, setRecargarGastos } =
     useContext(GastosContext);
+  const { tienePermiso } = useContext(LoginContext);
 
   const [filter, setFilter] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
@@ -166,18 +170,50 @@ const TablaGastos = ({ setGastoEditar }) => {
                 </TableCell>
                 <TableCell>{gasto.observacion || '-'}</TableCell>
                 <TableCell align="center">
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEditar(gasto)}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEliminar(gasto.id)}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                  {tienePermiso('gastos.editar') && (
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditar(gasto)}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  {tienePermiso('gastos.eliminar') && (
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEliminar(gasto.id)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  {tienePermiso('contabilidad.asientos-generar') && (
+                    <IconButton
+                      size="small"
+                      title="Generar Asiento Contable"
+                      onClick={() => {
+                        Swal.fire({
+                          title: 'Generar asiento contable',
+                          text: `¿Generar asiento desde el gasto "${gasto.concepto}"?`,
+                          icon: 'question',
+                          showCancelButton: true,
+                          confirmButtonText: 'Sí, generar',
+                          cancelButtonText: 'Cancelar'
+                        }).then(async (result) => {
+                          if (result.isConfirmed) {
+                            try {
+                              const resp = await API.post(`api/asientos-contables/generar/desde-gasto/${gasto.id}`);
+                              alertify.success(resp.data.mensaje || 'Asiento generado', 2);
+                            } catch (error) {
+                              const msg = error.response?.data?.mensaje || 'Error al generar asiento';
+                              alertify.error(msg, 3);
+                            }
+                          }
+                        });
+                      }}
+                    >
+                      <AccountBalanceIcon fontSize="small" style={{ color: '#1976d2' }} />
+                    </IconButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))

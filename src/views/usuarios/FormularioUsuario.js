@@ -15,6 +15,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import alertify from 'alertifyjs';
 import { UsuariosContext } from '../../context/UsuariosContext';
+import { LoginContext } from '../../context/LoginContext';
 
 const useStyles = makeStyles((theme) => ({
   input: {
@@ -32,6 +33,9 @@ const FormularioUsuario = ({ usuarioEditar, setUsuarioEditar }) => {
   const classes = useStyles();
   const { crearUsuario, actualizarUsuario, setRecargarUsuarios, tiposUsuario } =
     useContext(UsuariosContext);
+  const { tienePermiso } = useContext(LoginContext);
+  const puedeCrear = tienePermiso('usuarios.crear');
+  const puedeEditar = tienePermiso('usuarios.editar');
 
   const [form, setForm] = useState({
     nombres: '',
@@ -201,6 +205,7 @@ const FormularioUsuario = ({ usuarioEditar, setUsuarioEditar }) => {
                 color="primary"
                 onClick={guardar}
                 size="small"
+                disabled={usuarioEditar ? !puedeEditar : !puedeCrear}
               >
                 {usuarioEditar ? 'Actualizar' : 'Guardar'}
               </Button>

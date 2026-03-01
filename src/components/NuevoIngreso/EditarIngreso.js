@@ -6,15 +6,29 @@ import { ClienteContext } from '../../context/ClienteContext';
 import { TecnicoContext } from '../../context/TecnicoContext';
 import { IngresoContext } from '../../context/IngresoContext';
 import { EstadisticasContext } from '../../context/EstadisticasContext';
-import { Box, Button } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Tooltip,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
+} from '@material-ui/core';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import date from 'date-and-time';
 import SelectCliente from '../../../src/components/SelectCliente/SelectCliente';
 import SelectTecnico from '../../../src/components/SelectTecnico/SelectTecnico';
 import EditarEstadoIngreso from '../../components/EstadoIngreso/EditarEstadoIngreso';
 import alertify from 'alertifyjs';
 import Permisos from '../../Environment/Permisos.json';
-// public\css\bootstrap.min.css
-// import 'publiccss\bootstrap.min.css';
+
+const getPermisos = () => {
+  const tipo = localStorage.getItem('tipo_usuario');
+  return Permisos[tipo] || Permisos['ADMINISTRADOR'];
+};
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,7 +70,8 @@ export default function EditarIngreso({ fn_cerrarModal }) {
     setReload,
     state,
     datosImpresion,
-    setState
+    setState,
+    cambiarEstadoOrden
   } = useContext(IngresoContext);
 
   const now = new Date(datosImpresion?.orden?.fecha);
@@ -81,6 +96,36 @@ export default function EditarIngreso({ fn_cerrarModal }) {
   const [total, setTotal] = useState(0);
   const [saldo, setSaldo] = useState(0);
   const [abono, setAbono] = useState(0);
+
+  const [estadoReparacion, setEstadoReparacion] = useState(
+    datosImpresion?.orden?.estado_reparacion || 'pendiente'
+  );
+
+  // Sincronizar cuando cambia la orden seleccionada
+  useEffect(() => {
+    setEstadoReparacion(datosImpresion?.orden?.estado_reparacion || 'pendiente');
+  }, [datosImpresion?.orden?.id, datosImpresion?.orden?.estado_reparacion]);
+
+  const estadoOpciones = [
+    { value: 'pendiente', label: 'Pendiente', color: '#E65100' },
+    { value: 'en_proceso', label: 'En Proceso', color: '#1565C0' },
+    { value: 'completado', label: 'Completado', color: '#2E7D32' },
+    { value: 'entregado', label: 'Entregado', color: '#7B1FA2' }
+  ];
+
+  const handleCambiarEstado = async (e) => {
+    const nuevoEstado = e.target.value;
+    const ok = await cambiarEstadoOrden(datosImpresion?.orden?.id, nuevoEstado);
+    if (ok) {
+      setEstadoReparacion(nuevoEstado);
+    }
+  };
+
+  const copiarEnlaceConsulta = () => {
+    const url = `${window.location.origin}/consulta`;
+    navigator.clipboard.writeText(url);
+    alertify.success('Enlace copiado. Comparta con el cliente.', 2);
+  };
 
   // const verificarPermiso = (/*perfil, opcion*/) => {
   //   console.log();
@@ -198,6 +243,16 @@ export default function EditarIngreso({ fn_cerrarModal }) {
     setTrabajo(e.target.value);
   };
 
+  const insertarMarcaTiempo = () => {
+    const ahora = new Date();
+    const fechaStr = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')} ${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+    const usuario = localStorage.getItem('nombres') || 'Usuario';
+    const prefijo = `[${fechaStr} - ${usuario}] `;
+    const nuevoTrabajo = prefijo + (trabajo || '');
+    setTrabajo(nuevoTrabajo);
+    setUpdateWork(true);
+  };
+
   const validarCampos = () => {
     if (equipo === '') return { estado: false, mensaje: 'Ingrese el equipo' };
     if (marca === '') return { estado: false, mensaje: 'Ingrese la marca' };
@@ -235,7 +290,7 @@ export default function EditarIngreso({ fn_cerrarModal }) {
               defaultValue={fechaIngreso}
               className={classes.textFieldFecha}
               disabled={
-                !Permisos[localStorage.getItem('tipo_usuario')]['fecha']
+                !getPermisos()['fecha']
               }
               InputLabelProps={{
                 shrink: true
@@ -244,7 +299,7 @@ export default function EditarIngreso({ fn_cerrarModal }) {
             <SelectCliente
               ancho={400}
               selectInactive={
-                !Permisos[localStorage.getItem('tipo_usuario')]['cliente']
+                !getPermisos()['cliente']
               }
               disabled={true}
               concatenarCedula={true}
@@ -258,7 +313,7 @@ export default function EditarIngreso({ fn_cerrarModal }) {
           <TextField
             required
             label="Equipo"
-            disabled={!Permisos[localStorage.getItem('tipo_usuario')]['equipo']}
+            disabled={!getPermisos()['equipo']}
             id="margin-none"
             defaultValue={datosImpresion?.orden?.equipo}
             onChange={(e) => setEquipo(e.target.value)}
@@ -268,7 +323,7 @@ export default function EditarIngreso({ fn_cerrarModal }) {
           <TextField
             required
             label="Marca"
-            disabled={!Permisos[localStorage.getItem('tipo_usuario')]['marca']}
+            disabled={!getPermisos()['marca']}
             id="margin-none"
             defaultValue={datosImpresion?.orden?.marca}
             onChange={(e) => setMarca(e.target.value)}
@@ -279,7 +334,7 @@ export default function EditarIngreso({ fn_cerrarModal }) {
             required
             label="Modelo"
             id="margin-none"
-            disabled={!Permisos[localStorage.getItem('tipo_usuario')]['modelo']}
+            disabled={!getPermisos()['modelo']}
             defaultValue={datosImpresion?.orden?.modelo}
             onChange={(e) => setModelo(e.target.value)}
             className={classes.textField1}
@@ -290,20 +345,61 @@ export default function EditarIngreso({ fn_cerrarModal }) {
             label="Serie"
             id="margin-none"
             defaultValue={datosImpresion?.orden?.serie}
-            disabled={!Permisos[localStorage.getItem('tipo_usuario')]['serie']}
+            disabled={!getPermisos()['serie']}
             onChange={(e) => setSerie(e.target.value)}
             className={classes.textField1}
             helperText=""
           />
 
           <EditarEstadoIngreso
-            inactivo={!Permisos[localStorage.getItem('tipo_usuario')]['serie']}
+            inactivo={!getPermisos()['serie']}
           ></EditarEstadoIngreso>
+
+          {/* Estado de reparacion */}
+          <Box display="flex" alignItems="center" style={{ margin: '8px 8px 16px 8px', gap: 12 }}>
+            <FormControl variant="outlined" size="small" style={{ minWidth: 180 }}>
+              <InputLabel>Estado Reparacion</InputLabel>
+              <Select
+                value={estadoReparacion}
+                onChange={handleCambiarEstado}
+                label="Estado Reparacion"
+              >
+                {estadoOpciones.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    <Box display="flex" alignItems="center">
+                      <Box
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          backgroundColor: opt.color,
+                          marginRight: 8
+                        }}
+                      />
+                      {opt.label}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Tooltip title="Copiar enlace de seguimiento para el cliente">
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<FileCopyIcon />}
+                onClick={copiarEnlaceConsulta}
+                style={{ textTransform: 'none' }}
+              >
+                Copiar enlace
+              </Button>
+            </Tooltip>
+          </Box>
+
           <TextField
             id="standard-full-width"
             onChange={(e) => setFalla(e.target.value)}
             label="Falla"
-            disabled={!Permisos[localStorage.getItem('tipo_usuario')]['falla']}
+            disabled={!getPermisos()['falla']}
             defaultValue={datosImpresion?.orden?.falla}
             style={{ margin: 8, width: '90%' }}
             placeholder=""
@@ -315,32 +411,43 @@ export default function EditarIngreso({ fn_cerrarModal }) {
               shrink: true
             }}
           />
-          <TextField
-            id="standard-full-width"
-            onChange={(e) => fn_actualizarTrabajo(e)}
-            label="Trabajo"
-            disabled={
-              !Permisos[localStorage.getItem('tipo_usuario')]['trabajo']
-            }
-            defaultValue={datosImpresion?.orden?.trabajo}
-            style={{ margin: 8, width: '90%', fontSize: '50' }}
-            placeholder=""
-            multiline
-            helperText="P. Ej. Se reparó circuito"
-            //   fullWidth
-            margin="normal"
-            InputProps={{ style: { fontSize: 25 } }}
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
+          <Box display="flex" alignItems="flex-start" style={{ width: '90%', margin: 8 }}>
+            <TextField
+              id="standard-full-width"
+              onChange={(e) => fn_actualizarTrabajo(e)}
+              label="Trabajo"
+              disabled={
+                !getPermisos()['trabajo']
+              }
+              value={trabajo}
+              style={{ width: '100%', fontSize: '50' }}
+              placeholder=""
+              multiline
+              helperText="P. Ej. Se reparó circuito"
+              margin="normal"
+              InputProps={{ style: { fontSize: 25 } }}
+              InputLabelProps={{ shrink: true }}
+            />
+            {getPermisos()['trabajo'] && (
+              <Tooltip title="Insertar marca de tiempo con usuario">
+                <IconButton
+                  size="small"
+                  onClick={insertarMarcaTiempo}
+                  style={{ marginTop: 20, marginLeft: 4 }}
+                  color="primary"
+                >
+                  <AccessTimeIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
         </div>
         <div>
           <TextField
             id="filled-full-width"
             label="Observación"
             disabled={
-              !Permisos[localStorage.getItem('tipo_usuario')]['observacion']
+              !getPermisos()['observacion']
             }
             defaultValue={datosImpresion?.orden?.observacion}
             style={{ margin: '3px 10px 3px 3px', width: '425px' }}

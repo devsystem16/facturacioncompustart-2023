@@ -9,6 +9,7 @@ import React, {
 import { useReactToPrint } from 'react-to-print';
 import API from '../Environment/config';
 import Swal from 'sweetalert2';
+import alertify from 'alertifyjs';
 import { ClienteContext } from './ClienteContext';
 import { EstadisticasContext } from './EstadisticasContext';
 
@@ -21,12 +22,18 @@ const END_POINT = {
   actualizar: 'api/ordenes',
   eliminar_orden: 'api/ordenes',
   abonar: 'api/ordenes/abonos/nuevoabono',
-  actualizarTotal: 'api/ordenes/total/actualizar'
+  actualizarTotal: 'api/ordenes/total/actualizar',
+  cambiarEstado: 'api/ordenes/cambiar-estado'
+};
+
+const estadoLabels = {
+  pendiente: 'Pendiente',
+  en_proceso: 'En Proceso',
+  completado: 'Completado',
+  entregado: 'Entregado'
 };
 
 const IngresoProvider = (props) => {
-
-  
   const [ordenes, setOrdenes] = useState([]);
   const [ordenesTemp, setOrdenesTemp] = useState([]);
   const [isNew, setIsNew] = useState(false);
@@ -45,6 +52,10 @@ const IngresoProvider = (props) => {
   const [isOpenModalTotal, SetIsOpenModalTotal] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  // Nuevos estados para mejoras
+  const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [ordenDuplicar, setOrdenDuplicar] = useState(null);
 
   const [state, setState] = useState({
     camara: false,
@@ -78,26 +89,16 @@ const IngresoProvider = (props) => {
   };
 
   const PrepararDatosImpresion = async (orden) => {
-    console.log('Orden a imprimir', orden);
-
     var cliente = clientes.filter((cli) => {
       return cli.id === orden.cliente_id;
     });
-    // console.log('cliente', cliente.length);
-
-    // const tecnico = tecnicos.filter((tec) => {
-    //   return tec.id === orden.tecnico_id;
-    // });
 
     if (cliente === undefined) return;
 
     if (cliente.length == 0) {
       const objcliente = await buscarCliente(orden.cliente_id);
-
       cliente = [{ ...objcliente }];
     }
-
-    
 
     setDatosImpresion({
       cliente: {
@@ -108,8 +109,6 @@ const IngresoProvider = (props) => {
       tecnico: {
         nombres: localStorage.getItem('nombres')
       },
-
-   
       orden: {
         id: orden.id,
         cliente_id: orden.cliente_id,
@@ -128,31 +127,31 @@ const IngresoProvider = (props) => {
         teclado: orden.teclado,
         microfono: orden.microfono,
         parlantes: orden.parlantes,
-        factura_relacionada: orden.factura_relacionada
+        factura_relacionada: orden.factura_relacionada,
+        estado_reparacion: orden.estado_reparacion
       }
     });
-
-    // console.log(datosImpresion);
   };
 
   useEffect(() => {
     if (reload) {
-      console.log('RECARGANDO ORDENES.');
       cargarOrdenes();
       setReload(false);
     }
-    // console.log('CONTEXTO', datosImpresion);
   }, [reload, datosImpresion]);
 
   const cargarOrdenes = async () => {
     const response = await API.get(END_POINT.listado);
-    setOrdenes(response.data);
-    setOrdenesTemp(response.data);
+    const ordenesEnriquecidas = response.data.map((orden) => ({
+      ...orden,
+      estado_label: estadoLabels[orden.estado_reparacion] || orden.estado_reparacion || ''
+    }));
+    setOrdenes(ordenesEnriquecidas);
+    setOrdenesTemp(ordenesEnriquecidas);
   };
 
   const guardarOrden = async (orden) => {
     const response = await API.post(END_POINT.guardar, orden);
-    console.log(response);
     return { code: 200, mensaje: 'Guardado OK' };
   };
 
@@ -171,7 +170,6 @@ const IngresoProvider = (props) => {
           { estado: 0 }
         );
         if (response.data === 1) {
-          // aqui orden
           if (datosImpresion.orden.factura_relacionada > 0) {
             var responseFac = await fn_anularFactura(
               datosImpresion.orden.factura_relacionada
@@ -202,6 +200,73 @@ const IngresoProvider = (props) => {
     );
 
     return { code: 200, mensaje: 'Actualizado', payload: result.data };
+  };
+
+  // Contadores para dashboard
+  const contadorEstados = () => {
+    const pendientes = ordenes.filter((o) => o.estado_reparacion === 'pendiente').length;
+    const enProceso = ordenes.filter((o) => o.estado_reparacion === 'en_proceso').length;
+    const completados = ordenes.filter((o) => o.estado_reparacion === 'completado').length;
+    const entregados = ordenes.filter((o) => o.estado_reparacion === 'entregado').length;
+    return { pendientes, enProceso, completados, entregados, total: ordenes.length };
+  };
+
+  // Cambiar estado de reparacion
+  const cambiarEstadoOrden = async (ordenId, nuevoEstado) => {
+    const estadoOpciones = [
+      { value: 'pendiente', label: 'Pendiente' },
+      { value: 'en_proceso', label: 'En Proceso' },
+      { value: 'completado', label: 'Completado' },
+      { value: 'entregado', label: 'Entregado' }
+    ];
+
+    const result = await Swal.fire({
+      title: 'Cambiar estado?',
+      text: `Desea cambiar el estado a "${estadoOpciones.find((e) => e.value === nuevoEstado)?.label}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Si, cambiar',
+      cancelButtonText: 'Cancelar',
+      customClass: { container: 'swal-sobre-modal' }
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await API.post(END_POINT.cambiarEstado, {
+          orden_id: ordenId,
+          estado_reparacion: nuevoEstado,
+          usuario_id: parseInt(localStorage.getItem('user_id'))
+        });
+
+        if (response.data.codigo === 200) {
+          alertify.success(response.data.mensaje, 2);
+
+          // Actualizar estado localmente de inmediato
+          const actualizarLocal = (lista) =>
+            lista.map((o) =>
+              o.id === ordenId
+                ? { ...o, estado_reparacion: nuevoEstado, estado_label: estadoLabels[nuevoEstado] }
+                : o
+            );
+          setOrdenes((prev) => actualizarLocal(prev));
+          setOrdenesTemp((prev) => actualizarLocal(prev));
+
+          // Actualizar datosImpresion si es la orden actual
+          setDatosImpresion((prev) => {
+            if (prev?.orden?.id === ordenId) {
+              return { ...prev, orden: { ...prev.orden, estado_reparacion: nuevoEstado } };
+            }
+            return prev;
+          });
+
+          setReload(true);
+          return true;
+        }
+      } catch (err) {
+        alertify.error('Error al cambiar estado', 2);
+      }
+    }
+    return false;
   };
 
   const componentRef = useRef();
@@ -255,7 +320,13 @@ const IngresoProvider = (props) => {
           setOpenModalIngreso,
           datosImpresion,
           definirFactura,
-          setDefinirFactura
+          setDefinirFactura,
+          filtroEstado,
+          setFiltroEstado,
+          ordenDuplicar,
+          setOrdenDuplicar,
+          contadorEstados,
+          cambiarEstadoOrden
         }}
       >
         {props.children}

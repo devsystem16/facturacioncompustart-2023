@@ -11,7 +11,7 @@ import { PeriodoContext } from '../../context/PeriodoContext';
 import { EstadisticasContext } from '../../context/EstadisticasContext';
 import { FacturaContext } from '../../context/FacturaContext';
 
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Typography, colors } from '@material-ui/core';
 import date from 'date-and-time';
 import SelectCliente from '../../../src/components/SelectCliente/SelectCliente';
 import Switch from '@material-ui/core/Switch';
@@ -20,13 +20,11 @@ import alertify from 'alertifyjs';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import ModalFacturaIgreso from './ModalFacturaIgreso';
-// public\css\bootstrap.min.css
-// import 'publiccss\bootstrap.min.css';
 
 // Impresion
 import Loading from './Loading';
 import { useReactToPrint } from 'react-to-print';
-import Factura_imp from '../ComponentesImpresion/Factura_imp'; //'components/ComponentesImpresion/Factura_imp';
+import Factura_imp from '../ComponentesImpresion/Factura_imp';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -52,6 +50,15 @@ const useStyles = makeStyles((theme) => ({
   btn: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1)
+  },
+  duplicadoBanner: {
+    backgroundColor: '#e3f2fd',
+    color: '#1565c0',
+    padding: '8px 16px',
+    borderRadius: 6,
+    fontSize: 13,
+    fontWeight: 500,
+    marginBottom: 12
   }
 }));
 
@@ -77,11 +84,10 @@ export default function NuevoIngreso() {
 
   const { currentTecnico } = useContext(TecnicoContext);
   const { setIsReload } = useContext(EstadisticasContext);
-  const { guardarOrden, setIsNew, setReload, state } =
+  const { guardarOrden, setIsNew, setReload, state, ordenDuplicar, setOrdenDuplicar } =
     useContext(IngresoContext);
 
   // IMPRESION
-
   const componentRef = useRef();
   const EventoImprimirReact = () => {
     print();
@@ -90,7 +96,6 @@ export default function NuevoIngreso() {
     content: () => componentRef.current,
     onAfterPrint: () => {
       setProductosFactura([]);
-
       setCredito(false);
       setCurrentCliente({
         cedula: '',
@@ -99,21 +104,22 @@ export default function NuevoIngreso() {
     }
   });
 
-  // END IMPRESION
-  const [equipo, setEquipo] = useState('');
-  const [marca, setMarca] = useState('');
-  const [modelo, setModelo] = useState('');
+  // Pre-fill desde orden duplicada
+  const [equipo, setEquipo] = useState(ordenDuplicar?.equipo || '');
+  const [marca, setMarca] = useState(ordenDuplicar?.marca || '');
+  const [modelo, setModelo] = useState(ordenDuplicar?.modelo || '');
   const [serie, setSerie] = useState('');
-  const [falla, setFalla] = useState('');
+  const [falla, setFalla] = useState(ordenDuplicar?.falla || '');
   const [trabajo, setTrabajo] = useState('');
   const [total, setTotal] = useState(0);
   const [saldo, setSaldo] = useState(0);
   const [abono, setAbono] = useState(0);
   const [observacion, setObservacionLocal] = useState('');
 
-  useEffect(() => {
-    console.log('redner nuevo');
+  // Errores de validación
+  const [errores, setErrores] = useState({});
 
+  useEffect(() => {
     setCurrentCliente({
       cedula: '',
       nombres: '-SELECCIONE-'
@@ -211,26 +217,34 @@ export default function NuevoIngreso() {
     setIsNew(false);
     setIsLoading(false);
     setObservacion('');
+    setOrdenDuplicar(null);
   };
 
   const cancelar = () => {
+    setOrdenDuplicar(null);
     setIsNew(false);
   };
 
   const validarCampos = () => {
-    if (equipo === '') return { estado: false, mensaje: 'Ingrese el equipo' };
-    if (marca === '') return { estado: false, mensaje: 'Ingrese la marca' };
-    if (modelo === '') return { estado: false, mensaje: 'Ingrese el modelo' };
-    if (serie === '') return { estado: false, mensaje: 'Ingrese la serie' };
-    if (falla === '') return { estado: false, mensaje: 'Ingrese la falla' };
-    // if (total === 0 || total === '0')
-    //   return { estado: false, mensaje: 'Total inválido, no puede ser 0' };
+    const nuevosErrores = {};
 
-    if (currentCliente.id === undefined)
+    if (!equipo.trim()) nuevosErrores.equipo = true;
+    if (!marca.trim()) nuevosErrores.marca = true;
+    if (!modelo.trim()) nuevosErrores.modelo = true;
+    if (!serie.trim()) nuevosErrores.serie = true;
+    if (!falla.trim()) nuevosErrores.falla = true;
+    if (!currentCliente.id) nuevosErrores.cliente = true;
+
+    setErrores(nuevosErrores);
+
+    if (!equipo.trim()) return { estado: false, mensaje: 'Ingrese el equipo' };
+    if (!marca.trim()) return { estado: false, mensaje: 'Ingrese la marca' };
+    if (!modelo.trim()) return { estado: false, mensaje: 'Ingrese el modelo' };
+    if (!serie.trim()) return { estado: false, mensaje: 'Ingrese la serie' };
+    if (!falla.trim())
+      return { estado: false, mensaje: 'Describa la falla del equipo' };
+    if (!currentCliente.id)
       return { estado: false, mensaje: 'Seleccione el cliente' };
-
-    // if (localStorage.getItem('tipo_usuario') === undefined)
-    //   return { estado: false, mensaje: 'Seleccione el Técnico' };
 
     return { estado: true, mensaje: 'OK' };
   };
@@ -249,16 +263,17 @@ export default function NuevoIngreso() {
   return (
     <>
       <div className={classes.root}>
-        <div
-          style={{
-            display: 'none'
-          }}
-        >
+        <div style={{ display: 'none' }}>
           <Factura_imp ref={componentRef}></Factura_imp>
         </div>
 
         <div>
-          <div></div>
+          {/* Banner de duplicado */}
+          {ordenDuplicar && (
+            <div className={classes.duplicadoBanner}>
+              Duplicando orden #{ordenDuplicar.id} — Modifique los campos necesarios (serie, falla, etc.)
+            </div>
+          )}
 
           <FormControlLabel
             control={
@@ -273,24 +288,18 @@ export default function NuevoIngreso() {
           />
           {facturarIngreso.checked_facturarIngreso && <ModalFacturaIgreso />}
 
-          {/* {stateStock.checked_descontarStock && <SelectProducto ancho="400" />} */}
-
           <br />
           <br />
 
-          <div></div>
           <div className={classes.root}>
             <TextField
               id="date"
               label="Fecha Ingreso"
-              // type="date"
               type="datetime-local"
               onChange={(e) => setFechaIngreso(e.target.value)}
               defaultValue={fechaIngreso}
               className={classes.textFieldFecha}
-              InputLabelProps={{
-                shrink: true
-              }}
+              InputLabelProps={{ shrink: true }}
             />
             <SelectCliente ancho={400} concatenarCedula={true} />
           </div>
@@ -299,93 +308,88 @@ export default function NuevoIngreso() {
             required
             label="Equipo"
             id="margin-none"
-            defaultValue=""
-            onChange={(e) => setEquipo(e.target.value)}
+            value={equipo}
+            error={errores.equipo}
+            onChange={(e) => {
+              setEquipo(e.target.value);
+              setErrores({ ...errores, equipo: false });
+            }}
             className={classes.textField1}
-            helperText="P. Ej. CPU"
+            helperText={errores.equipo ? 'Campo requerido' : 'P. Ej. CPU'}
           />
           <TextField
             required
             label="Marca"
             id="margin-none"
-            defaultValue=""
-            onChange={(e) => setMarca(e.target.value)}
+            value={marca}
+            error={errores.marca}
+            onChange={(e) => {
+              setMarca(e.target.value);
+              setErrores({ ...errores, marca: false });
+            }}
             className={classes.textField1}
-            // helperText="P. Ej. DELL"
+            helperText={errores.marca ? 'Campo requerido' : ''}
           />
           <TextField
             required
             label="Modelo"
             id="margin-none"
-            defaultValue=""
-            onChange={(e) => setModelo(e.target.value)}
+            value={modelo}
+            error={errores.modelo}
+            onChange={(e) => {
+              setModelo(e.target.value);
+              setErrores({ ...errores, modelo: false });
+            }}
             className={classes.textField1}
-            helperText=""
+            helperText={errores.modelo ? 'Campo requerido' : ''}
           />
           <TextField
             required
             label="Serie"
             id="margin-none"
-            defaultValue=""
-            onChange={(e) => setSerie(e.target.value)}
+            value={serie}
+            error={errores.serie}
+            onChange={(e) => {
+              setSerie(e.target.value);
+              setErrores({ ...errores, serie: false });
+            }}
             className={classes.textField1}
-            helperText=""
+            helperText={errores.serie ? 'Campo requerido' : ''}
           />
           <EstadoIngreso></EstadoIngreso>
 
           <TextField
             id="standard-full-width"
-            onChange={(e) => setFalla(e.target.value)}
+            onChange={(e) => {
+              setFalla(e.target.value);
+              setErrores({ ...errores, falla: false });
+            }}
             label="Falla"
+            value={falla}
+            error={errores.falla}
             style={{ margin: 8, width: '90%' }}
             placeholder=""
             multiline
-            helperText="P. Ej. No enciende"
-            //   fullWidth
+            helperText={
+              errores.falla
+                ? 'Describa la falla del equipo'
+                : 'P. Ej. No enciende'
+            }
             margin="normal"
-            InputLabelProps={{
-              shrink: true
-            }}
+            InputLabelProps={{ shrink: true }}
           />
           <TextField
             id="standard-full-width"
             onChange={(e) => setTrabajo(e.target.value)}
             label="Trabajo"
+            value={trabajo}
             style={{ margin: 8, width: '90%' }}
             placeholder=""
             multiline
             helperText="P. Ej. Se reparó circuito"
-            //   fullWidth
             margin="normal"
-            InputLabelProps={{
-              shrink: true
-            }}
+            InputLabelProps={{ shrink: true }}
           />
-
-          {/* <InputMoneda
-            label="Total"
-            helperText=""
-            onChangeText={calcularSaldo_total}
-          />
-          <InputMoneda
-            label="Abono"
-            helperText=""
-            onChangeText={calcularSaldo_abono}
-          />
-          <TextField
-            disabled
-            id="standard-disabled"
-            label="Saldo"
-            value={saldo}
-          /> */}
-
-          {/* <InputMoneda
-            label="Saldo"
-            Disabled={true}
-            helperText=""
-            value={saldo}
-            onChangeText={setSaldo}
-          /> */}
         </div>
         <div>
           <TextField
@@ -397,15 +401,12 @@ export default function NuevoIngreso() {
             fullWidth
             margin="normal"
             onChange={(e) => setObservacionLocal(e.target.value)}
-            InputLabelProps={{
-              shrink: true
-            }}
+            InputLabelProps={{ shrink: true }}
             variant="filled"
           />
         </div>
 
         <div>
-          {/* <SelectTecnico ancho={300} />  */}
           <TextField
             disabled
             id="standard-disabled"

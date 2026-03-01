@@ -5,6 +5,7 @@ export const ReportesAvanzadosContext = createContext();
 
 const END_POINT = {
   utilidades: 'api/reportes/utilidades',
+  abonosCreditos: 'api/reportes/abonos-creditos',
   inventarioValorizado: 'api/reportes/inventario-valorizado',
   cuentasPorCobrar: 'api/reportes/cuentas-por-cobrar',
   ventasPorProducto: 'api/reportes/ventas-por-producto',
@@ -16,6 +17,7 @@ const END_POINT = {
 
 const ReportesAvanzadosProvider = (props) => {
   const [utilidades, setUtilidades] = useState(null);
+  const [abonosCreditos, setAbonosCreditos] = useState(null);
   const [inventarioValorizado, setInventarioValorizado] = useState(null);
   const [cuentasPorCobrar, setCuentasPorCobrar] = useState(null);
   const [ventasPorProducto, setVentasPorProducto] = useState(null);
@@ -26,12 +28,19 @@ const ReportesAvanzadosProvider = (props) => {
   const cargarUtilidades = async (fechaDesde, fechaHasta) => {
     try {
       setIsLoading(true);
-      const response = await API.post(END_POINT.utilidades, {
-        fecha_desde: fechaDesde,
-        fecha_hasta: fechaHasta
-      });
-      setUtilidades(response.data.data || null);
-      return response.data.data;
+      const [responseUtilidades, responseAbonos] = await Promise.all([
+        API.post(END_POINT.utilidades, {
+          fecha_desde: fechaDesde,
+          fecha_hasta: fechaHasta
+        }),
+        API.post(END_POINT.abonosCreditos, {
+          fecha_desde: fechaDesde,
+          fecha_hasta: fechaHasta
+        }).catch(() => ({ data: { data: { total_abonos: 0, detalle: [] } } }))
+      ]);
+      setUtilidades(responseUtilidades.data.data || null);
+      setAbonosCreditos(responseAbonos.data.data || null);
+      return responseUtilidades.data.data;
     } catch (error) {
       console.error('Error al cargar utilidades:', error);
     } finally {
@@ -157,6 +166,7 @@ const ReportesAvanzadosProvider = (props) => {
     <ReportesAvanzadosContext.Provider
       value={{
         utilidades,
+        abonosCreditos,
         inventarioValorizado,
         cuentasPorCobrar,
         ventasPorProducto,

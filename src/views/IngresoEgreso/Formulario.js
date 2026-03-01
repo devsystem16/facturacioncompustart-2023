@@ -1,51 +1,36 @@
-import React, { useState } from 'react';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Button from '@material-ui/core/Button';
-
-import TextField from '@material-ui/core/TextField';
+import React, { useState, useContext } from 'react';
+import {
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  TextField,
+  Typography,
+  Box,
+  InputAdornment,
+  makeStyles
+} from '@material-ui/core';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import API from '../../Environment/config';
 import Loading from '../../components/Loading/Loading';
 import NumberFormatCustom from '../../components/ValidationCurrency/ValidationCurrency';
-import Permisos from '../../Environment/Permisos.json';
+import { LoginContext } from '../../context/LoginContext';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
+  buttonGroup: {
     display: 'flex',
-    flexWrap: 'wrap'
-  },
-  margin: {
-    margin: theme.spacing(1)
-  },
-  withoutLabel: {
-    marginTop: theme.spacing(3)
-  },
-  textField: {
-    width: '25ch'
+    alignItems: 'center'
   }
 }));
 
-export default function InputAdornments({ setDenominaciones }) {
+export default function FormularioIngreso({ setDenominaciones }) {
   const classes = useStyles();
+  const { tienePermiso } = useContext(LoginContext);
 
   const [amount, setAmount] = useState('');
   const [concept, setConcept] = useState('');
   const [observation, setObservation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleAmountChange = (event) => {
-    setAmount(event.target.value);
-  };
-
-  const handleConceptChange = (event) => {
-    setConcept(event.target.value);
-  };
-
-  const handleObservationChange = (event) => {
-    setObservation(event.target.value);
-  };
 
   const añadirRetiro = async () => {
     setIsLoading(true);
@@ -65,55 +50,73 @@ export default function InputAdornments({ setDenominaciones }) {
     setIsLoading(false);
   };
 
+  const formInvalido = !amount || !concept;
+
   return (
-    <div className={classes.root}>
-      <Loading
-        text="Procesando..."
-        open={isLoading}
-        setOpen={setIsLoading}
-      ></Loading>
-      <div>
-        <TextField
-          label="Valor del retiro"
-          id="amount"
-          value={amount}
-          className={clsx(classes.margin, classes.textField)}
-          onChange={handleAmountChange}
-          InputProps={{
-            startAdornment: <InputAdornment position="start">$</InputAdornment>,
-            inputComponent: NumberFormatCustom
-          }}
+    <Card>
+      <CardContent>
+        <Loading
+          text="Procesando..."
+          open={isLoading}
+          setOpen={setIsLoading}
         />
-        <TextField
-          label="Por concepto de"
-          id="concept"
-          value={concept}
-          onChange={handleConceptChange}
-          className={clsx(classes.margin, classes.textField)}
-          InputProps={{
-            startAdornment: <InputAdornment position="start"></InputAdornment>
-          }}
-        />
+        <Box display="flex" alignItems="center" mb={2}>
+          <AddCircleOutlineIcon style={{ marginRight: 8, color: '#3f51b5' }} />
+          <Typography variant="h5">Registrar Nuevo Gasto</Typography>
+        </Box>
 
-        <TextField
-          label="Observación"
-          id="observation"
-          value={observation}
-          onChange={handleObservationChange}
-          className={clsx(classes.margin, classes.textField)}
-          InputProps={{
-            startAdornment: <InputAdornment position="start"></InputAdornment>
-          }}
-        />
-      </div>
-
-      {Permisos[localStorage.getItem('tipo_usuario')]['registrar-retiros'] && (
-        <Button variant="contained" color="primary" onClick={añadirRetiro}>
-          Añadir gasto
-        </Button>
-      )}
-
-      <div></div>
-    </div>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={3}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              label="Valor del retiro"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                inputComponent: NumberFormatCustom
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              label="Por concepto de"
+              value={concept}
+              onChange={(e) => setConcept(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              label="Observación"
+              value={observation}
+              onChange={(e) => setObservation(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <div className={classes.buttonGroup}>
+              {tienePermiso('retiros.crear') && (
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={añadirRetiro}
+                  disabled={formInvalido}
+                >
+                  Añadir gasto
+                </Button>
+              )}
+            </div>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
   );
 }

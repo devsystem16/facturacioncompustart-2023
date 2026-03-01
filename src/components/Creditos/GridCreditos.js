@@ -16,16 +16,22 @@ import FacturaYPagos from './FacturaYPagos';
 
 import ModalAbono from '../../components/CreditosTable/ModalAbono';
 import { CreditoContext } from '../../context/CreditoContext';
-import { TextField, InputAdornment, SvgIcon } from '@material-ui/core';
+import { TextField, InputAdornment, SvgIcon, Chip, Button, CircularProgress } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
+import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
+import EditIcon from '@material-ui/icons/Edit';
 
 import Swal from 'sweetalert2';
+import alertify from 'alertifyjs';
+import API from '../../Environment/config';
 import DeleteForever from '@material-ui/icons/DeleteForever';
 import PagosIcon from '@material-ui/icons/ChromeReaderMode';
 import PayIcon from '@material-ui/icons/MonetizationOn';
 import ModalPagos from './ModalPagos';
 import { formatCurrencySimple } from '../../Environment/utileria';
-import Permisos from '../../Environment/Permisos.json';
+import { LoginContext } from '../../context/LoginContext';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const useStyles = makeStyles({
   table: {
@@ -48,8 +54,32 @@ function Row(props) {
 
   const [AbrirModalPagos, setAbrirModalPagos] = useState(false);
 
-  const { SetIsOpenModalAbono, setCurrentCredito, eliminarCreditos } =
+  const { SetIsOpenModalAbono, setCurrentCredito, eliminarCreditos, setRecargarListaCreditos, setRecargarFiltro } =
     useContext(CreditoContext);
+  const { tienePermiso } = useContext(LoginContext);
+
+  const [editandoDesc, setEditandoDesc] = useState(false);
+  const [descValue, setDescValue] = useState(credito.detalle || '');
+  const [savingDesc, setSavingDesc] = useState(false);
+
+  const guardarDescripcion = async () => {
+    if (descValue === (credito.detalle || '')) {
+      setEditandoDesc(false);
+      return;
+    }
+    setSavingDesc(true);
+    try {
+      await API.put(`api/creditos/${credito.id}`, { detalle: descValue });
+      alertify.success('Descripcion actualizada', 2);
+      setRecargarListaCreditos(true);
+      setRecargarFiltro(true);
+    } catch {
+      alertify.error('Error al actualizar', 3);
+    } finally {
+      setSavingDesc(false);
+      setEditandoDesc(false);
+    }
+  };
 
   const abonarCredito = (credito) => {
     setCurrentCredito(credito);
@@ -108,7 +138,37 @@ function Row(props) {
           {credito.fecha}
         </TableCell>
        <TableCell align="right"> {credito.cliente}</TableCell>
-        <TableCell align="right"> {credito.detalle}</TableCell>
+        <TableCell align="right">
+          {editandoDesc ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+              <TextField
+                value={descValue}
+                onChange={(e) => setDescValue(e.target.value)}
+                size="small"
+                variant="outlined"
+                autoFocus
+                disabled={savingDesc}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') guardarDescripcion();
+                  if (e.key === 'Escape') { setEditandoDesc(false); setDescValue(credito.detalle || ''); }
+                }}
+                style={{ minWidth: 120 }}
+                inputProps={{ style: { fontSize: 13, padding: '4px 8px' } }}
+              />
+              <IconButton size="small" onClick={guardarDescripcion} disabled={savingDesc}>
+                {savingDesc ? <CircularProgress size={16} /> : <EditIcon style={{ color: '#4caf50' }} fontSize="small" />}
+              </IconButton>
+            </div>
+          ) : (
+            <span
+              onClick={() => setEditandoDesc(true)}
+              style={{ cursor: 'pointer' }}
+              title="Clic para editar"
+            >
+              {credito.detalle || '-'}
+            </span>
+          )}
+        </TableCell>
         <TableCell align="right">{credito.telefono}</TableCell>
         <TableCell align="right">
           {formatCurrencySimple(credito.total)}
@@ -121,7 +181,7 @@ function Row(props) {
           {formatCurrencySimple(credito.saldo)}
         </TableCell>
         <TableCell align="right">
-          {Permisos[localStorage.getItem('tipo_usuario')]['abonar-credito'] && (
+          {tienePermiso('creditos.abonar') && (
             <PayIcon
               style={{ cursor: 'pointer' }}
               fontSize="small"
@@ -129,9 +189,7 @@ function Row(props) {
             />
           )}
 
-          {Permisos[localStorage.getItem('tipo_usuario')][
-            'historialpagos-credito'
-          ] && (
+          {tienePermiso('creditos.ver-pagos') && (
             <PagosIcon
               title="Ver Abonos"
               onClick={() => imprimirAbonos(credito)}
@@ -139,7 +197,7 @@ function Row(props) {
             />
           )}
 
-          {Permisos[localStorage.getItem('tipo_usuario')]['anular-credito'] && (
+          {tienePermiso('creditos.anular') && (
             <DeleteForever
               title="Anular Crédito"
               onClick={() => eliminarCredito(credito)}
@@ -215,6 +273,75 @@ export default function CollapsibleTable() {
       setRecargarFiltro(false);
     }
   }, [creditos, _creditos]);
+  const totalSaldoPendiente = _creditos.reduce((sum, c) => sum + parseFloat(c.saldo || 0), 0);
+  const totalGeneral = _creditos.reduce((sum, c) => sum + parseFloat(c.total || 0), 0);
+  const totalAbonado = _creditos.reduce((sum, c) => sum + parseFloat(c.abono || 0), 0);
+
+  const exportarPDF = () => {
+    const doc = new jsPDF();
+    const fecha = new Date().toLocaleDateString('es-EC');
+
+    // Titulo
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('REPORTE DE CREDITOS PENDIENTES', 14, 18);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Fecha de emisión: ${fecha}`, 14, 25);
+
+    // Si hay un solo cliente filtrado, mostrar su nombre
+    const clientesUnicos = [...new Set(_creditos.map((c) => c.cliente))];
+    if (clientesUnicos.length === 1) {
+      doc.setFont(undefined, 'bold');
+      doc.text(`Cliente: ${clientesUnicos[0]}`, 14, 31);
+      doc.setFont(undefined, 'normal');
+    }
+    doc.text(`Total de créditos: ${_creditos.length}`, 14, clientesUnicos.length === 1 ? 37 : 31);
+
+    const startY = clientesUnicos.length === 1 ? 42 : 36;
+
+    // Tabla
+    doc.autoTable({
+      startY,
+      head: [['# Fact.', 'Fecha', 'Cliente', 'Descripción', 'Total', 'Abono', 'Saldo']],
+      body: _creditos.map((c) => [
+        c.factura?.id || '',
+        c.fecha || '',
+        c.cliente || '',
+        c.detalle || '',
+        formatCurrencySimple(c.total),
+        formatCurrencySimple(c.abono),
+        formatCurrencySimple(c.saldo)
+      ]),
+      foot: [['', '', '', 'TOTALES', formatCurrencySimple(totalGeneral), formatCurrencySimple(totalAbonado), formatCurrencySimple(totalSaldoPendiente)]],
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [63, 81, 181], textColor: 255, fontStyle: 'bold' },
+      footStyles: { fillColor: [245, 245, 245], textColor: [0, 0, 0], fontStyle: 'bold' },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 18 },
+        1: { cellWidth: 22 },
+        4: { halign: 'right' },
+        5: { halign: 'right' },
+        6: { halign: 'right' }
+      },
+      alternateRowStyles: { fillColor: [248, 249, 255] }
+    });
+
+    // Saldo pendiente resaltado al final
+    const finalY = doc.lastAutoTable.finalY + 8;
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(230, 81, 0);
+    doc.text(`SALDO PENDIENTE TOTAL: ${formatCurrencySimple(totalSaldoPendiente)}`, 14, finalY);
+
+    // Nombre del archivo
+    const nombreArchivo = clientesUnicos.length === 1
+      ? `Creditos_${clientesUnicos[0].replace(/\s+/g, '_')}_${fecha.replace(/\//g, '-')}.pdf`
+      : `Creditos_${fecha.replace(/\//g, '-')}.pdf`;
+
+    doc.save(nombreArchivo);
+  };
+
   return (
     <TableContainer component={Paper}>
       <ModalAbono></ModalAbono>
@@ -231,10 +358,43 @@ export default function CollapsibleTable() {
               </InputAdornment>
             )
           }}
-          placeholder="Buscar credito"
+          placeholder="Buscar credito por cliente o # factura"
           variant="outlined"
         />
       </Paper>
+
+      <Box display="flex" alignItems="center" justifyContent="flex-end" px={2} py={1} style={{ gap: 12 }}>
+        <Chip
+          size="small"
+          label={`${_creditos.length} crédito(s)`}
+          style={{ backgroundColor: '#e3f2fd', fontWeight: 500 }}
+        />
+        <Chip
+          size="small"
+          label={`Total: ${formatCurrencySimple(totalGeneral)}`}
+          style={{ backgroundColor: '#e8eaf6', fontWeight: 500 }}
+        />
+        <Chip
+          size="small"
+          label={`Abonado: ${formatCurrencySimple(totalAbonado)}`}
+          style={{ backgroundColor: '#e8f5e9', fontWeight: 500 }}
+        />
+        <Chip
+          size="small"
+          label={`Saldo pendiente: ${formatCurrencySimple(totalSaldoPendiente)}`}
+          style={{ backgroundColor: '#fff3e0', color: '#e65100', fontWeight: 'bold' }}
+        />
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<PictureAsPdfIcon />}
+          onClick={exportarPDF}
+          disabled={_creditos.length === 0}
+          style={{ backgroundColor: '#d32f2f', color: '#fff', textTransform: 'none' }}
+        >
+          Exportar PDF
+        </Button>
+      </Box>
 
       <Table aria-label="collapsible table">
         <TableHead>

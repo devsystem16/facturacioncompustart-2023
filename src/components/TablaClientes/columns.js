@@ -1,5 +1,6 @@
 import React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
+
 export default [
   {
     field: 'id',
@@ -10,17 +11,26 @@ export default [
   {
     field: 'cedula',
     headerName: 'Cédula',
-    width: 130,
-    editable: true
+    width: 150,
+    editable: true,
+    renderCell: (cellValues) => {
+      return (
+        <Tooltip title={cellValues.formattedValue || ''}>
+          <span className="table-cell-trucate">
+            {cellValues.formattedValue}
+          </span>
+        </Tooltip>
+      );
+    }
   },
   {
     field: 'nombres',
     headerName: 'Nombres',
-    width: 300,
+    width: 280,
     editable: true,
     renderCell: (cellValues) => {
       return (
-        <Tooltip title={cellValues.formattedValue}>
+        <Tooltip title={cellValues.formattedValue || ''}>
           <span className="table-cell-trucate">
             {cellValues.formattedValue}
           </span>
@@ -31,27 +41,61 @@ export default [
   {
     field: 'correo',
     headerName: 'Correo',
-    width: 250,
-    editable: true
+    width: 230,
+    editable: true,
+    renderCell: (cellValues) => {
+      return (
+        <Tooltip title={cellValues.formattedValue || ''}>
+          <span className="table-cell-trucate">
+            {cellValues.formattedValue}
+          </span>
+        </Tooltip>
+      );
+    }
   },
   {
     field: 'telefono',
     headerName: 'Teléfono',
-    width: 250,
-    editable: true
+    width: 150,
+    editable: true,
+    renderCell: (cellValues) => {
+      return (
+        <Tooltip title={cellValues.formattedValue || ''}>
+          <span className="table-cell-trucate">
+            {cellValues.formattedValue}
+          </span>
+        </Tooltip>
+      );
+    }
   },
   {
     field: 'direccion',
     headerName: 'Dirección',
-    // type: 'number',
-    width: 400,
-    editable: true
+    width: 300,
+    editable: true,
+    renderCell: (cellValues) => {
+      return (
+        <Tooltip title={cellValues.formattedValue || ''}>
+          <span className="table-cell-trucate">
+            {cellValues.formattedValue}
+          </span>
+        </Tooltip>
+      );
+    }
   },
   {
     field: 'observacion',
     headerName: 'Observación',
-    // type: 'number',
-    width: 350,
-    editable: true
+    width: 300,
+    editable: true,
+    renderCell: (cellValues) => {
+      return (
+        <Tooltip title={cellValues.formattedValue || ''}>
+          <span className="table-cell-trucate">
+            {cellValues.formattedValue}
+          </span>
+        </Tooltip>
+      );
+    }
   }
 ];

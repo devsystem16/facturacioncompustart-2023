@@ -45,6 +45,16 @@ const CambiarPassword = () => {
   const [passConfirmar, setPassConfirmar] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const miTipo = (localStorage.getItem('tipo_usuario') || '').toUpperCase();
+
+  // Filtrar usuarios según jerarquía de permisos
+  const usuariosPermitidos = usuarios.filter((u) => {
+    const tipoUsuario = (u.tipo || '').toUpperCase();
+    if (miTipo === 'SUPER USUARIO') return true;
+    if (miTipo === 'ADMINISTRADOR') return tipoUsuario !== 'SUPER USUARIO';
+    return false;
+  });
+
   const limpiar = () => {
     setUsuarioId('');
     setPassNueva('');
@@ -99,13 +109,14 @@ const CambiarPassword = () => {
               color: '#3f51b5'
             }}
           />
-          Reset de Contraseña (Administrador)
+          Reset de Contraseña
         </Typography>
 
         <Box className={classes.infoBox}>
           <Typography variant="body2" style={{ color: colors.grey[700] }}>
-            Este formulario permite al administrador resetear la contraseña de
-            cualquier usuario sin necesidad de conocer la contraseña actual.
+            {miTipo === 'SUPER USUARIO'
+              ? 'Como Super Usuario puede resetear la contraseña de cualquier usuario del sistema.'
+              : 'Puede resetear la contraseña de usuarios según su nivel de acceso. No es posible modificar la contraseña de un Super Usuario.'}
           </Typography>
         </Box>
 
@@ -120,7 +131,7 @@ const CambiarPassword = () => {
               value={usuarioId}
               onChange={(e) => setUsuarioId(e.target.value)}
             >
-              {usuarios.map((u) => (
+              {usuariosPermitidos.map((u) => (
                 <MenuItem key={u.id} value={u.id}>
                   {u.nombres} ({u.usuario})
                 </MenuItem>

@@ -19,10 +19,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Swal from 'sweetalert2';
 import alertify from 'alertifyjs';
 import { UsuariosContext } from '../../context/UsuariosContext';
+import { LoginContext } from '../../context/LoginContext';
 
 const TablaUsuarios = ({ setUsuarioEditar }) => {
   const { usuarios, eliminarUsuario, setRecargarUsuarios } =
     useContext(UsuariosContext);
+  const { tienePermiso } = useContext(LoginContext);
 
   const [filtro, setFiltro] = useState('');
 
@@ -152,23 +154,27 @@ const TablaUsuarios = ({ setUsuarioEditar }) => {
                   </Typography>
                 </TableCell>
                 <TableCell align="center">
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEditar(user)}
-                    title="Editar"
-                  >
-                    <EditIcon fontSize="small" style={{ color: '#3f51b5' }} />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEliminar(user)}
-                    title="Eliminar"
-                  >
-                    <DeleteIcon
-                      fontSize="small"
-                      style={{ color: colors.red[400] }}
-                    />
-                  </IconButton>
+                  {tienePermiso('usuarios.editar') && (
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditar(user)}
+                      title="Editar"
+                    >
+                      <EditIcon fontSize="small" style={{ color: '#3f51b5' }} />
+                    </IconButton>
+                  )}
+                  {tienePermiso('usuarios.eliminar') && (
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEliminar(user)}
+                      title="Eliminar"
+                    >
+                      <DeleteIcon
+                        fontSize="small"
+                        style={{ color: colors.red[400] }}
+                      />
+                    </IconButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))

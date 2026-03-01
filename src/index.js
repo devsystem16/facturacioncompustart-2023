@@ -13,6 +13,7 @@ import GastosProvider from './context/GastosContext';
 import EstadisticasProvider from './context/EstadisticasContext';
 import LoginProvider from './context/LoginContext';
 import PeriodoProvider from './context/PeriodoContext';
+import UtilidadProductosProvider from './context/UtilidadProductosContext';
 
 ReactDOM.render(
   <BrowserRouter>
@@ -26,7 +27,9 @@ ReactDOM.render(
                   <CreditoProvider>
                     <GastosProvider>
                       <FacturaProvider>
-                        <App />
+                        <UtilidadProductosProvider>
+                          <App />
+                        </UtilidadProductosProvider>
                       </FacturaProvider>
                     </GastosProvider>
                   </CreditoProvider>

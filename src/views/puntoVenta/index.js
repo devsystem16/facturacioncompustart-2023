@@ -19,6 +19,7 @@ import NuevoPeriodo from '../../components/Periodo/NuevoPeriodo/NuevoPeriodo';
 import { ProductosContext } from '../../context/ProductosContext';
 import { ClienteContext } from '../../context/ClienteContext';
 import { PeriodoContext } from '../../context/PeriodoContext';
+import { FacturaContext } from '../../context/FacturaContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,6 +46,11 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     textAlign: 'center',
     color: theme.palette.text.secondary
+  },
+  shortcutHint: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.6)',
+    marginLeft: 16
   }
 }));
 
@@ -54,10 +60,42 @@ const PuntoVenta = () => {
     useContext(ProductosContext);
   const { setCurrentCliente } = useContext(ClienteContext);
   const { periodoActivo, verificarPeriodoActivo } = useContext(PeriodoContext);
+  const { limpiarFactura } = useContext(FacturaContext);
 
   useEffect(() => {
     inicializarPuntoVenta();
   }, []);
+
+  // Atajos de teclado globales
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      switch (e.key) {
+        case 'F2':
+          e.preventDefault();
+          document.querySelector('[data-shortcut="guardar"]')?.click();
+          break;
+        case 'F3':
+          e.preventDefault();
+          const buscador = document.querySelector('[data-shortcut="buscador"] input');
+          if (buscador) buscador.focus();
+          break;
+        case 'F4':
+          e.preventDefault();
+          const clienteInput = document.querySelector('#debug');
+          if (clienteInput) clienteInput.focus();
+          break;
+        case 'F8':
+          e.preventDefault();
+          limpiarFactura();
+          break;
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [limpiarFactura]);
 
   const inicializarPuntoVenta = async () => {
     setCurrentCliente({ cedula: '', nombres: '-SELECCIONE-' });
@@ -82,10 +120,15 @@ const PuntoVenta = () => {
         {/* Header */}
         <Card className={classes.headerCard}>
           <CardContent style={{ padding: '12px 20px' }}>
-            <Box display="flex" alignItems="center">
-              <ShoppingCartIcon style={{ marginRight: 10, fontSize: 28 }} />
-              <Typography variant="h5" style={{ color: '#fff', fontWeight: 600 }}>
-                Punto de Venta
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box display="flex" alignItems="center">
+                <ShoppingCartIcon style={{ marginRight: 10, fontSize: 28 }} />
+                <Typography variant="h5" style={{ color: '#fff', fontWeight: 600 }}>
+                  Punto de Venta
+                </Typography>
+              </Box>
+              <Typography className={classes.shortcutHint}>
+                F2: Guardar | F3: Buscar | F4: Cliente | F8: Nueva Venta
               </Typography>
             </Box>
           </CardContent>

@@ -7,12 +7,20 @@ import {
   Switch,
   FormControlLabel,
   Divider,
+  Button,
   colors
 } from '@material-ui/core';
+import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 import { ClienteContext } from '../../../context/ClienteContext';
 import { FacturaContext } from '../../../context/FacturaContext';
 import SelectCliente from '../../../components/SelectCliente/SelectCliente';
 import Swal from 'sweetalert2';
+import API from '../../../Environment/config';
+
+const formatCurrency = (n) => {
+  if (isNaN(n) || n === null) return '$0.00';
+  return '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
 
 const useStyles = makeStyles((theme) => ({
   infoLabel: {
@@ -33,16 +41,34 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: '0.5px',
     padding: '8px 4px',
     textAlign: 'center'
+  },
+  btnNuevaVenta: {
+    textTransform: 'none',
+    fontWeight: 600,
+    fontSize: 12,
+    borderRadius: 6,
+    color: colors.red[600],
+    borderColor: colors.red[300],
+    '&:hover': {
+      backgroundColor: colors.red[50],
+      borderColor: colors.red[400]
+    }
   }
 }));
 
 export default function HeadFactura({ defaultCliente }) {
   const classes = useStyles();
   const { currentCliente, setCurrentCliente } = useContext(ClienteContext);
-  const { credito, setCredito, permitirBotonCredito, esProforma } =
-    useContext(FacturaContext);
+  const {
+    credito,
+    setCredito,
+    permitirBotonCredito,
+    esProforma,
+    limpiarFactura,
+    productosFactura
+  } = useContext(FacturaContext);
 
-  const handleChange = (event) => {
+  const handleChange = async (event) => {
     if (!permitirBotonCredito) {
       Swal.fire({
         icon: 'error',
@@ -51,7 +77,111 @@ export default function HeadFactura({ defaultCliente }) {
       });
       return;
     }
-    setCredito(event.target.checked);
+
+    const activarCredito = event.target.checked;
+
+    if (!activarCredito) {
+      setCredito(false);
+      return;
+    }
+
+    // Verificar creditos pendientes del cliente
+    if (!currentCliente.id) {
+      setCredito(true);
+      return;
+    }
+
+    try {
+      const resp = await API.get(`api/creditos/pendientes/cliente/${currentCliente.id}`);
+      const data = resp.data;
+
+      if (data.cantidad > 0) {
+        let filasHTML = data.creditos.map((c) =>
+          `<tr>
+            <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;font-size:12px;">${c.fecha}</td>
+            <td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:12px;">${c.detalle || '-'}</td>
+            <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;font-size:12px;">${formatCurrency(c.total)}</td>
+            <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;font-size:12px;">${formatCurrency(c.abono)}</td>
+            <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;font-size:12px;color:#d32f2f;font-weight:600;">${formatCurrency(c.saldo)}</td>
+          </tr>`
+        ).join('');
+
+        const htmlContent = `
+          <div style="text-align:left;">
+            <div style="background:#fff3e0;border-left:4px solid #ff9800;padding:10px 14px;border-radius:4px;margin-bottom:14px;">
+              <div style="font-weight:700;color:#e65100;font-size:14px;">
+                Este cliente tiene ${data.cantidad} credito${data.cantidad > 1 ? 's' : ''} pendiente${data.cantidad > 1 ? 's' : ''}
+              </div>
+              <div style="color:#bf360c;font-size:13px;margin-top:4px;">
+                Deuda total: <strong>${formatCurrency(data.totalDeuda)}</strong>
+              </div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                  <tr style="background:#f5f5f5;">
+                    <th style="padding:8px 10px;text-align:center;font-weight:600;color:#555;font-size:11px;">Fecha</th>
+                    <th style="padding:8px 10px;text-align:left;font-weight:600;color:#555;font-size:11px;">Descripcion</th>
+                    <th style="padding:8px 10px;text-align:right;font-weight:600;color:#555;font-size:11px;">Total</th>
+                    <th style="padding:8px 10px;text-align:right;font-weight:600;color:#555;font-size:11px;">Abonado</th>
+                    <th style="padding:8px 10px;text-align:right;font-weight:600;color:#555;font-size:11px;">Saldo</th>
+                  </tr>
+                </thead>
+                <tbody>${filasHTML}</tbody>
+                <tfoot>
+                  <tr style="background:#fafafa;">
+                    <td colspan="4" style="padding:8px 10px;text-align:right;font-weight:700;font-size:12px;">TOTAL PENDIENTE:</td>
+                    <td style="padding:8px 10px;text-align:right;font-weight:700;color:#d32f2f;font-size:13px;">${formatCurrency(data.totalDeuda)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>`;
+
+        const result = await Swal.fire({
+          title: 'Creditos pendientes detectados',
+          html: htmlContent,
+          icon: 'warning',
+          width: 620,
+          showCancelButton: true,
+          confirmButtonText: 'Continuar con credito',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#ff9800',
+          cancelButtonColor: '#9e9e9e'
+        });
+
+        if (result.isConfirmed) {
+          setCredito(true);
+        }
+        // Si cancela, no activa credito
+      } else {
+        setCredito(true);
+      }
+    } catch {
+      // Si falla la consulta, permitir el credito sin aviso
+      setCredito(true);
+    }
+  };
+
+  const handleNuevaVenta = () => {
+    if (productosFactura.length === 0) {
+      limpiarFactura();
+      return;
+    }
+    Swal.fire({
+      title: 'Nueva Venta',
+      text: 'Se descartará la factura actual. ¿Está seguro?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3f51b5',
+      cancelButtonColor: '#9e9e9e',
+      confirmButtonText: 'Sí, nueva venta',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        limpiarFactura();
+      }
+    });
   };
 
   var today = new Date(),
@@ -70,7 +200,7 @@ export default function HeadFactura({ defaultCliente }) {
 
   return (
     <div>
-      {/* Título + Switch crédito */}
+      {/* Título + Switch crédito + Nueva Venta */}
       <Box
         display="flex"
         alignItems="center"
@@ -84,24 +214,36 @@ export default function HeadFactura({ defaultCliente }) {
           {esProforma ? 'Proforma' : 'Facturación'}
         </Typography>
 
-        {!esProforma && (
-          <FormControlLabel
-            control={
-              <Switch
-                checked={credito}
-                onChange={handleChange}
-                name="credito"
-                color="primary"
-                size="small"
-              />
-            }
-            label={
-              <Typography variant="body2" style={{ fontSize: 13 }}>
-                Crédito
-              </Typography>
-            }
-          />
-        )}
+        <Box display="flex" alignItems="center" style={{ gap: 8 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            className={classes.btnNuevaVenta}
+            onClick={handleNuevaVenta}
+            startIcon={<DeleteSweepIcon fontSize="small" />}
+          >
+            Nueva Venta (F8)
+          </Button>
+
+          {!esProforma && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={credito}
+                  onChange={handleChange}
+                  name="credito"
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={
+                <Typography variant="body2" style={{ fontSize: 13 }}>
+                  Crédito
+                </Typography>
+              }
+            />
+          )}
+        </Box>
       </Box>
 
       {/* Cliente + Info */}

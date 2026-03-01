@@ -59,16 +59,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ProductosTabla = ({ productos }) => {
-  const productosConStock = productos.filter((producto) => producto.stock > 0);
-
+const ProductosTabla = ({ productos, esProforma }) => {
   return (
     <FixedSizeList
       height={520}
       width={'100%'}
-      itemCount={productosConStock.length}
+      itemCount={productos.length}
       itemSize={90}
-      itemData={productosConStock}
+      itemData={productos}
     >
       {Row}
     </FixedSizeList>
@@ -84,7 +82,9 @@ function Row(props) {
   const item = data[index];
 
   const stockColor =
-    item?.stock <= 3
+    item?.stock <= 0
+      ? colors.grey[500]
+      : item?.stock <= 3
       ? colors.red[500]
       : item?.stock <= 10
       ? colors.orange[500]

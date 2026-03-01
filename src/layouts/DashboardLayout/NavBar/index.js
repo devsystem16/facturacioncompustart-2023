@@ -27,11 +27,14 @@ import {
   Edit as EditIconF,
   Smartphone,
   Clipboard as iconoFacturas,
+  Package as ClipboardIcon,
   FileText as proformaIcon,
   DollarSign,
-  PieChart
+  PieChart,
+  BookOpen
 } from 'react-feather';
 import NavItem from './NavItem';
+import NavItemGroup from './NavItemGroup';
 
 const user = {
   avatar: '/static/images/avatars/avatar_6.png',
@@ -123,7 +126,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const NavBar = ({ onMobileClose, openMobile }) => {
+const NavBar = ({ onMobileClose, openMobile, openDesktop = true }) => {
   const { userloggin, items } = useContext(LoginContext);
   const classes = useStyles();
   const location = useLocation();
@@ -140,6 +143,8 @@ const NavBar = ({ onMobileClose, openMobile }) => {
     if (nombreIcono === 'DollarSign') return DollarSign;
     if (nombreIcono === 'PieChart') return PieChart;
     if (nombreIcono === 'SettingsIcon') return SettingsIcon;
+    if (nombreIcono === 'ClipboardIcon') return ClipboardIcon;
+    if (nombreIcono === 'BookOpen') return BookOpen;
   };
 
   useEffect(() => {
@@ -172,14 +177,24 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       <Divider />
       <Box p={2}>
         <List>
-          {items.map((item) => (
-            <NavItem
-              href={item.href}
-              key={item.title}
-              title={item.title}
-              icon={obtenerIcono(item.icon)}
-            />
-          ))}
+          {items.map((item) =>
+            item.children && item.children.length > 0 ? (
+              <NavItemGroup
+                key={item.title}
+                title={item.title}
+                icon={obtenerIcono(item.icon)}
+                children={item.children}
+                obtenerIcono={obtenerIcono}
+              />
+            ) : (
+              <NavItem
+                href={item.href}
+                key={item.title}
+                title={item.title}
+                icon={obtenerIcono(item.icon)}
+              />
+            )
+          )}
         </List>
       </Box>
       <Box flexGrow={1} />
@@ -203,7 +218,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
         <Drawer
           anchor="left"
           classes={{ paper: classes.desktopDrawer }}
-          open
+          open={openDesktop}
           variant="persistent"
         >
           {content}
@@ -215,7 +230,8 @@ const NavBar = ({ onMobileClose, openMobile }) => {
 
 NavBar.propTypes = {
   onMobileClose: PropTypes.func,
-  openMobile: PropTypes.bool
+  openMobile: PropTypes.bool,
+  openDesktop: PropTypes.bool
 };
 
 NavBar.defaultProps = {

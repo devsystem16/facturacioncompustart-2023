@@ -4,18 +4,14 @@ import { Card } from '@material-ui/core';
 import columns from './columns';
 import columnsAtencionPublico from './ColumnsAtencionPublico';
 import ColumnsTecnico from './ColumnsTecnico';
-import axios from 'axios';
 
 import alertify from 'alertifyjs';
-import { Paper, TextField, InputAdornment, SvgIcon } from '@material-ui/core';
-import { Search as SearchIcon } from 'react-feather';
 import ModalAbonoIngreso from '../../components/TablaIngresos/ModalAbonoIngreso';
 import ModalTotal from '../../components/TablaIngresos/ModalTotal';
 import ModalVerIngreso from '../../components/ModalVerIngreso/ModalVerIngreso';
 
 import { IngresoContext } from '../../context/IngresoContext';
 import { LoginContext } from '../../context/LoginContext';
-
 
 export default function TablaIngresos() {
   const [tableIsLoading, setTableIsLoading] = React.useState(false);
@@ -29,18 +25,17 @@ export default function TablaIngresos() {
     SetIsOpenModalIngreso,
     SetIsOpenModalTotal,
     setOrdenes,
-    setDefinirFactura
+    setDefinirFactura,
+    filtroEstado
   } = React.useContext(IngresoContext);
-  const {
-    setEdicionActiva
-  } = React.useContext(LoginContext);
-  // const [reloadThis, setReloadThis] = React.useState(1);
+  const { setEdicionActiva, tienePermiso } = React.useContext(LoginContext);
 
   const verificarAccesosGRID = () => {
-    if (localStorage.getItem('tipo_usuario') === 'ATENCION AL PUBLICO') {
+    const tipo = localStorage.getItem('tipo_usuario');
+    if (tipo === 'ATENCION AL PUBLICO') {
       setColumnas(columnsAtencionPublico);
     }
-    if (localStorage.getItem('tipo_usuario') === 'TECNICO') {
+    if (tipo === 'TECNICO') {
       setColumnas(ColumnsTecnico);
     }
   };
@@ -48,19 +43,20 @@ export default function TablaIngresos() {
   React.useEffect(() => {
     verificarAccesosGRID();
 
-
-    
-     const handleKeyDown = (e) => {
+    const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        console.log('Se presionó Escape');
         setEdicionActiva(false);
-        // Aquí puedes cancelar edición, cerrar modal, etc.
       }
     };
-document.addEventListener('keydown', handleKeyDown);
-
-
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Aplicar filtro de estado sobre ordenesTemp
+  const ordenesFiltradas = React.useMemo(() => {
+    if (filtroEstado === 'todos') return ordenesTemp;
+    return ordenesTemp.filter((o) => o.estado_reparacion === filtroEstado);
+  }, [ordenesTemp, filtroEstado]);
 
   const editarIngreso = (ingreso) => {
     var field = ingreso.field;
@@ -69,31 +65,15 @@ document.addEventListener('keydown', handleKeyDown);
     const nuevoListado = ordenes.map((item) => {
       if (item.id === ingreso.id) {
         if (field === 'fecha')
-          IngresoNuevo = {
-            ...item,
-
-            fecha: ingreso?.value
-          };
+          IngresoNuevo = { ...item, fecha: ingreso?.value };
         if (field === 'equipo')
-          IngresoNuevo = {
-            ...item,
-            equipo: ingreso?.value
-          };
+          IngresoNuevo = { ...item, equipo: ingreso?.value };
         if (field === 'marca')
-          IngresoNuevo = {
-            ...item,
-            marca: ingreso?.value
-          };
+          IngresoNuevo = { ...item, marca: ingreso?.value };
         if (field === 'modelo')
-          IngresoNuevo = {
-            ...item,
-            modelo: ingreso?.value
-          };
+          IngresoNuevo = { ...item, modelo: ingreso?.value };
         if (field === 'falla')
-          IngresoNuevo = {
-            ...item,
-            falla: ingreso?.value
-          };
+          IngresoNuevo = { ...item, falla: ingreso?.value };
         if (field === 'trabajo')
           IngresoNuevo = {
             ...item,
@@ -101,66 +81,41 @@ document.addEventListener('keydown', handleKeyDown);
             trabajo: ingreso?.value
           };
         if (field === 'total')
-          IngresoNuevo = {
-            ...item,
-            total: ingreso?.value
-          };
+          IngresoNuevo = { ...item, total: ingreso?.value };
         if (field === 'abono')
-          IngresoNuevo = {
-            ...item,
-            abono: ingreso?.value
-          };
+          IngresoNuevo = { ...item, abono: ingreso?.value };
         if (field === 'observacion')
-          IngresoNuevo = {
-            ...item,
-            observacion: ingreso?.value
-          };
-             if (field === 'serie')
-          IngresoNuevo = {
-            ...item,
-            serie: ingreso?.value
-          };
+          IngresoNuevo = { ...item, observacion: ingreso?.value };
+        if (field === 'serie')
+          IngresoNuevo = { ...item, serie: ingreso?.value };
 
         updateIngresoDB(IngresoNuevo, field);
-        console.log('Ingreso Nuevo', IngresoNuevo);
-
-        setEdicionActiva(false)
+        setEdicionActiva(false);
         return IngresoNuevo;
       }
       return item;
     });
     setOrdenes(nuevoListado);
-    // setProductos(nuevoListado);
-    // setProductosTemp(nuevoListado);
   };
 
   const fn_abonarIngreso = (event) => {
-    // console.log('evento fikla', event.colDef.editable);
     if (event.field === 'abono') {
-      // if (localStorage.getItem('tipo_usuario') === 'ATENCION AL PUBLICO') {
-      //   alertify.error('No tiene permisos para realizar esta acción.', 2);
-      //   return;
-      // }
-      if (localStorage.getItem('tipo_usuario') === 'TECNICO') {
+      if (!tienePermiso('ingresos.abonar')) {
         alertify.error('No tiene permisos para realizar esta acción.', 2);
         return;
       }
-
       SetIsOpenModalIngreso(true);
     }
     if (event.field === 'total') {
-      if (localStorage.getItem('tipo_usuario') === 'ADMINISTRADOR') {
-        SetIsOpenModalTotal(true);
-      } else {
+      if (!tienePermiso('ingresos.editar-total')) {
         alertify.error('No tiene permisos para realizar esta acción.', 2);
+        return;
       }
+      SetIsOpenModalTotal(true);
     }
   };
 
   const updateIngresoDB = async (ingreso, campo) => {
-    if (campo === 'abono') {
-    }
-
     setTableIsLoading(true);
     const result = await actualizarIngreso(ingreso);
     setTableIsLoading(false);
@@ -170,13 +125,7 @@ document.addEventListener('keydown', handleKeyDown);
       return;
     }
 
-    // setReload(true);
     alertify.success(result.mensaje, 2);
-    // console.log(result);
-  };
-
-  const fn_onEditRowsModelChange = (dato) => {
-    console.log(dato);
   };
 
   const buscarOrden = (id) => {
@@ -199,25 +148,20 @@ document.addEventListener('keydown', handleKeyDown);
     }
     PrepararDatosImpresion(orden);
   };
- const marcarCambios = (params, event) => {
- 
-if(params.colDef.editable)
-    setEdicionActiva(true);
- 
+
+  const marcarCambios = (params, event) => {
+    if (params.colDef.editable) setEdicionActiva(true);
   };
-  const handleRowSelected = (selection) => {
-    console.log(selection);
-  };
+
   return (
     <Card>
-      <ModalAbonoIngreso></ModalAbonoIngreso>
+      <ModalAbonoIngreso />
       <ModalTotal />
       <ModalVerIngreso />
-      <div style={{ height: 360, width: '100%', cursor: 'pointer' }}>
+      <div style={{ height: 400, width: '100%', cursor: 'pointer' }}>
         <DataGrid
-          rows={ordenesTemp}
+          rows={ordenesFiltradas}
           columns={columnas}
-          datasets="Commodity"
           onCellEditCommit={(params) => {
             editarIngreso(params);
           }}
@@ -229,10 +173,9 @@ if(params.colDef.editable)
           onSelectionModelChange={(row) => {
             filaSeleccionada(row);
           }}
- onCellDoubleClick={(params, event) => {
-   marcarCambios(params, event);
-  }}
-          // onCellDoubleClick={marcarCambios}
+          onCellDoubleClick={(params, event) => {
+            marcarCambios(params, event);
+          }}
         />
       </div>
     </Card>

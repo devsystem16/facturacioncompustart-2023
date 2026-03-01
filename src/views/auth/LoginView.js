@@ -135,7 +135,7 @@ const useStyles = makeStyles((theme) => ({
 const LoginView = () => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const { login, setCredenciales, setUserloggin, setPestaniaActiva } = useContext(LoginContext);
+  const { login, setCredenciales, setUserloggin, setPestaniaActiva, cargarPermisos } = useContext(LoginContext);
 
   const clearSession = useCallback(() => {
     localStorage.clear();
@@ -174,13 +174,16 @@ const LoginView = () => {
         localStorage.setItem(key, value);
       });
 
-      if (response.tipo === 'ADMINISTRADOR') {
+      // Cargar permisos del usuario
+      await cargarPermisos();
+
+      if (response.tipo === 'SUPER USUARIO' || response.tipo === 'ADMINISTRADOR') {
         setPestaniaActiva('Dashboard');
       } else {
         setPestaniaActiva('');
       }
 
-      navigate(response.tipo === 'ADMINISTRADOR' ? '/app/dashboard' : '/app', {
+      navigate(response.tipo === 'SUPER USUARIO' || response.tipo === 'ADMINISTRADOR' ? '/app/dashboard' : '/app', {
         replace: true,
       });
     } catch (error) {
@@ -288,7 +291,7 @@ const LoginView = () => {
                       {'.'}
                     </Typography>
                     <Typography variant="body2" color="textSecondary" align="center">
-                      {'V 3.0.0'}
+                      {'V 3.1.0'}
 
                     </Typography>
                   </Box>

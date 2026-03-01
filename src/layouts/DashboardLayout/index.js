@@ -17,6 +17,9 @@ const useStyles = makeStyles((theme) => ({
     flex: '1 1 auto',
     overflow: 'hidden',
     paddingTop: 64,
+    transition: 'padding-left 225ms cubic-bezier(0, 0, 0.2, 1)'
+  },
+  wrapperShift: {
     [theme.breakpoints.up('lg')]: {
       paddingLeft: 256
     }
@@ -36,15 +39,20 @@ const useStyles = makeStyles((theme) => ({
 const DashboardLayout = () => {
   const classes = useStyles();
   const [isMobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isDesktopNavOpen, setDesktopNavOpen] = useState(true);
 
   return (
     <div className={classes.root}>
-      <TopBar onMobileNavOpen={() => setMobileNavOpen(true)} />
+      <TopBar
+        onMobileNavOpen={() => setMobileNavOpen(true)}
+        onDesktopNavToggle={() => setDesktopNavOpen(!isDesktopNavOpen)}
+      />
       <NavBar
         onMobileClose={() => setMobileNavOpen(false)}
         openMobile={isMobileNavOpen}
+        openDesktop={isDesktopNavOpen}
       />
-      <div className={classes.wrapper}>
+      <div className={`${classes.wrapper} ${isDesktopNavOpen ? classes.wrapperShift : ''}`}>
         <div className={classes.contentContainer}>
           <div className={classes.content}>
             <Outlet />

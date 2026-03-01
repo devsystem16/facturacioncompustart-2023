@@ -14,6 +14,7 @@ import alertify from 'alertifyjs';
 import moment from 'moment';
 import NumberFormatCustom from '../../components/ValidationCurrency/ValidationCurrency';
 import { GastosContext } from '../../context/GastosContext';
+import { LoginContext } from '../../context/LoginContext';
 
 const useStyles = makeStyles((theme) => ({
   input: {
@@ -31,6 +32,9 @@ const FormularioGasto = ({ gastoEditar, setGastoEditar }) => {
   const classes = useStyles();
   const { categorias, crearGasto, actualizarGasto, setRecargarGastos } =
     useContext(GastosContext);
+  const { tienePermiso } = useContext(LoginContext);
+  const puedeCrear = tienePermiso('gastos.crear');
+  const puedeEditar = tienePermiso('gastos.editar');
 
   const [form, setForm] = useState({
     categoria_gasto_id: '',
@@ -195,7 +199,12 @@ const FormularioGasto = ({ gastoEditar, setGastoEditar }) => {
               Cancelar
             </Button>
           )}
-          <Button variant="contained" color="primary" onClick={guardar}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={guardar}
+            disabled={gastoEditar ? !puedeEditar : !puedeCrear}
+          >
             {gastoEditar ? 'Actualizar' : 'Registrar Gasto'}
           </Button>
         </div>

@@ -24,7 +24,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const TopBar = ({ className, onMobileNavOpen, ...rest }) => {
+const TopBar = ({ className, onMobileNavOpen, onDesktopNavToggle, ...rest }) => {
   const classes = useStyles();
   const [notifications] = useState([]);
 
@@ -38,6 +38,11 @@ const TopBar = ({ className, onMobileNavOpen, ...rest }) => {
   return (
     <AppBar className={clsx(classes.root, className)} elevation={0} {...rest}>
       <Toolbar>
+        <Hidden mdDown>
+          <IconButton color="inherit" onClick={onDesktopNavToggle} edge="start">
+            <MenuIcon />
+          </IconButton>
+        </Hidden>
         <RouterLink to="/app/dashboard">
           <Logo />
         </RouterLink>
@@ -76,7 +81,8 @@ const TopBar = ({ className, onMobileNavOpen, ...rest }) => {
 
 TopBar.propTypes = {
   className: PropTypes.string,
-  onMobileNavOpen: PropTypes.func
+  onMobileNavOpen: PropTypes.func,
+  onDesktopNavToggle: PropTypes.func
 };
 
 export default TopBar;

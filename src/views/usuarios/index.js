@@ -5,6 +5,7 @@ import UsuariosProvider from '../../context/UsuariosContext';
 import FormularioUsuario from './FormularioUsuario';
 import TablaUsuarios from './TablaUsuarios';
 import CambiarPassword from './CambiarPassword';
+import TabPermisos from './TabPermisos';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,6 +48,7 @@ function UsuariosContent() {
         >
           <Tab label="Usuarios" />
           <Tab label="Cambiar Contraseña" />
+          <Tab label="Permisos" />
         </Tabs>
       </Paper>
 
@@ -60,6 +62,10 @@ function UsuariosContent() {
 
       <TabPanel value={tabValue} index={1}>
         <CambiarPassword />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={2}>
+        <TabPermisos />
       </TabPanel>
     </div>
   );

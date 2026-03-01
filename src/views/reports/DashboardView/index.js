@@ -29,7 +29,7 @@ import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import TodayIcon from '@material-ui/icons/Today';
 
-import Permisos from '../../../Environment/Permisos.json';
+import { LoginContext } from '../../../context/LoginContext';
 import { PeriodoContext } from '../../../context/PeriodoContext';
 import { EstadisticasContext } from '../../../context/EstadisticasContext';
 import { ComponentIniciarPeriodo } from '../../../Environment/utileria';
@@ -118,6 +118,7 @@ const SummaryCard = ({ titulo, valor, subtitulo, icon, avatarColor }) => {
 
 const DashboardContent = () => {
   const classes = useStyles();
+  const { tienePermiso } = useContext(LoginContext);
   const { periodo, cerrarPeriodo, periodoActivo } = useContext(PeriodoContext);
   const { setIsReload, reporte } = useContext(EstadisticasContext);
   const { periodoActivo: pa, totalRetiros, obtenerRetirosBD } = useContext(PeriodoContext);
@@ -142,18 +143,18 @@ const DashboardContent = () => {
   useEffect(() => {
     if (periodoActivo) {
       cargarResumen();
-      cargarVentasPeriodo(tipoPeriodo, fechaDesde, fechaHasta);
-      cargarTopProductos(fechaDesde, fechaHasta);
-      cargarTopClientes(fechaDesde, fechaHasta);
+      if (tienePermiso('dashboard.ver-ventas-periodo')) cargarVentasPeriodo(tipoPeriodo, fechaDesde, fechaHasta);
+      if (tienePermiso('dashboard.ver-top-productos')) cargarTopProductos(fechaDesde, fechaHasta);
+      if (tienePermiso('dashboard.ver-top-clientes')) cargarTopClientes(fechaDesde, fechaHasta);
       obtenerRetirosBD();
     }
   }, [periodoActivo]);
 
   const actualizarDashboard = () => {
     cargarResumen();
-    cargarVentasPeriodo(tipoPeriodo, fechaDesde, fechaHasta);
-    cargarTopProductos(fechaDesde, fechaHasta);
-    cargarTopClientes(fechaDesde, fechaHasta);
+    if (tienePermiso('dashboard.ver-ventas-periodo')) cargarVentasPeriodo(tipoPeriodo, fechaDesde, fechaHasta);
+    if (tienePermiso('dashboard.ver-top-productos')) cargarTopProductos(fechaDesde, fechaHasta);
+    if (tienePermiso('dashboard.ver-top-clientes')) cargarTopClientes(fechaDesde, fechaHasta);
   };
 
   const cerrarPeriodoVentas = async () => {
@@ -214,8 +215,7 @@ const DashboardContent = () => {
                   </Typography>
                 </Box>
               </Box>
-              {periodoActivo &&
-                Permisos[localStorage.getItem('tipo_usuario')]['finalizar-periodo'] && (
+              {periodoActivo && tienePermiso('dashboard.finalizar-periodo') && (
                   <Button
                     onClick={cerrarPeriodoVentas}
                     variant="contained"
@@ -347,35 +347,47 @@ const DashboardContent = () => {
         </Grid>
 
         {/* ===== FILTRO + GRÁFICAS ===== */}
-        <Typography variant="h6" className={classes.sectionTitle}>
-          Análisis de Ventas
-        </Typography>
+        {(tienePermiso('dashboard.ver-ventas-periodo') || tienePermiso('dashboard.ver-top-productos') || tienePermiso('dashboard.ver-top-clientes') || tienePermiso('dashboard.ver-detalles-ventas')) && (
+          <>
+            <Typography variant="h6" className={classes.sectionTitle}>
+              Análisis de Ventas
+            </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <DashboardDateFilter
-              fechaDesde={fechaDesde}
-              setFechaDesde={setFechaDesde}
-              fechaHasta={fechaHasta}
-              setFechaHasta={setFechaHasta}
-              tipoPeriodo={tipoPeriodo}
-              setTipoPeriodo={setTipoPeriodo}
-              onActualizar={actualizarDashboard}
-            />
-          </Grid>
-          <Grid item lg={8} md={12} xs={12}>
-            <VentasPeriodoChart ventasPeriodo={ventasPeriodo} />
-          </Grid>
-          <Grid item lg={4} md={12} xs={12}>
-            <TopProductosChart topProductos={topProductos} />
-          </Grid>
-          <Grid item lg={6} md={12} xs={12}>
-            <TopClientesChart topClientes={topClientes} />
-          </Grid>
-          <Grid item lg={6} md={12} xs={12}>
-            <LatestOrders />
-          </Grid>
-        </Grid>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <DashboardDateFilter
+                  fechaDesde={fechaDesde}
+                  setFechaDesde={setFechaDesde}
+                  fechaHasta={fechaHasta}
+                  setFechaHasta={setFechaHasta}
+                  tipoPeriodo={tipoPeriodo}
+                  setTipoPeriodo={setTipoPeriodo}
+                  onActualizar={actualizarDashboard}
+                />
+              </Grid>
+              {tienePermiso('dashboard.ver-ventas-periodo') && (
+                <Grid item lg={8} md={12} xs={12}>
+                  <VentasPeriodoChart ventasPeriodo={ventasPeriodo} />
+                </Grid>
+              )}
+              {tienePermiso('dashboard.ver-top-productos') && (
+                <Grid item lg={4} md={12} xs={12}>
+                  <TopProductosChart topProductos={topProductos} />
+                </Grid>
+              )}
+              {tienePermiso('dashboard.ver-top-clientes') && (
+                <Grid item lg={6} md={12} xs={12}>
+                  <TopClientesChart topClientes={topClientes} />
+                </Grid>
+              )}
+              {tienePermiso('dashboard.ver-detalles-ventas') && (
+                <Grid item lg={6} md={12} xs={12}>
+                  <LatestOrders />
+                </Grid>
+              )}
+            </Grid>
+          </>
+        )}
       </Container>
     </Page>
   );

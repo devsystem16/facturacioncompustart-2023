@@ -16,6 +16,7 @@ import {
 import { Search as SearchIcon } from 'react-feather';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ProductosContext } from '../../../context/ProductosContext';
+import { LoginContext } from '../../../context/LoginContext';
 const useStyles = makeStyles((theme) => ({
   root: {},
   importButton: {
@@ -37,6 +38,7 @@ const BuscadorProducto = ({ className, ...rest }) => {
     eliminarProducto,
     deleteProducto
   } = useContext(ProductosContext);
+  const { tienePermiso } = useContext(LoginContext);
 
   const filtrarProductos = (e) => {
     const palabrasFiltro = e.target.value.toLowerCase().split(' ');
@@ -102,7 +104,7 @@ const BuscadorProducto = ({ className, ...rest }) => {
   return (
     <div className={clsx(classes.root, className)} {...rest}>
       <Box display="flex" justifyContent="flex-end">
-        {isNew ? null : (
+        {isNew ? null : tienePermiso('productos.eliminar') && (
           <Button
             variant="contained"
             style={{ backgroundColor: 'rgb(154, 0, 54)' }}
@@ -115,7 +117,7 @@ const BuscadorProducto = ({ className, ...rest }) => {
           </Button>
         )}
 
-        {isNew ? null : (
+        {isNew ? null : tienePermiso('productos.crear') && (
           <Button
             color="primary"
             variant="contained"

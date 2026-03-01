@@ -24,6 +24,9 @@ import IngresoEgreso from '../src/views/IngresoEgreso';
 import Gastos from '../src/views/gastos';
 import LayoutReportesAvanzados from '../src/components/LayoutReportesAvanzados';
 import Usuarios from '../src/views/usuarios';
+import KardexView from './views/kardex';
+import Contabilidad from './views/contabilidad';
+import ConsultaOrden from './views/consultaOrden';
 
 const routes = [
   {
@@ -48,6 +51,8 @@ const routes = [
       { path: 'gastos', element: <Gastos /> },
       { path: 'reportes-avanzados', element: <LayoutReportesAvanzados /> },
       { path: 'usuarios', element: <Usuarios /> },
+      { path: 'kardex', element: <KardexView /> },
+      { path: 'contabilidad', element: <Contabilidad /> },
       { path: '*', element: <Navigate to="/404" /> }
     ]
   },
@@ -55,6 +60,7 @@ const routes = [
     path: '/',
     element: <MainLayout />,
     children: [
+      { path: 'consulta', element: <ConsultaOrden /> },
       { path: 'login', element: <LoginView /> },
       { path: 'register', element: <RegisterView /> },
       { path: '404', element: <NotFoundView /> },

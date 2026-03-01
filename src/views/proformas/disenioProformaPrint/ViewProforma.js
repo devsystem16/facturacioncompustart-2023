@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useReactToPrint } from "react-to-print";
+import LogoIngreso from "../../../assets/LogoIngreso.PNG";
 
 const useStyles = makeStyles((theme) => ({
   paperContainer: {
@@ -45,6 +46,9 @@ const useStyles = makeStyles((theme) => ({
     "&:nth-of-type(odd)": {
       backgroundColor: "#f7f7f7",
     },
+    "& td, & th": {
+      padding: "2px 8px",
+    },
   },
   totalsBox: {
     padding: theme.spacing(3),
@@ -70,6 +74,19 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(2, "auto"),
   },
 }));
+
+const formatFechaHora = (fechaStr) => {
+  if (!fechaStr) return "-";
+  const d = new Date(fechaStr);
+  if (isNaN(d.getTime())) return fechaStr;
+  return d.toLocaleString("es-EC", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 const ViewProforma = ({ proforma }) => {
   const classes = useStyles();
@@ -110,13 +127,16 @@ const ViewProforma = ({ proforma }) => {
       <div ref={proformaRef}>
         <Paper className={classes.paperContainer} elevation={3}>
           {/* Encabezado */}
-          <Box className={classes.header}>
-            <Typography variant="h4" style={{ fontWeight: "bold" }}>
-              PROFORMA
-            </Typography>
-            <Typography variant="subtitle2" color="textSecondary">
-              Documento no válido como factura oficial
-            </Typography>
+          <Box className={classes.header} display="flex" alignItems="center" justifyContent="center">
+            <img src={LogoIngreso} alt="Logo" style={{ height: 60, marginRight: 16 }} />
+            <Box>
+              <Typography variant="h4" style={{ fontWeight: "bold" }}>
+                PROFORMA
+              </Typography>
+              <Typography variant="subtitle2" color="textSecondary">
+                Documento no válido como factura oficial
+              </Typography>
+            </Box>
           </Box>
 
           {/* Datos Generales */}
@@ -124,13 +144,10 @@ const ViewProforma = ({ proforma }) => {
             <Grid item xs={6}>
               <Box className={classes.dataBox}>
                 <Typography variant="body2" gutterBottom>
-                  <strong>Fecha de Emisión:</strong> {proforma.fecha_emision}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  <strong>Fecha de Vencimiento:</strong> {proforma.fecha_vencimiento}
+                  <strong>Fecha de Emisión:</strong> {formatFechaHora(proforma.fecha_emision)}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Fecha de Creación:</strong> {proforma.created_at}
+                  <strong>Fecha de Vencimiento:</strong> {proforma.fecha_vencimiento}
                 </Typography>
               </Box>
             </Grid>
@@ -151,10 +168,11 @@ const ViewProforma = ({ proforma }) => {
 
           {/* Detalles */}
           <TableContainer component={Paper} style={{ marginBottom: 16, border: "1px solid #ccc" }}>
-            <Table>
+            <Table size="small">
               <TableHead className={classes.tableHead}>
                 <TableRow>
                   <TableCell align="center"><strong>Cant</strong></TableCell>
+                  <TableCell align="center"><strong>Código</strong></TableCell>
                   <TableCell><strong>Producto</strong></TableCell>
                   <TableCell align="right"><strong>Precio Unit.</strong></TableCell>
                   <TableCell align="right"><strong>Total</strong></TableCell>
@@ -164,6 +182,7 @@ const ViewProforma = ({ proforma }) => {
                 {proforma.detalles_proforma?.map((item, index) => (
                   <TableRow key={index} className={classes.tableRow}>
                     <TableCell align="center">{item.cantidad}</TableCell>
+                    <TableCell align="center">{item.producto_id}</TableCell>
                     <TableCell>{item.producto?.nombre || "-"}</TableCell>
                     <TableCell align="right">${item.producto?.precio_publico?.toFixed(2) || "0.00"}</TableCell>
                     <TableCell align="right">
@@ -172,7 +191,7 @@ const ViewProforma = ({ proforma }) => {
                   </TableRow>
                 )) || (
                   <TableRow>
-                    <TableCell colSpan={4} align="center">
+                    <TableCell colSpan={5} align="center">
                       No hay detalles para mostrar
                     </TableCell>
                   </TableRow>

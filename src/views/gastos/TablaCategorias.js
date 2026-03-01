@@ -16,10 +16,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Swal from 'sweetalert2';
 import alertify from 'alertifyjs';
 import { GastosContext } from '../../context/GastosContext';
+import { LoginContext } from '../../context/LoginContext';
 
 const TablaCategorias = ({ setCategoriaEditar }) => {
   const { categorias, eliminarCategoria, setRecargarCategorias } =
     useContext(GastosContext);
+  const { tienePermiso } = useContext(LoginContext);
 
   const handleEditar = (categoria) => {
     setCategoriaEditar(categoria);
@@ -84,12 +86,16 @@ const TablaCategorias = ({ setCategoriaEditar }) => {
                   />
                 </TableCell>
                 <TableCell align="center">
-                  <IconButton size="small" onClick={() => handleEditar(cat)}>
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" onClick={() => handleEliminar(cat.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                  {tienePermiso('gastos.categorias-editar') && (
+                    <IconButton size="small" onClick={() => handleEditar(cat)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  {tienePermiso('gastos.categorias-eliminar') && (
+                    <IconButton size="small" onClick={() => handleEliminar(cat.id)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { makeStyles, Grid, Box, IconButton, Typography, colors } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import alertify from 'alertifyjs';
@@ -13,6 +13,13 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       backgroundColor: '#fafbff'
     }
+  },
+  '@keyframes flashGreen': {
+    '0%': { backgroundColor: '#c8e6c9' },
+    '100%': { backgroundColor: 'transparent' }
+  },
+  rowFlash: {
+    animation: '$flashGreen 0.6s ease-out'
   },
   cell: {
     display: 'flex',
@@ -74,14 +81,29 @@ export default function RowFactura({ producto }) {
 
   const {
     eliminarProductoFactura,
+    sumarStockProductoFactura,
+    restarStockProductoFactura,
     SetNumeroItems,
     actualizarStockProductosCantidad,
     productosFactura,
     calcularTotalesFactura,
-    actualizarProductosFactura
+    actualizarProductosFactura,
+    esProforma
   } = useContext(FacturaContext);
 
-  const [cantidad, setCantidad] = useState(1);
+  const [cantidad, setCantidad] = useState(producto.cantidad);
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    setCantidad(producto.cantidad);
+  }, [producto.cantidad]);
+
+  // Flash animation when quantity changes
+  useEffect(() => {
+    setFlash(true);
+    const timer = setTimeout(() => setFlash(false), 600);
+    return () => clearTimeout(timer);
+  }, [producto.cantidad]);
 
   const fn_onBlur = (producto, cantidad) => {
     var cont = 0;
@@ -104,7 +126,7 @@ export default function RowFactura({ producto }) {
       alertify.error('La cantidad no puede ser 0', 2);
       return;
     }
-    if (cantidad > producto.stock) {
+    if (!esProforma && cantidad > producto.stock) {
       alertify.error('La cantidad supera el Stock del producto', 2);
       return;
     }
@@ -123,8 +145,21 @@ export default function RowFactura({ producto }) {
     eliminarProductoFactura(producto, cont);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === '+') {
+      e.preventDefault();
+      sumarStockProductoFactura(producto);
+    } else if (e.key === '-') {
+      e.preventDefault();
+      restarStockProductoFactura(producto);
+    }
+  };
+
   return (
-    <div className={classes.row} key={producto.id + producto.tipoPrecio}>
+    <div
+      className={`${classes.row} ${flash ? classes.rowFlash : ''}`}
+      key={producto.id + producto.tipoPrecio}
+    >
       <Grid container spacing={0} alignItems="center">
         {/* Delete */}
         <Grid item xs={1}>
@@ -146,6 +181,7 @@ export default function RowFactura({ producto }) {
               type="text"
               onBlur={(e) => fn_onBlur(producto, e.target.value)}
               onChange={(e) => cambiarCantidad(e.target.value, e, producto)}
+              onKeyDown={handleKeyDown}
               value={cantidad}
               pattern="[0-9]{0,13}"
               className={classes.cantidadInput}

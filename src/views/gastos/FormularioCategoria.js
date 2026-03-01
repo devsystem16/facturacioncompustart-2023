@@ -10,6 +10,7 @@ import {
 } from '@material-ui/core';
 import alertify from 'alertifyjs';
 import { GastosContext } from '../../context/GastosContext';
+import { LoginContext } from '../../context/LoginContext';
 
 const useStyles = makeStyles((theme) => ({
   input: {
@@ -27,6 +28,9 @@ const FormularioCategoria = ({ categoriaEditar, setCategoriaEditar }) => {
   const classes = useStyles();
   const { crearCategoria, actualizarCategoria, setRecargarCategorias } =
     useContext(GastosContext);
+  const { tienePermiso } = useContext(LoginContext);
+  const puedeCrear = tienePermiso('gastos.categorias-crear');
+  const puedeEditar = tienePermiso('gastos.categorias-editar');
 
   const [form, setForm] = useState({
     nombre: '',
@@ -133,7 +137,12 @@ const FormularioCategoria = ({ categoriaEditar, setCategoriaEditar }) => {
                   Cancelar
                 </Button>
               )}
-              <Button variant="contained" color="primary" onClick={guardar}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={guardar}
+                disabled={categoriaEditar ? !puedeEditar : !puedeCrear}
+              >
                 {categoriaEditar ? 'Actualizar' : 'Guardar'}
               </Button>
             </div>

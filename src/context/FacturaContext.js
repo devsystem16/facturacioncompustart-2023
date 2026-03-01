@@ -112,10 +112,10 @@ const FacturaProvider = (props) => {
   });
 
   const [fechaEmision, setFechaEmision] = useState(
-    date.format(now, 'YYYY-MM-DD')
+    date.format(now, 'YYYY-MM-DD[T]HH:mm')
   );
   const [fechaVencimiento, setFechaVencimiento] = useState(
-    date.format(now, 'YYYY-MM-DD')
+    date.format(date.addDays(now, 15), 'YYYY-MM-DD')
   );
 
   const [currentPrecio, setCurrentPrecio] = useState('publico');
@@ -268,22 +268,19 @@ const FacturaProvider = (props) => {
     setProductosTemp(nuevoListado);
     return productoReturn;
   };
-  const agregarProductoFactura = async (producto) => {
-    if (+producto.stock <= 0) {
+  const agregarProductoFactura = async (producto, cantidadInicial = 1) => {
+    if (!esProforma && +producto.stock < cantidadInicial) {
       alertify.error('El producto no tiene Stock', 2);
       return;
     }
-    setPermitirBotonCredito(true); // Cada vez que añaden un producto, todas las formas de pago se reestablecen, entonces tambien debo permitir que el boron de ¿es credito? se pueda activar.!!
+    setPermitirBotonCredito(true);
 
-    if (currentPrecio === 'publico') totalParcial = 1 * producto.precio_publico;
-
-    if (currentPrecio === 'tecnico') totalParcial = 1 * producto.precio_tecnico;
-
-    if (currentPrecio === 'mayorista')
-      totalParcial = 1 * producto.precio_distribuidor;
+    if (currentPrecio === 'publico') totalParcial = cantidadInicial * producto.precio_publico;
+    if (currentPrecio === 'tecnico') totalParcial = cantidadInicial * producto.precio_tecnico;
+    if (currentPrecio === 'mayorista') totalParcial = cantidadInicial * producto.precio_distribuidor;
 
     const newProduct = {
-      cantidad: 1,
+      cantidad: cantidadInicial,
       id: producto.id,
       nombre: producto.nombre,
       precio_publico: producto.precio_publico,
@@ -295,35 +292,26 @@ const FacturaProvider = (props) => {
       stock: producto.stock
     };
 
-    var existe = false;
-    // console.log('añadir', newProduct);
-
-    await productosFactura.map((product) => {
+    let productoExistente = null;
+    productosFactura.forEach((product) => {
       if (
         product.id === newProduct.id &&
         product.tipoPrecio === newProduct.tipoPrecio
       ) {
-        existe = true;
-        console.log('Existe');
+        productoExistente = product;
       }
     });
-    if (existe) {
-      alertify.error('El producto ya se encuentra en la factura.', 2);
+
+    if (productoExistente) {
+      sumarStockProductoFactura(productoExistente, cantidadInicial);
       return;
     }
 
-    const nuebo = await actualizarStockProductosGPT(newProduct);
-    // const nuebo = await actualizarStockProductosGPT4(newProduct);
-
-    if (!existe) {
-      // console.log('Se añadio', newProduct);
-      setProductosFactura([...productosFactura, newProduct]);
-
-      calcularTotalesFactura(productosFactura);
-    } else {
-      sumarStockProductoFactura(newProduct);
-      calcularTotalesFactura(productosFactura);
+    if (!esProforma) {
+      await actualizarStockProductosGPT(newProduct, cantidadInicial);
     }
+    setProductosFactura([...productosFactura, newProduct]);
+    calcularTotalesFactura(productosFactura);
   };
 
   const resetearStock = async (producto, cantidad) => {
@@ -349,7 +337,9 @@ const FacturaProvider = (props) => {
     return productoReturn;
   };
   const eliminarProductoFactura = async (objProducto, cantidad) => {
-    resetearStock(objProducto, cantidad);
+    if (!esProforma) {
+      resetearStock(objProducto, cantidad);
+    }
 
     const results = productosFactura.filter((producto) => {
       return !(
@@ -364,20 +354,16 @@ const FacturaProvider = (props) => {
     prm_Producto,
     numItems = 1
   ) => {
-    // if (+prm_Producto.stock <= 0) {
-    //   alertify.error('El producto no tiene Stock', 2);
-    //   return;
-    // }
-    // alert(JSON.stringify(prm_Producto));
+    if (!esProforma) {
+      const tiene = await tieneStock(prm_Producto);
 
-    const tiene = await tieneStock(prm_Producto);
+      if (!tiene) {
+        alertify.error('Ya no quedan mas unidades para este producto.', 2);
+        return;
+      }
 
-    if (!tiene) {
-      alertify.error('Ya no quedan mas unidades para este producto.', 2);
-      return;
+      await actualizarStockProductos(prm_Producto, numItems);
     }
-
-    const nuebo = await actualizarStockProductos(prm_Producto, numItems);
 
     // SetNumeroItems(numeroItems + numItems);
     let totalParcial = 0;
@@ -439,20 +425,16 @@ const FacturaProvider = (props) => {
     setProductosFactura(results);
   };
   const sumarStockProductoFactura = async (prm_Producto, numItems = 1) => {
-    // if (+prm_Producto.stock <= 0) {
-    //   alertify.error('El producto no tiene Stock', 2);
-    //   return;
-    // }
-    // alert(JSON.stringify(prm_Producto));
+    if (!esProforma) {
+      const tiene = await tieneStock(prm_Producto);
 
-    const tiene = await tieneStock(prm_Producto);
+      if (!tiene) {
+        alertify.error('Ya no quedan mas unidades para este producto.', 2);
+        return;
+      }
 
-    if (!tiene) {
-      alertify.error('Ya no quedan mas unidades para este producto.', 2);
-      return;
+      await actualizarStockProductos(prm_Producto, numItems);
     }
-
-    const nuebo = await actualizarStockProductos(prm_Producto, numItems);
 
     // SetNumeroItems(numeroItems + numItems);
     let totalParcial = 0;
@@ -472,12 +454,12 @@ const FacturaProvider = (props) => {
 
         return {
           ...producto,
-          cantidad: producto.cantidad + 1,
+          cantidad: producto.cantidad + numItems,
 
           total: obtienePrecioBruto(
-            trunc((producto.cantidad + 1) * totalParcial, 4)
+            trunc((producto.cantidad + numItems) * totalParcial, 4)
           ),
-          totalBruto: trunc((producto.cantidad + 1) * totalParcial, 4)
+          totalBruto: trunc((producto.cantidad + numItems) * totalParcial, 4)
         };
       }
       return producto;
@@ -493,7 +475,9 @@ const FacturaProvider = (props) => {
         producto.tipoPrecio === prm_Producto.tipoPrecio
       ) {
         if (producto.cantidad > 1) {
-          restarStockProductos(prm_Producto, numItems);
+          if (!esProforma) {
+            restarStockProductos(prm_Producto, numItems);
+          }
           SetNumeroItems(numeroItems - numItems);
 
           if (producto.tipoPrecio === 'publico')
@@ -519,6 +503,19 @@ const FacturaProvider = (props) => {
     });
 
     setProductosFactura(results);
+  };
+
+  const limpiarFactura = () => {
+    setProductosFactura([]);
+    setObservacion('');
+    setFormasPago({});
+    setCredito(false);
+    setCreditoFP(false);
+    setPermitirBotonCredito(true);
+    setEsProforma(false);
+    setProductos([...productosTemp2]);
+    setProductosTemp([...productosTemp2]);
+    setCurrentCliente({ cedula: '', nombres: '-SELECCIONE-' });
   };
 
   function trunc(x, posiciones = 0) {
@@ -566,7 +563,7 @@ const FacturaProvider = (props) => {
         cliente_id: currentCliente.id,
         usuario_id: localStorage.getItem('user_id'),
         forma_pago_id: 1,
-        fecha_emision: fechaEmision,
+        fecha_emision: fechaEmision.replace('T', ' '),
         fecha_vencimiento: fechaVencimiento,
 
         subtotal: totales.subtotal,
@@ -795,7 +792,8 @@ const FacturaProvider = (props) => {
           proformasTemp,
           setProformasTemp,
           setDefaultDataInvoice,
-          eliminarProforma
+          eliminarProforma,
+          limpiarFactura
         }}
       >
         {props.children}

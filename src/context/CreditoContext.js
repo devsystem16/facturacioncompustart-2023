@@ -38,7 +38,8 @@ const CreditoProvider = (props) => {
     setRecargarFiltro(true);
     setIsLoading(false);
     SetIsOpenModalAbono(false);
-    console.log(respuesta.data);
+
+    return respuesta.data;
   };
 
 

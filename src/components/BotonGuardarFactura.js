@@ -138,6 +138,7 @@ export default function CircularIntegration() {
           color="primary"
           className={buttonClassname}
           onClick={handleButtonClick}
+          data-shortcut="guardar"
         >
           {success ? <CheckIcon /> : <SaveIcon />}
         </Fab>

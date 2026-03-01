@@ -61,6 +61,7 @@ const NavItem = ({
   href,
   icon: Icon,
   title,
+  nested,
   ...rest
 }) => {
   const classes = useStyles();
@@ -92,6 +93,7 @@ const NavItem = ({
         })}
         component={RouterLink}
         to={href}
+        style={nested ? { paddingLeft: 32 } : undefined}
       >
         {Icon && (
           <Icon
@@ -109,7 +111,8 @@ NavItem.propTypes = {
   className: PropTypes.string,
   href: PropTypes.string,
   icon: PropTypes.elementType,
-  title: PropTypes.string
+  title: PropTypes.string,
+  nested: PropTypes.bool
 };
 
 export default NavItem;

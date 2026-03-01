@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-// import date from 'date-and-time';
+import date from 'date-and-time';
 import { ClienteContext } from '../../../context/ClienteContext';
 import { ProductosContext } from '../../../context/ProductosContext';
 import { FacturaContext } from '../../../context/FacturaContext';
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(5),
     marginBottom: theme.spacing(2),
-    width: '25ch'
+    width: '30ch'
   }
 }));
 const NuevaProforma = () => {
@@ -45,12 +45,14 @@ const NuevaProforma = () => {
 
   const classes = useStyles();
 
-  // const [fechaEmision, setFechaEmision] = useState(
-  //   date.format(now, 'YYYY-MM-DD')
-  // );
-  // const [fechaVencimiento, setFechaVencimiento] = useState(
-  //   date.format(now, 'YYYY-MM-DD')
-  // );
+  const handleFechaEmisionChange = (valor) => {
+    setFechaEmision(valor);
+    const fechaBase = new Date(valor);
+    if (!isNaN(fechaBase.getTime())) {
+      setFechaVencimiento(date.format(date.addDays(fechaBase, 15), 'YYYY-MM-DD'));
+    }
+  };
+
   return (
     <Grid item xs={12}>
       <Grid container spacing={1}>
@@ -70,7 +72,8 @@ const NuevaProforma = () => {
             <InpuFecha
               label="Fecha Emisión"
               value={fechaEmision}
-              setValue={setFechaEmision}
+              setValue={handleFechaEmisionChange}
+              type="datetime-local"
             ></InpuFecha>
 
             <InpuFecha
@@ -91,13 +94,13 @@ const NuevaProforma = () => {
 
 export default NuevaProforma;
 
-const InpuFecha = ({ label, value, setValue }) => {
+const InpuFecha = ({ label, value, setValue, type = 'date' }) => {
   const classes = useStyles();
   return (
     <TextField
       id="date"
       label={label}
-      type="date"
+      type={type}
       onChange={(e) => setValue(e.target.value)}
       defaultValue={value}
       className={classes.textFieldFecha}

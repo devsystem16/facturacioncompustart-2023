@@ -133,7 +133,7 @@ export default ListadoProformas;
 
 
  const Row = ({ proforma, eliminarProforma, handleAbrirModal }) => {
-  const { setPestaniaActiva } = useContext(LoginContext);
+  const { setPestaniaActiva, tienePermiso } = useContext(LoginContext);
   const navigate = useNavigate();
 
   const handleRedireccionar = (proforma) => {
@@ -181,16 +181,20 @@ export default ListadoProformas;
           onClick={imprimirProforma}
           style={{ cursor: 'pointer', color: '#1976d2' }}
         />
-        <LocalAtmIcon
-          titleAccess="Facturar desde Proforma"
-          onClick={() => handleRedireccionar(proforma)}
-          style={{ cursor: 'pointer', color: '#43a047' }}
-        />
-        <DeleteForeverIcon
-          titleAccess="Eliminar Proforma"
-          onClick={() => eliminar(proforma)}
-          style={{ cursor: 'pointer', color: '#e53935' }}
-        />
+        {tienePermiso('puntoventa.facturar') && (
+          <LocalAtmIcon
+            titleAccess="Facturar desde Proforma"
+            onClick={() => handleRedireccionar(proforma)}
+            style={{ cursor: 'pointer', color: '#43a047' }}
+          />
+        )}
+        {tienePermiso('proformas.eliminar') && (
+          <DeleteForeverIcon
+            titleAccess="Eliminar Proforma"
+            onClick={() => eliminar(proforma)}
+            style={{ cursor: 'pointer', color: '#e53935' }}
+          />
+        )}
       </td>
     </tr>
   );

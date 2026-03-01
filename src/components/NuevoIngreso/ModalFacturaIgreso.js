@@ -63,17 +63,19 @@ export default function MaxWidthDialog({ IsguardarFactura = false }) {
   });
   const  handleClickOpen =async () => {
 
-   var cliente = await findClienteById(datosImpresion.cliente.cedula);
-    setCurrentCliente({
-        id:cliente.id,
-        cedula:  cliente.cedula,
-        nombres:   cliente.nombres,
-        telefono: cliente.telefono
-      });
+   if (datosImpresion?.cliente?.cedula) {
+     var cliente = await findClienteById(datosImpresion.cliente.cedula);
+     if (cliente) {
+       setCurrentCliente({
+           id: cliente.id,
+           cedula: cliente.cedula,
+           nombres: cliente.nombres,
+           telefono: cliente.telefono
+         });
+     }
+   }
 
-
-       setOpen(true);
-   
+   setOpen(true);
 
   };
 
