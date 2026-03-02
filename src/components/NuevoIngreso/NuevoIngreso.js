@@ -108,7 +108,7 @@ export default function NuevoIngreso() {
   const [equipo, setEquipo] = useState(ordenDuplicar?.equipo || '');
   const [marca, setMarca] = useState(ordenDuplicar?.marca || '');
   const [modelo, setModelo] = useState(ordenDuplicar?.modelo || '');
-  const [serie, setSerie] = useState('');
+  const [serie, setSerie] = useState(ordenDuplicar?.serie || '');
   const [falla, setFalla] = useState(ordenDuplicar?.falla || '');
   const [trabajo, setTrabajo] = useState('');
   const [total, setTotal] = useState(0);

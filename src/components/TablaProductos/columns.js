@@ -85,7 +85,7 @@ export default [
     editable: true
   },
   {
-    field: 'proveedor_nombre',
+    field: 'proveedor_codigo',
     headerName: 'Proveedor',
     flex: 1.2,
     minWidth: 150,

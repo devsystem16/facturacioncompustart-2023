@@ -215,6 +215,14 @@ const TabPermisos = () => {
     }
   }, [tipoSeleccionado]);
 
+  // Mapa para normalizar nombres de módulos desde la API al nombre canónico con tildes
+  const MODULO_NORMALIZE = {
+    'Creditos': 'Créditos',
+    'creditos': 'Créditos',
+    'Proformas': 'Proformas',
+    'Reportes avanzados': 'Reportes Avanzados'
+  };
+
   const cargarCatalogoAPI = async () => {
     try {
       const response = await API.get('api/permisos');
@@ -222,10 +230,15 @@ const TabPermisos = () => {
       if (data && typeof data === 'object') {
         const lista = [];
         Object.entries(data).forEach(([modulo, permisos]) => {
+          let nombreModulo = modulo.charAt(0).toUpperCase() + modulo.slice(1).replace(/-/g, ' ');
+          // Normalizar nombre del módulo para que coincida con ORDEN_MODULOS
+          if (MODULO_NORMALIZE[nombreModulo]) {
+            nombreModulo = MODULO_NORMALIZE[nombreModulo];
+          }
           permisos.forEach((p) => {
             lista.push({
               codigo: p.codigo,
-              modulo: modulo.charAt(0).toUpperCase() + modulo.slice(1).replace(/-/g, ' '),
+              modulo: nombreModulo,
               descripcion: p.descripcion
             });
           });
