@@ -3,6 +3,8 @@ import { Outlet } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core';
 import NavBar from './NavBar';
 import TopBar from './TopBar';
+import PagoPendienteBanner, { BANNER_HEIGHT } from '../../components/PagoPendienteBanner';
+import PAYMENT_CONFIG from '../../Environment/payment';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -16,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flex: '1 1 auto',
     overflow: 'hidden',
-    paddingTop: 64,
+    paddingTop: PAYMENT_CONFIG.pendiente ? 64 + BANNER_HEIGHT : 64,
     transition: 'padding-left 225ms cubic-bezier(0, 0, 0.2, 1)'
   },
   wrapperShift: {
@@ -47,6 +49,7 @@ const DashboardLayout = () => {
         onMobileNavOpen={() => setMobileNavOpen(true)}
         onDesktopNavToggle={() => setDesktopNavOpen(!isDesktopNavOpen)}
       />
+      <PagoPendienteBanner />
       <NavBar
         onMobileClose={() => setMobileNavOpen(false)}
         openMobile={isMobileNavOpen}

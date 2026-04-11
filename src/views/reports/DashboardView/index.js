@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Grid,
@@ -28,6 +29,7 @@ import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import TodayIcon from '@material-ui/icons/Today';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 
 import { LoginContext } from '../../../context/LoginContext';
 import { PeriodoContext } from '../../../context/PeriodoContext';
@@ -88,10 +90,17 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const SummaryCard = ({ titulo, valor, subtitulo, icon, avatarColor }) => {
+const SummaryCard = ({ titulo, valor, subtitulo, icon, avatarColor, onClick, accentColor }) => {
   const classes = useStyles();
   return (
-    <Card className={classes.statCard}>
+    <Card
+      className={classes.statCard}
+      onClick={onClick}
+      style={{
+        cursor: onClick ? 'pointer' : 'default',
+        borderLeft: accentColor ? `4px solid ${accentColor}` : undefined
+      }}
+    >
       <CardContent className={classes.statCardContent}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box>
@@ -123,15 +132,19 @@ const DashboardContent = () => {
   const { setIsReload, reporte } = useContext(EstadisticasContext);
   const { periodoActivo: pa, totalRetiros, obtenerRetirosBD } = useContext(PeriodoContext);
 
+  const navigate = useNavigate();
+
   const {
     resumen,
     ventasPeriodo,
     topProductos,
     topClientes,
+    creditosVencidos,
     cargarResumen,
     cargarVentasPeriodo,
     cargarTopProductos,
-    cargarTopClientes
+    cargarTopClientes,
+    cargarCreditosVencidos
   } = useContext(DashboardContext);
 
   const [fechaDesde, setFechaDesde] = useState(
@@ -143,6 +156,7 @@ const DashboardContent = () => {
   useEffect(() => {
     if (periodoActivo) {
       cargarResumen();
+      cargarCreditosVencidos();
       if (tienePermiso('dashboard.ver-ventas-periodo')) cargarVentasPeriodo(tipoPeriodo, fechaDesde, fechaHasta);
       if (tienePermiso('dashboard.ver-top-productos')) cargarTopProductos(fechaDesde, fechaHasta);
       if (tienePermiso('dashboard.ver-top-clientes')) cargarTopClientes(fechaDesde, fechaHasta);
@@ -216,18 +230,18 @@ const DashboardContent = () => {
                 </Box>
               </Box>
               {periodoActivo && tienePermiso('dashboard.finalizar-periodo') && (
-                  <Button
-                    onClick={cerrarPeriodoVentas}
-                    variant="contained"
-                    style={{
-                      backgroundColor: '#fff',
-                      color: '#1a237e',
-                      fontWeight: 600
-                    }}
-                  >
-                    Finalizar Día
-                  </Button>
-                )}
+                <Button
+                  onClick={cerrarPeriodoVentas}
+                  variant="contained"
+                  style={{
+                    backgroundColor: '#fff',
+                    color: '#1a237e',
+                    fontWeight: 600
+                  }}
+                >
+                  Finalizar Día
+                </Button>
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -258,6 +272,7 @@ const DashboardContent = () => {
               valor={reporte.numeroCreditos + ' crédito/s'}
               icon={<InsertChartIcon />}
               avatarColor={colors.orange[600]}
+              onClick={() => navigate('/creditos')}
             />
           </Grid>
           <Grid item lg={3} sm={6} xs={12}>
@@ -268,6 +283,19 @@ const DashboardContent = () => {
               avatarColor={colors.indigo[600]}
             />
           </Grid>
+          {creditosVencidos && creditosVencidos.total_creditos > 0 && (
+            <Grid item lg={3} sm={6} xs={12}>
+              <SummaryCard
+                titulo="CRÉDITOS VENCIDOS"
+                valor={creditosVencidos.total_creditos + ' crédito/s'}
+                subtitulo={formatCurrency(creditosVencidos.total_saldo || 0)}
+                icon={<ErrorOutlineIcon />}
+                avatarColor={colors.red[600]}
+                accentColor={colors.red[400]}
+                onClick={() => navigate('/creditos?estado=vencido')}
+              />
+            </Grid>
+          )}
         </Grid>
 
         {/* ===== VENTAS DETALLE + CAJA ===== */}
@@ -355,15 +383,23 @@ const DashboardContent = () => {
 
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <DashboardDateFilter
-                  fechaDesde={fechaDesde}
-                  setFechaDesde={setFechaDesde}
-                  fechaHasta={fechaHasta}
-                  setFechaHasta={setFechaHasta}
-                  tipoPeriodo={tipoPeriodo}
-                  setTipoPeriodo={setTipoPeriodo}
-                  onActualizar={actualizarDashboard}
-                />
+
+                {tienePermiso('dashboard.ver-ventas-periodo') && (
+
+
+                  <DashboardDateFilter
+                    fechaDesde={fechaDesde}
+                    setFechaDesde={setFechaDesde}
+                    fechaHasta={fechaHasta}
+                    setFechaHasta={setFechaHasta}
+                    tipoPeriodo={tipoPeriodo}
+                    setTipoPeriodo={setTipoPeriodo}
+                    onActualizar={actualizarDashboard}
+                  />
+                )}
+
+
+
               </Grid>
               {tienePermiso('dashboard.ver-ventas-periodo') && (
                 <Grid item lg={8} md={12} xs={12}>

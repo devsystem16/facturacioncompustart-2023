@@ -13,9 +13,18 @@ import {
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import EventIcon from '@material-ui/icons/Event';
 import NumberFormatCustom from '../../../components/ValidationCurrency/ValidationCurrency';
 import API from '../../../Environment/config';
 import { FacturaContext } from '../../../context/FacturaContext';
+
+const defaultFechaLimite = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 30);
+  return d.toISOString().split('T')[0];
+};
+
+const hoyISO = () => new Date().toISOString().split('T')[0];
 
 const useStyles = makeStyles((theme) => ({
   drawerPaper: {
@@ -112,6 +121,13 @@ const useStyles = makeStyles((theme) => ({
     color: colors.orange[800],
     border: '1px solid ' + colors.orange[200]
   },
+  fechaBox: {
+    margin: '0 20px 4px',
+    padding: '12px 14px',
+    borderRadius: 8,
+    backgroundColor: '#fff8e1',
+    border: '1px solid #ffe082'
+  },
   actions: {
     padding: '16px 20px',
     display: 'flex',
@@ -148,7 +164,9 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
   const [abrirFormasPago, setAbrirFormasPago] = useState(false);
   const [valorDeclarado, setValorDeclarado] = useState(0);
   const [ListformasPago, setListformasPago] = useState([]);
-  const { setCredito, setCreditoFP, setPermitirBotonCredito } =
+  const [fechaLimite, setFechaLimite] = useState(defaultFechaLimite());
+
+  const { setCredito, setCreditoFP, setPermitirBotonCredito, setFechaLimiteCredito } =
     useContext(FacturaContext);
 
   const [mensaje, setMensaje] = useState({
@@ -160,13 +178,8 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
     bloquarBoton: false
   });
 
-  const setFormaPagoDefault = (listFormasPago) => {
-    listFormasPago.find((FPago) => FPago.default === 1);
-  };
-
   const cargarFormasPago = async () => {
     const respuesta = await API.get('/api/forma-pagos');
-    setFormaPagoDefault(respuesta.data);
     setListformasPago(respuesta.data);
   };
 
@@ -206,8 +219,8 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
     }
     return {
       estado: '<',
-      mensaje: 'El valor declarado es menor que el total de la factura.',
-      btnName: 'Aceptar/Crédito',
+      mensaje: 'El saldo restante quedará registrado como crédito.',
+      btnName: 'Aceptar / Crédito',
       factura: false,
       credito: true,
       bloquarBoton: false,
@@ -215,14 +228,25 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
     };
   };
 
-  const recalcular = () => {
+  useEffect(() => {
     const suma = Object.values(formasPago).reduce(
       (acumulador, { valor }) => acumulador + +valor,
       0
     );
     setValorDeclarado(suma);
 
-    var res = compararValores(
+    // Solo recalcular crédito cuando el drawer está abierto
+    if (!abrirFormasPago) return;
+
+    // Si no se ha declarado ningún pago, no activar crédito automáticamente
+    if (suma === 0) {
+      setCredito(false);
+      setCreditoFP(false);
+      setPermitirBotonCredito(true);
+      return;
+    }
+
+    const res = compararValores(
       TotalFactura.replace(/[^\d.]/g, '').toString(),
       suma.toString()
     );
@@ -230,7 +254,12 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
     setCredito(res.credito);
     setCreditoFP(res.credito);
     setPermitirBotonCredito(res.permitirBotonCreditos);
-  };
+
+    // Resetear fecha cuando deja de ser crédito
+    if (!res.credito) {
+      setFechaLimite(defaultFechaLimite());
+    }
+  }, [formasPago, TotalFactura, abrirFormasPago]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (event, codigo) => {
     const { name, value } = event.target;
@@ -247,6 +276,7 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
     setPermitirBotonCredito(true);
     setCreditoFP(false);
     setCredito(false);
+    setFechaLimiteCredito(null);
     setMensaje({
       estado: '=',
       mensaje: 'TODO OK',
@@ -257,11 +287,21 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
     });
     setValorDeclarado(0);
     setFormasPago({});
+    setFechaLimite(defaultFechaLimite());
+    setAbrirFormasPago(false);
+  };
+
+  const fn_aceptar = () => {
+    if (mensaje.credito) {
+      setFechaLimiteCredito(fechaLimite);
+    } else {
+      setFechaLimiteCredito(null);
+    }
     setAbrirFormasPago(false);
   };
 
   const buscarValor = (id) => {
-    let formaPago = Object.values(formasPago).find((fp) => fp.id === id);
+    const formaPago = Object.values(formasPago).find((fp) => fp.id === id);
     return formaPago ? formaPago.valor : 0;
   };
 
@@ -310,18 +350,12 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
         {/* Summary */}
         <div className={classes.summaryBox}>
           <div className={classes.summaryRow}>
-            <Typography className={classes.summaryLabel}>
-              Total Factura
-            </Typography>
-            <Typography className={classes.summaryValue}>
-              {TotalFactura}
-            </Typography>
+            <Typography className={classes.summaryLabel}>Total Factura</Typography>
+            <Typography className={classes.summaryValue}>{TotalFactura}</Typography>
           </div>
           <Divider style={{ margin: '6px 0' }} />
           <div className={classes.summaryRow}>
-            <Typography className={classes.summaryLabel}>
-              Valor Declarado
-            </Typography>
+            <Typography className={classes.summaryLabel}>Valor Declarado</Typography>
             <Typography
               className={classes.summaryValue}
               style={{
@@ -343,19 +377,13 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
           {ListformasPago.map((formaP, index) => (
             <div className={classes.formItem} key={formaP.id || index}>
               <div className={classes.formIcon}>
-                <AttachMoneyIcon
-                  fontSize="small"
-                  style={{ color: '#3f51b5' }}
-                />
+                <AttachMoneyIcon fontSize="small" style={{ color: '#3f51b5' }} />
               </div>
-              <Typography className={classes.formLabel}>
-                {formaP.label}
-              </Typography>
+              <Typography className={classes.formLabel}>{formaP.label}</Typography>
               <TextField
                 name={formaP.nombre}
-                defaultValue={buscarValor(formaP.id)}
+                value={buscarValor(formaP.id)}
                 onChange={(event) => handleChange(event, formaP.id)}
-                onKeyUp={recalcular}
                 variant="outlined"
                 size="small"
                 className={classes.formInput}
@@ -379,6 +407,39 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
           {mensaje.mensaje}
         </div>
 
+        {/* Fecha límite — obligatoria cuando es crédito */}
+        {mensaje.credito && (
+          <div className={classes.fechaBox}>
+            <Box display="flex" alignItems="center" style={{ gap: 6, marginBottom: 8 }}>
+              <EventIcon fontSize="small" style={{ color: colors.orange[700] }} />
+              <Typography
+                variant="body2"
+                style={{ fontWeight: 700, color: colors.orange[900] }}
+              >
+                Fecha límite de pago{' '}
+                <span style={{ color: colors.red[600] }}>*</span>
+              </Typography>
+            </Box>
+
+            <TextField
+              type="date"
+              value={fechaLimite}
+              onChange={(e) => setFechaLimite(e.target.value)}
+              inputProps={{ min: hoyISO() }}
+              variant="outlined"
+              size="small"
+              fullWidth
+            />
+
+            <Typography
+              variant="caption"
+              style={{ color: colors.grey[500], marginTop: 4, display: 'block' }}
+            >
+              Campo obligatorio para registrar el crédito.
+            </Typography>
+          </div>
+        )}
+
         {/* Actions */}
         <Box flexGrow={1} />
         <div className={classes.actions}>
@@ -390,10 +451,10 @@ export default function FormaPago({ TotalFactura, formasPago, setFormasPago }) {
             Cancelar
           </Button>
           <Button
-            onClick={() => setAbrirFormasPago(false)}
+            onClick={fn_aceptar}
             variant="contained"
             color="primary"
-            disabled={mensaje.bloquarBoton}
+            disabled={mensaje.bloquarBoton || (mensaje.credito && !fechaLimite)}
             className={classes.btnAceptar}
           >
             {mensaje.btnName}

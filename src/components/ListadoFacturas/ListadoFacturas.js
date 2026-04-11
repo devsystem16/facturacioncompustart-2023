@@ -526,11 +526,28 @@ function Row(props) {
                 </TableBody> */}
 
                 <Typography variant="h6" gutterBottom component="div" sx={{ mt: 2 }}>
-                  Formas de Pago
+                  {row.es_credito ? 'Abonos realizados' : 'Formas de Pago'}
                 </Typography>
+                <TableHead>
+                  <TableRow>
+                    <TableCell style={{ fontSize: 11, fontWeight: 700, color: '#888', padding: '4px 8px' }}>Tipo de Pago</TableCell>
+                    <TableCell style={{ fontSize: 11, fontWeight: 700, color: '#888', padding: '4px 8px' }}>Valor</TableCell>
+                    <TableCell style={{ fontSize: 11, fontWeight: 700, color: '#888', padding: '4px 8px' }}>
+                      {row.es_credito ? 'Fecha Abono' : 'Observación'}
+                    </TableCell>
+                    <TableCell style={{ fontSize: 11, fontWeight: 700, color: '#888', padding: '4px 8px' }}>
+                      {row.es_credito ? 'Comentario' : ''}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
                 <TableBody>
-                  {row.formasPago.map((fp) => {
-                    // Selección de icono según tipo de pago
+                  {row.formasPago.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} style={{ color: '#aaa', fontSize: 12, fontStyle: 'italic' }}>
+                        {row.es_credito ? 'Sin abonos registrados' : 'Sin formas de pago'}
+                      </TableCell>
+                    </TableRow>
+                  ) : row.formasPago.map((fp) => {
                     let Icon;
                     switch (fp.descripcionFormaPago?.toLowerCase()) {
                       case 'efectivo':
@@ -554,13 +571,13 @@ function Row(props) {
 
                     return (
                       <TableRow key={`fp${fp.id}`}>
-                        <TableCell component="th" scope="row" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TableCell component="th" scope="row" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <Icon fontSize="small" color="primary" />
-                          {fp.descripcionFormaPago}
+                          {fp.descripcionFormaPago || '-'}
                         </TableCell>
                         <TableCell>${formatCurrencySimple(fp.valor)}</TableCell>
-                        <TableCell align="center">{fp.numeroTransaccion || '-'}</TableCell>
-                        <TableCell align="right">{fp.estado || '-'}</TableCell>
+                        <TableCell align="left">{fp.fecha || '-'}</TableCell>
+                        <TableCell align="left">{fp.comentario || '-'}</TableCell>
                       </TableRow>
                     );
                   })}

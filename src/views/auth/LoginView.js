@@ -291,7 +291,7 @@ const LoginView = () => {
                       {'.'}
                     </Typography>
                     <Typography variant="body2" color="textSecondary" align="center">
-                      {'V 3.1.0'}
+                      {'V 3.2.5'}
 
                     </Typography>
                   </Box>

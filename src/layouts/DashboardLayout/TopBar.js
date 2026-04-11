@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
@@ -9,10 +9,10 @@ import {
   Hidden,
   IconButton,
   Toolbar,
+  Typography,
   makeStyles
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
-import NotificationsIcon from '@material-ui/icons/NotificationsOutlined';
 import InputIcon from '@material-ui/icons/Input';
 
 import Logo from '../../components/Logo';
@@ -21,12 +21,26 @@ const useStyles = makeStyles(() => ({
   avatar: {
     width: 60,
     height: 60
+  },
+  dateTime: {
+    fontSize: 16,
+    fontWeight: 500,
+    color: 'rgba(255,255,255,0.9)',
+    letterSpacing: '0.3px',
+    lineHeight: 1.4,
+    textAlign: 'center'
   }
 }));
 
 const TopBar = ({ className, onMobileNavOpen, onDesktopNavToggle, ...rest }) => {
   const classes = useStyles();
   const [notifications] = useState([]);
+  const [ahora, setAhora] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setAhora(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const logut = () => {
     localStorage.removeItem('user_id');
@@ -46,17 +60,17 @@ const TopBar = ({ className, onMobileNavOpen, onDesktopNavToggle, ...rest }) => 
         <RouterLink to="/app/dashboard">
           <Logo />
         </RouterLink>
+
         <Box flexGrow={1} />
         <Hidden mdDown>
-          <IconButton color="inherit">
-            <Badge
-              badgeContent={notifications.length}
-              color="primary"
-              variant="dot"
-            >
-              {/* <NotificationsIcon /> */}
-            </Badge>
-          </IconButton>
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mr={1}>
+            <Typography className={classes.dateTime}>
+              {ahora.toLocaleDateString('es-EC', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
+            </Typography>
+            <Typography className={classes.dateTime}>
+              {ahora.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </Typography>
+          </Box>
           <IconButton color="inherit">
             <RouterLink
               to="/"

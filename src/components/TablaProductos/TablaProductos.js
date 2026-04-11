@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { DataGrid } from '@material-ui/data-grid';
 import { Card } from '@material-ui/core';
-import columns from './columns';
+import columnsBase from './columns';
 import API from '../../Environment/config';
 import alertify from 'alertifyjs';
 
 import { ProductosContext } from '../../context/ProductosContext';
+import { LoginContext } from '../../context/LoginContext';
+import ModalCambiarProveedor from './ModalCambiarProveedor';
 
 const END_POINT = {
   actualizarProducto: 'api/productos'
@@ -16,6 +18,8 @@ export default function TablaProductos() {
   const [productosDesmontado, setProductosDesmontado] = React.useState([
     { mycae: '1' }
   ]);
+  const [modalProveedorOpen, setModalProveedorOpen] = React.useState(false);
+  const [productoEditandoProveedor, setProductoEditandoProveedor] = React.useState(null);
   const {
     productos,
     productosTemp,
@@ -25,6 +29,34 @@ export default function TablaProductos() {
     setDeleteProducto,
     ObtenerProductos
   } = React.useContext(ProductosContext);
+  const { tienePermiso } = React.useContext(LoginContext);
+
+  const columns = React.useMemo(() => {
+    return columnsBase.map((col) => {
+      if (col.field === 'proveedor_codigo') {
+        return {
+          ...col,
+          editable: false,
+          renderCell: (cellValues) => {
+            const puedeEditar = tienePermiso('productos.editar-proveedor');
+            return (
+              <span
+                style={{
+                  cursor: puedeEditar ? 'pointer' : 'default',
+                  color: puedeEditar ? '#1976d2' : 'inherit',
+                  textDecoration: puedeEditar ? 'underline' : 'none'
+                }}
+                title={puedeEditar ? 'Click para cambiar proveedor' : ''}
+              >
+                {cellValues.value || '-'}
+              </span>
+            );
+          }
+        };
+      }
+      return col;
+    });
+  }, [tienePermiso]);
 
   // const [reloadThis, setReloadThis] = React.useState(1);
 
@@ -93,6 +125,12 @@ export default function TablaProductos() {
             codigo_barra: producto.value
           };
 
+        if (field === 'proveedor_codigo')
+          productoNuevo = {
+            ...item,
+            proveedor_codigo: producto.value
+          };
+
         updateProductoDB(productoNuevo);
         return productoNuevo;
       }
@@ -117,6 +155,46 @@ export default function TablaProductos() {
     setTableIsLoading(false);
     alertify.success('Actualizado', 2);
     console.log(result);
+  };
+
+  const handleCellClick = (params) => {
+    if (params.field !== 'proveedor_codigo') return;
+    if (!tienePermiso('productos.editar-proveedor')) return;
+    const producto = buscarProductoObjeto(params.id);
+    if (!producto) return;
+    setProductoEditandoProveedor(producto);
+    setModalProveedorOpen(true);
+  };
+
+  const handleGuardarProveedor = async (productoId, proveedor) => {
+    setTableIsLoading(true);
+    try {
+      await API.patch(END_POINT.actualizarProducto + '/' + productoId, {
+        proveedor_id: proveedor.id,
+        proveedor_codigo: proveedor.codigo
+      });
+
+      const actualizar = (lista) =>
+        lista.map((item) => {
+          if (item.id === productoId) {
+            return {
+              ...item,
+              proveedor_id: proveedor.id,
+              proveedor_codigo: proveedor.codigo,
+              proveedor_nombre: proveedor.nombre
+            };
+          }
+          return item;
+        });
+
+      setProductos(actualizar(productos));
+      setProductosTemp(actualizar(productosTemp));
+
+      alertify.success('Proveedor actualizado', 2);
+    } catch (e) {
+      alertify.error('Error al actualizar proveedor', 2);
+    }
+    setTableIsLoading(false);
   };
 
   const onRowSelectEvent = (parameters) => {
@@ -146,9 +224,16 @@ export default function TablaProductos() {
           onSelectionModelChange={(row) => {
             onRowSelectEvent(row);
           }}
+          onCellClick={handleCellClick}
           loading={tableIsLoading}
         />
       </div>
+      <ModalCambiarProveedor
+        open={modalProveedorOpen}
+        onClose={() => setModalProveedorOpen(false)}
+        producto={productoEditandoProveedor}
+        onGuardar={handleGuardarProveedor}
+      />
     </Card>
   );
 }

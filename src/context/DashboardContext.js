@@ -19,6 +19,7 @@ const DashboardProvider = (props) => {
   const [topClientes, setTopClientes] = useState([]);
   const [productosStockBajo, setProductosStockBajo] = useState([]);
   const [creditosPendientes, setCreditosPendientes] = useState(null);
+  const [creditosVencidos, setCreditosVencidos] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const cargarResumen = async () => {
@@ -94,6 +95,17 @@ const DashboardProvider = (props) => {
     }
   };
 
+  const cargarCreditosVencidos = async () => {
+    try {
+      const response = await API.get('api/dashboard/creditos-vencidos');
+      setCreditosVencidos(response.data.data || null);
+      return response.data.data;
+    } catch (error) {
+      // Endpoint puede no existir aún en el backend
+      console.warn('Endpoint creditos-vencidos no disponible:', error?.response?.status);
+    }
+  };
+
   return (
     <DashboardContext.Provider
       value={{
@@ -103,6 +115,7 @@ const DashboardProvider = (props) => {
         topClientes,
         productosStockBajo,
         creditosPendientes,
+        creditosVencidos,
         isLoading,
         setIsLoading,
         cargarResumen,
@@ -110,7 +123,8 @@ const DashboardProvider = (props) => {
         cargarTopProductos,
         cargarTopClientes,
         cargarStockBajo,
-        cargarCreditosPendientes
+        cargarCreditosPendientes,
+        cargarCreditosVencidos
       }}
     >
       {props.children}

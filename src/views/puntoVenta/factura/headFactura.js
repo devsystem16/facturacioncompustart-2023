@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   makeStyles,
   Typography,
@@ -8,6 +8,7 @@ import {
   FormControlLabel,
   Divider,
   Button,
+  CircularProgress,
   colors
 } from '@material-ui/core';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
@@ -16,6 +17,7 @@ import { FacturaContext } from '../../../context/FacturaContext';
 import SelectCliente from '../../../components/SelectCliente/SelectCliente';
 import Swal from 'sweetalert2';
 import API from '../../../Environment/config';
+import ModalFechaCredito from './ModalFechaCredito';
 
 const formatCurrency = (n) => {
   if (isNaN(n) || n === null) return '$0.00';
@@ -65,8 +67,12 @@ export default function HeadFactura({ defaultCliente }) {
     permitirBotonCredito,
     esProforma,
     limpiarFactura,
-    productosFactura
+    productosFactura,
+    setFechaLimiteCredito
   } = useContext(FacturaContext);
+
+  const [mostrarModalFecha, setMostrarModalFecha] = useState(false);
+  const [verificandoCreditos, setVerificandoCreditos] = useState(false);
 
   const handleChange = async (event) => {
     if (!permitirBotonCredito) {
@@ -87,11 +93,12 @@ export default function HeadFactura({ defaultCliente }) {
 
     // Verificar creditos pendientes del cliente
     if (!currentCliente.id) {
-      setCredito(true);
+      setMostrarModalFecha(true);
       return;
     }
 
     try {
+      setVerificandoCreditos(true);
       const resp = await API.get(`api/creditos/pendientes/cliente/${currentCliente.id}`);
       const data = resp.data;
 
@@ -139,27 +146,28 @@ export default function HeadFactura({ defaultCliente }) {
           </div>`;
 
         const result = await Swal.fire({
-          title: 'Creditos pendientes detectados',
+          title: 'Créditos pendientes detectados',
           html: htmlContent,
           icon: 'warning',
           width: 620,
           showCancelButton: true,
-          confirmButtonText: 'Continuar con credito',
+          confirmButtonText: 'Continuar con crédito',
           cancelButtonText: 'Cancelar',
           confirmButtonColor: '#ff9800',
           cancelButtonColor: '#9e9e9e'
         });
 
         if (result.isConfirmed) {
-          setCredito(true);
+          setMostrarModalFecha(true);
         }
-        // Si cancela, no activa credito
+        // Si cancela, el switch no se activa
       } else {
-        setCredito(true);
+        setMostrarModalFecha(true);
       }
     } catch {
-      // Si falla la consulta, permitir el credito sin aviso
-      setCredito(true);
+      setMostrarModalFecha(true);
+    } finally {
+      setVerificandoCreditos(false);
     }
   };
 
@@ -200,6 +208,19 @@ export default function HeadFactura({ defaultCliente }) {
 
   return (
     <div>
+      <ModalFechaCredito
+        open={mostrarModalFecha}
+        onConfirmar={(fecha) => {
+          setFechaLimiteCredito(fecha);
+          setCredito(true);
+          setMostrarModalFecha(false);
+        }}
+        onCancelar={() => {
+          setMostrarModalFecha(false);
+          // El switch no llega a activarse
+        }}
+      />
+
       {/* Título + Switch crédito + Nueva Venta */}
       <Box
         display="flex"
@@ -228,17 +249,22 @@ export default function HeadFactura({ defaultCliente }) {
           {!esProforma && (
             <FormControlLabel
               control={
-                <Switch
-                  checked={credito}
-                  onChange={handleChange}
-                  name="credito"
-                  color="primary"
-                  size="small"
-                />
+                verificandoCreditos
+                  ? <CircularProgress size={20} style={{ margin: '0 9px' }} />
+                  : (
+                    <Switch
+                      checked={credito}
+                      onChange={handleChange}
+                      name="credito"
+                      color="primary"
+                      size="small"
+                      disabled={verificandoCreditos}
+                    />
+                  )
               }
               label={
-                <Typography variant="body2" style={{ fontSize: 13 }}>
-                  Crédito
+                <Typography variant="body2" style={{ fontSize: 13, color: verificandoCreditos ? colors.grey[400] : 'inherit' }}>
+                  {verificandoCreditos ? 'Verificando...' : 'Crédito'}
                 </Typography>
               }
             />

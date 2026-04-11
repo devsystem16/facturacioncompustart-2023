@@ -56,6 +56,7 @@ const FacturaProvider = (props) => {
   const [productosFactura, setProductosFactura] = useState([]);
   const [credito, setCredito] = useState(false);
   const [creditoFP, setCreditoFP] = useState(false);
+  const [fechaLimiteCredito, setFechaLimiteCredito] = useState(null);
   const [permitirBotonCredito, setPermitirBotonCredito] = useState(true);
   const [numeroItems, SetNumeroItems] = useState(1);
   const [formasPago, setFormasPago] = useState({});
@@ -511,6 +512,7 @@ const FacturaProvider = (props) => {
     setFormasPago({});
     setCredito(false);
     setCreditoFP(false);
+    setFechaLimiteCredito(null);
     setPermitirBotonCredito(true);
     setEsProforma(false);
     setProductos([...productosTemp2]);
@@ -598,7 +600,8 @@ const FacturaProvider = (props) => {
         detalle: observacion === '' ? 'CREDITO' : observacion,
         saldo: totales.total,
         total: totales.total,
-        periodo_id: periodo.id
+        periodo_id: periodo.id,
+        fecha_limite: fechaLimiteCredito || null
       },
       detalle,
       formasPago: creditoFP ? formasPago : {}
@@ -693,7 +696,7 @@ const FacturaProvider = (props) => {
     }
     setFormasPago({});
     // setProductosFactura([]);
-    // setObservacion('');
+    // setObservacion se limpia en onAfterPrint de BotonGuardarFactura para que aparezca en la impresión
     // setCurrentCliente({
     //   cedula: '',
     //   nombres: ''
@@ -728,6 +731,7 @@ const FacturaProvider = (props) => {
 
     const response = await API.post(END_POINT.obtenerProforma, proforma);
     setProforma(response.data);
+    return response.data;
   };
 
 
@@ -760,6 +764,8 @@ const FacturaProvider = (props) => {
           setCurrentPrecio,
           credito,
           setCredito,
+          fechaLimiteCredito,
+          setFechaLimiteCredito,
           factura_id,
           setFactura_id,
           fechaFactura,

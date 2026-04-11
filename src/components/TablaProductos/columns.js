@@ -89,6 +89,7 @@ export default [
     headerName: 'Proveedor',
     flex: 1.2,
     minWidth: 150,
+    editable: true,
     renderCell: (cellValues) => {
       return (
         <Tooltip title={cellValues.formattedValue || ''}>

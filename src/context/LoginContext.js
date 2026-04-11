@@ -53,7 +53,7 @@ const generarPermisosFallback = (tipoUsuario) => {
       'puntoventa.ver', 'puntoventa.facturar', 'puntoventa.aplicar-descuento', 'puntoventa.seleccionar-tipo-precio',
       'clientes.ver', 'clientes.crear', 'clientes.editar', 'clientes.eliminar',
       'productos.ver', 'productos.crear', 'productos.editar', 'productos.eliminar',
-      'productos.utilidad-ver', 'productos.utilidad-exportar',
+      'productos.utilidad-ver', 'productos.utilidad-exportar', 'productos.editar-proveedor',
       'ingresos.ver', 'ingresos.crear', 'ingresos.editar-equipo', 'ingresos.editar-trabajo',
       'ingresos.editar-total', 'ingresos.editar-observacion', 'ingresos.abonar',
       'ingresos.eliminar', 'ingresos.imprimir', 'ingresos.ver-detalle', 'ingresos.facturar-ingreso',

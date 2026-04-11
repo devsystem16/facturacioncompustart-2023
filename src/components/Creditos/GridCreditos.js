@@ -16,10 +16,23 @@ import FacturaYPagos from './FacturaYPagos';
 
 import ModalAbono from '../../components/CreditosTable/ModalAbono';
 import { CreditoContext } from '../../context/CreditoContext';
-import { TextField, InputAdornment, SvgIcon, Chip, Button, CircularProgress } from '@material-ui/core';
+import {
+  TextField,
+  InputAdornment,
+  SvgIcon,
+  Chip,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography
+} from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
 import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import EditIcon from '@material-ui/icons/Edit';
+import EventIcon from '@material-ui/icons/Event';
 
 import Swal from 'sweetalert2';
 import alertify from 'alertifyjs';
@@ -47,6 +60,130 @@ const useRowStyles = makeStyles({
   }
 });
 
+// ─── Utilidades de fecha límite ────────────────────────────────────────────────
+
+const parseFechaLimite = (fechaStr) => {
+  if (!fechaStr) return null;
+  const [y, m, d] = fechaStr.split('-');
+  return new Date(+y, +m - 1, +d);
+};
+
+const estadoFechaLimite = (fechaStr) => {
+  if (!fechaStr) return 'sin_fecha';
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const fl = parseFechaLimite(fechaStr);
+  const enSieteDias = new Date(hoy);
+  enSieteDias.setDate(enSieteDias.getDate() + 7);
+  if (fl < hoy) return 'vencido';
+  if (fl <= enSieteDias) return 'por_vencer';
+  return 'vigente';
+};
+
+const hoyISO = () => new Date().toISOString().split('T')[0];
+
+function ChipFechaLimite({ fecha }) {
+  const estado = estadoFechaLimite(fecha);
+  const texto = fecha
+    ? fecha.split('-').reverse().join('/')
+    : null;
+
+  if (!fecha) {
+    return (
+      <Chip
+        size="small"
+        label="Sin fecha"
+        style={{ backgroundColor: '#f5f5f5', color: '#9e9e9e', fontSize: 11 }}
+      />
+    );
+  }
+  if (estado === 'vencido') {
+    return (
+      <Box>
+        <Chip
+          size="small"
+          label="VENCIDO"
+          style={{ backgroundColor: '#ffcdd2', color: '#c62828', fontWeight: 700, fontSize: 11 }}
+        />
+        <Typography variant="caption" display="block" style={{ color: '#c62828', marginTop: 2 }}>
+          {texto}
+        </Typography>
+      </Box>
+    );
+  }
+  if (estado === 'por_vencer') {
+    return (
+      <Box>
+        <Chip
+          size="small"
+          label="Vence pronto"
+          style={{ backgroundColor: '#fff9c4', color: '#f57f17', fontWeight: 600, fontSize: 11 }}
+        />
+        <Typography variant="caption" display="block" style={{ color: '#f57f17', marginTop: 2 }}>
+          {texto}
+        </Typography>
+      </Box>
+    );
+  }
+  return (
+    <Typography variant="caption" style={{ color: '#388e3c' }}>
+      {texto}
+    </Typography>
+  );
+}
+
+// ─── Dialog para asignar fecha límite ─────────────────────────────────────────
+
+function DialogFechaLimite({ open, onClose, onGuardar, fechaActual }) {
+  const [fecha, setFecha] = useState(fechaActual || '');
+
+  useEffect(() => {
+    setFecha(fechaActual || '');
+  }, [fechaActual, open]);
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Asignar fecha límite de pago</DialogTitle>
+      <DialogContent>
+        <TextField
+          type="date"
+          value={fecha}
+          onChange={(e) => setFecha(e.target.value)}
+          inputProps={{ min: hoyISO() }}
+          variant="outlined"
+          size="small"
+          fullWidth
+          label="Fecha límite"
+          InputLabelProps={{ shrink: true }}
+        />
+        {fechaActual && (
+          <Button
+            size="small"
+            onClick={() => onGuardar(null)}
+            style={{ marginTop: 8, textTransform: 'none', color: '#9e9e9e' }}
+          >
+            Quitar fecha límite
+          </Button>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} style={{ textTransform: 'none' }}>
+          Cancelar
+        </Button>
+        <Button
+          onClick={() => onGuardar(fecha)}
+          color="primary"
+          variant="contained"
+          disabled={!fecha}
+          style={{ textTransform: 'none' }}
+        >
+          Guardar
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 function Row(props) {
   const { credito  } = props;
   const [open, setOpen] = React.useState(false);
@@ -61,6 +198,24 @@ function Row(props) {
   const [editandoDesc, setEditandoDesc] = useState(false);
   const [descValue, setDescValue] = useState(credito.detalle || '');
   const [savingDesc, setSavingDesc] = useState(false);
+
+  const [abrirDialogFecha, setAbrirDialogFecha] = useState(false);
+  const [guardandoFecha, setGuardandoFecha] = useState(false);
+
+  const guardarFechaLimite = async (nuevaFecha) => {
+    setGuardandoFecha(true);
+    try {
+      await API.put(`api/creditos/${credito.id}`, { fecha_limite: nuevaFecha });
+      alertify.success('Fecha límite actualizada', 2);
+      setRecargarListaCreditos(true);
+      setRecargarFiltro(true);
+    } catch {
+      alertify.error('Error al actualizar la fecha', 3);
+    } finally {
+      setGuardandoFecha(false);
+      setAbrirDialogFecha(false);
+    }
+  };
 
   const guardarDescripcion = async () => {
     if (descValue === (credito.detalle || '')) {
@@ -114,8 +269,14 @@ function Row(props) {
         open={AbrirModalPagos}
         setOpen={setAbrirModalPagos}
         credito={credito}
- 
       ></ModalPagos>
+
+      <DialogFechaLimite
+        open={abrirDialogFecha}
+        onClose={() => setAbrirDialogFecha(false)}
+        onGuardar={guardarFechaLimite}
+        fechaActual={credito.fecha_limite || ''}
+      />
 
       <TableRow className={classes.root}>
         <TableCell>
@@ -180,6 +341,9 @@ function Row(props) {
           {' '}
           {formatCurrencySimple(credito.saldo)}
         </TableCell>
+        <TableCell align="center">
+          <ChipFechaLimite fecha={credito.fecha_limite} />
+        </TableCell>
         <TableCell align="right">
           {tienePermiso('creditos.abonar') && (
             <PayIcon
@@ -205,6 +369,18 @@ function Row(props) {
             />
           )}
 
+          {tienePermiso('creditos.editar-fecha-limite') && (
+            <IconButton
+              size="small"
+              title="Asignar / editar fecha límite"
+              onClick={() => setAbrirDialogFecha(true)}
+              disabled={guardandoFecha}
+              style={{ padding: 2 }}
+            >
+              <EventIcon fontSize="small" style={{ color: '#757575' }} />
+            </IconButton>
+          )}
+
           {/* <DeleteForever
             title="Anular Crédito"
             onClick={() => eliminarCredito(credito)}
@@ -213,7 +389,7 @@ function Row(props) {
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
               <FacturaYPagos
@@ -231,7 +407,7 @@ function Row(props) {
 
 export default function CollapsibleTable() {
   const classes = useStyles();
-  const { creditos, recargarListaCreditos, recargarFiltro, setRecargarFiltro } =
+  const { creditos, recargarListaCreditos, recargarFiltro, setRecargarFiltro, filtroEstado } =
     useContext(CreditoContext);
 
   const [_creditos, _setCreditos] = useState(creditos);
@@ -241,18 +417,45 @@ export default function CollapsibleTable() {
   );
  
 
+  const aplicarFiltroEstado = (lista) => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const enSieteDias = new Date(hoy);
+    enSieteDias.setDate(enSieteDias.getDate() + 7);
+
+    if (filtroEstado === 'vencido') {
+      return lista.filter((c) => {
+        if (!c.fecha_limite) return false;
+        return parseFechaLimite(c.fecha_limite) < hoy;
+      });
+    }
+    if (filtroEstado === 'por_vencer') {
+      return lista.filter((c) => {
+        if (!c.fecha_limite) return false;
+        const fl = parseFechaLimite(c.fecha_limite);
+        return fl >= hoy && fl <= enSieteDias;
+      });
+    }
+    if (filtroEstado === 'sin_fecha') {
+      return lista.filter((c) => !c.fecha_limite);
+    }
+    return lista;
+  };
+
+  const [textoBusqueda, setTextoBusqueda] = useState('');
+
   const filrarProductos = (text) => {
+    setTextoBusqueda(text);
     const searchTerm = text.toUpperCase().split(' ');
 
-    const results = creditos.filter((credito) => {
+    const base = aplicarFiltroEstado(creditos);
+    const results = base.filter((credito) => {
       const nombres =
         credito && credito?.cliente ? credito?.cliente.toUpperCase() : '';
       const codigo =
         credito && credito?.factura?.id
           ? credito?.factura?.id.toString().toUpperCase()
           : '';
-
-      // Verificar si cada término de búsqueda está presente en alguno de los campos
       return searchTerm.every(
         (term) => nombres.includes(term) || codigo.includes(term)
       );
@@ -264,15 +467,32 @@ export default function CollapsibleTable() {
 
   useEffect(() => {
     if (_recargarListaCreditos) {
-      _setCreditos(creditos);
+      _setCreditos(aplicarFiltroEstado(creditos));
       setRecargarFiltro(false);
     }
 
     if (recargarFiltro) {
-      _setCreditos(creditos);
+      _setCreditos(aplicarFiltroEstado(creditos));
       setRecargarFiltro(false);
     }
   }, [creditos, _creditos]);
+
+  // Re-aplicar filtro de estado cuando cambia filtroEstado
+  useEffect(() => {
+    const base = aplicarFiltroEstado(creditos);
+    if (!textoBusqueda) {
+      _setCreditos(base);
+      return;
+    }
+    const searchTerm = textoBusqueda.toUpperCase().split(' ');
+    _setCreditos(
+      base.filter((c) => {
+        const nombres = c?.cliente ? c.cliente.toUpperCase() : '';
+        const codigo = c?.factura?.id ? c.factura.id.toString() : '';
+        return searchTerm.every((t) => nombres.includes(t) || codigo.includes(t));
+      })
+    );
+  }, [filtroEstado, creditos]);
   const totalSaldoPendiente = _creditos.reduce((sum, c) => sum + parseFloat(c.saldo || 0), 0);
   const totalGeneral = _creditos.reduce((sum, c) => sum + parseFloat(c.total || 0), 0);
   const totalAbonado = _creditos.reduce((sum, c) => sum + parseFloat(c.abono || 0), 0);
@@ -410,6 +630,7 @@ export default function CollapsibleTable() {
             <TableCell align="right">Total</TableCell>
             <TableCell align="right">Abono</TableCell>
             <TableCell align="right">Saldo</TableCell>
+            <TableCell align="center">Fecha límite</TableCell>
             <TableCell style={{ width: '10%' }} align="right">
               Acciones
             </TableCell>

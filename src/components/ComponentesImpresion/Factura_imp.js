@@ -48,8 +48,7 @@ const Factura_imp = React.forwardRef((props, ref) => {
       <img className="imagenImpresion" src={logo} />
       <Typography variant="subtitle1" gutterBottom>
         <center>
-          N° Control {factura_id} {credito && ' (Crédito)'}
-          {esProforma && ' (Proforma)'}
+          {esProforma ? 'N° Proforma' : credito ? 'N° Crédito' : 'N° Control'} {factura_id}
         </center>
       </Typography>
 

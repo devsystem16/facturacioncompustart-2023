@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -10,8 +10,11 @@ import {
   TableRow,
   Typography,
   Paper,
+  TextField,
+  InputAdornment,
   colors
 } from '@material-ui/core';
+import SearchIcon from '@material-ui/icons/Search';
 import FiltroFechas from './FiltroFechas';
 import ExportButtons from './ExportButtons';
 import { formatCurrency } from '../../Environment/utileria';
@@ -22,11 +25,23 @@ const ReporteVentasPorProducto = () => {
     ReportesAvanzadosContext
   );
   const [fechas, setFechas] = useState({ desde: '', hasta: '' });
+  const [filtro, setFiltro] = useState('');
 
   const handleBuscar = (fechaDesde, fechaHasta) => {
     setFechas({ desde: fechaDesde, hasta: fechaHasta });
     cargarVentasPorProducto(fechaDesde, fechaHasta);
   };
+
+  const productosFiltrados = useMemo(() => {
+    const productos = ventasPorProducto?.productos || [];
+    if (!filtro.trim()) return productos;
+    const texto = filtro.toLowerCase().trim();
+    return productos.filter(
+      (item) =>
+        (item.nombre || '').toLowerCase().includes(texto) ||
+        (item.codigo_barra || '').toLowerCase().includes(texto)
+    );
+  }, [ventasPorProducto, filtro]);
 
   return (
     <div>
@@ -43,6 +58,23 @@ const ReporteVentasPorProducto = () => {
             </CardContent>
           </Card>
 
+          <TextField
+            fullWidth
+            variant="outlined"
+            size="small"
+            placeholder="Buscar por nombre de producto o código..."
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+            style={{ marginBottom: 16 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              )
+            }}
+          />
+
           <TableContainer component={Paper}>
             <Table size="small">
               <TableHead>
@@ -54,7 +86,7 @@ const ReporteVentasPorProducto = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(ventasPorProducto.productos || []).map((item) => (
+                {productosFiltrados.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{item.nombre}</TableCell>
                     <TableCell>{item.codigo_barra}</TableCell>

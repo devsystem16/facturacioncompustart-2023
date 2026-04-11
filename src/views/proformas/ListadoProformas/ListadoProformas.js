@@ -132,13 +132,42 @@ export default ListadoProformas;
 
 
 
- const Row = ({ proforma, eliminarProforma, handleAbrirModal }) => {
+ const Row = ({ proforma, eliminarProforma, fn_obtenerProforma, handleAbrirModal }) => {
   const { setPestaniaActiva, tienePermiso } = useContext(LoginContext);
   const navigate = useNavigate();
 
-  const handleRedireccionar = (proforma) => {
+  const handleRedireccionar = async (proforma) => {
+    // Obtener datos frescos de la proforma con stock actualizado
+    const proformaActualizada = await fn_obtenerProforma(proforma.id);
+    const detalles = proformaActualizada?.detalles_proforma || [];
+
+    const productosSinStock = detalles.filter(
+      (detalle) => +detalle.producto?.stock <= 0
+    );
+
+    if (productosSinStock.length > 0) {
+      const listaHtml = productosSinStock
+        .map(
+          (d) =>
+            `<li style="text-align:left; margin-bottom:4px;">
+              <strong>${d.producto?.nombre}</strong> — Stock: ${d.producto?.stock}
+            </li>`
+        )
+        .join('');
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Productos sin stock',
+        html: `<p>No se puede facturar. Los siguientes productos tienen stock en 0:</p>
+               <ul style="list-style:none; padding:0; margin-top:10px;">${listaHtml}</ul>
+               <p style="margin-top:10px;">Debe aumentar el stock de estos productos antes de facturar.</p>`,
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+
     setPestaniaActiva('Punto de Venta');
-    navigate('/app/puntoventa', { state: { proforma }, replace: true });
+    navigate('/app/puntoventa', { state: { proforma: proformaActualizada }, replace: true });
   };
 
   const eliminar = (proforma) => {

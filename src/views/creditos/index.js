@@ -1,19 +1,13 @@
-import React, { useContext } from 'react';
-import { Box, Container, makeStyles } from '@material-ui/core';
+import React, { useContext, useEffect } from 'react';
+import { Box, Container, makeStyles, Typography } from '@material-ui/core';
+import { useSearchParams } from 'react-router-dom';
 
 import Page from '../../components/Page';
 import { ComponentIniciarPeriodo } from '../../Environment/utileria';
-// import Results from './Results';
-// import Toolbar from './Toolbar';
-
-// import NuevoCredito from '../../components/NuevoCredito';
-
 import { PeriodoContext } from '../../context/PeriodoContext';
-// import TablaCliente from '../../components/TablaClientes/TablaClientes';
-// import CreditosTable from '../../components/CreditosTable';
-// import CreditoProvider from '../../context/CreditoContext';
-
+import { CreditoContext } from '../../context/CreditoContext';
 import GridCreditos from '../../components/Creditos/GridCreditos';
+import ResumenCreditos from './ResumenCreditos';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,25 +20,39 @@ const useStyles = makeStyles((theme) => ({
 
 const Creditos = () => {
   const { periodoActivo } = useContext(PeriodoContext);
+  const { resumenCreditos, filtroEstado, setFiltroEstado } = useContext(CreditoContext);
   const classes = useStyles();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const estadoParam = searchParams.get('estado');
+    if (estadoParam) {
+      setFiltroEstado(estadoParam);
+    }
+  }, []);
 
   if (!periodoActivo)
     return <ComponentIniciarPeriodo></ComponentIniciarPeriodo>;
-  else
-    return (
-      // <CreditoProvider>
-      <Page className={classes.root} title="Clientes">
-        <Container maxWidth={false}>
-          <h2>CREDITOS</h2>
-          {/* <NuevoCredito /> */}
 
-          <Box mt={3}>
-            <GridCreditos></GridCreditos>
-            {/* <CreditosTable></CreditosTable> */}
-          </Box>
-        </Container>
-      </Page>
-    );
+  return (
+    <Page className={classes.root} title="Créditos">
+      <Container maxWidth={false}>
+        <Typography variant="h4" style={{ marginBottom: 16, fontWeight: 700 }}>
+          Créditos
+        </Typography>
+
+        <ResumenCreditos
+          resumen={resumenCreditos}
+          filtroEstado={filtroEstado}
+          setFiltroEstado={setFiltroEstado}
+        />
+
+        <Box mt={1}>
+          <GridCreditos />
+        </Box>
+      </Container>
+    </Page>
+  );
 };
 
 export default Creditos;

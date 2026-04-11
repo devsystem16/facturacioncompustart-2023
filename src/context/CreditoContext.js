@@ -19,6 +19,7 @@ const CreditoProvider = (props) => {
   const [creditos, setCreditos] = useState([]);
   const [recargarListaCreditos, setRecargarListaCreditos] = useState(true);
   const [recargarFiltro, setRecargarFiltro] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState('todos');
 
   const { setIsReload } = useContext(EstadisticasContext);
   const { periodo } = useContext(PeriodoContext);
@@ -61,9 +62,54 @@ const CreditoProvider = (props) => {
   }
 
 
+  const parseFecha = (fechaStr) => {
+    if (!fechaStr) return null;
+    const [y, m, d] = fechaStr.split('-');
+    return new Date(+y, +m - 1, +d);
+  };
+
+  const calcularResumenCreditos = (lista) => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const enSieteDias = new Date(hoy);
+    enSieteDias.setDate(enSieteDias.getDate() + 7);
+
+    const resumen = {
+      vencido: { total: 0, saldo: 0 },
+      por_vencer: { total: 0, saldo: 0 },
+      sin_fecha: { total: 0, saldo: 0 }
+    };
+
+    lista.forEach((c) => {
+      const saldo = parseFloat(c.saldo || 0);
+      if (!c.fecha_limite) {
+        resumen.sin_fecha.total += 1;
+        resumen.sin_fecha.saldo += saldo;
+      } else {
+        const fl = parseFecha(c.fecha_limite);
+        if (fl < hoy) {
+          resumen.vencido.total += 1;
+          resumen.vencido.saldo += saldo;
+        } else if (fl <= enSieteDias) {
+          resumen.por_vencer.total += 1;
+          resumen.por_vencer.saldo += saldo;
+        }
+      }
+    });
+
+    return resumen;
+  };
+
+  const [resumenCreditos, setResumenCreditos] = useState({
+    vencido: { total: 0, saldo: 0 },
+    por_vencer: { total: 0, saldo: 0 },
+    sin_fecha: { total: 0, saldo: 0 }
+  });
+
   const obtenerCreditos = async () => {
     const response = await API.get(END_POINT.obtenerCreditos);
     setCreditos(response.data);
+    setResumenCreditos(calcularResumenCreditos(response.data));
   };
 
   const eliminarCreditos = async (credito) => {
@@ -99,7 +145,10 @@ const CreditoProvider = (props) => {
         recargarFiltro,
         setRecargarFiltro,
         eliminarCreditos,
-        actualizarFormaPagoDetalleCredito
+        actualizarFormaPagoDetalleCredito,
+        filtroEstado,
+        setFiltroEstado,
+        resumenCreditos
       }}
     >
       {props.children}

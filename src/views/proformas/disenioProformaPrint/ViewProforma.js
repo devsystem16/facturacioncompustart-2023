@@ -179,17 +179,21 @@ const ViewProforma = ({ proforma }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {proforma.detalles_proforma?.map((item, index) => (
+                {proforma.detalles_proforma?.map((item, index) => {
+                  const precioUnitBase = item.producto?.precio_publico
+                    ? item.producto.precio_publico / 1.15
+                    : 0;
+                  const totalBase = item.subtotal ? item.subtotal / 1.15 : 0;
+                  return (
                   <TableRow key={index} className={classes.tableRow}>
                     <TableCell align="center">{item.cantidad}</TableCell>
                     <TableCell align="center">{item.producto_id}</TableCell>
                     <TableCell>{item.producto?.nombre || "-"}</TableCell>
-                    <TableCell align="right">${item.producto?.precio_publico?.toFixed(2) || "0.00"}</TableCell>
-                    <TableCell align="right">
-                      ${(item.subtotal?.toFixed(2)) || "0.00"}
-                    </TableCell>
+                    <TableCell align="right">${precioUnitBase.toFixed(2)}</TableCell>
+                    <TableCell align="right">${totalBase.toFixed(2)}</TableCell>
                   </TableRow>
-                )) || (
+                  );
+                }) || (
                   <TableRow>
                     <TableCell colSpan={5} align="center">
                       No hay detalles para mostrar

@@ -44,6 +44,7 @@ const CATALOGO_PERMISOS = [
   { codigo: 'productos.eliminar', modulo: 'Productos', descripcion: 'Eliminar producto' },
   { codigo: 'productos.utilidad-ver', modulo: 'Productos', descripcion: 'Ver pestaña Utilidad' },
   { codigo: 'productos.utilidad-exportar', modulo: 'Productos', descripcion: 'Exportar utilidad a Excel' },
+  { codigo: 'productos.editar-proveedor', modulo: 'Productos', descripcion: 'Modificar proveedor en tabla' },
 
   { codigo: 'ingresos.ver', modulo: 'Ingresos', descripcion: 'Acceder a órdenes de servicio' },
   { codigo: 'ingresos.crear', modulo: 'Ingresos', descripcion: 'Crear nueva orden de ingreso' },

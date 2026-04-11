@@ -23,9 +23,11 @@ export default function SelectJS({
   path_api,
   value,
   setValue,
+  setValueLabel = null,
   title = '*Seleccione*',
   margenes = 16,
-  defaultValue = -1
+  defaultValue = -1,
+  placeholderOption = null
 }) {
   const classes = useStyles();
   const [age, setAge] = React.useState('');
@@ -34,6 +36,10 @@ export default function SelectJS({
 
   const handleChange = (event) => {
     setValue(event.target.value);
+    if (setValueLabel) {
+      const selected = datos.find((d) => d.id === event.target.value);
+      setValueLabel(selected?.label || '');
+    }
   };
 
   const handleClose = () => {
@@ -53,15 +59,17 @@ export default function SelectJS({
   const loadData = async () => {
     const response = await API.get(path_api);
     const datoDefault = findDefault(response?.data);
- 
+
      let valorDefecto = datoDefault?.id ?? null;
-
-
 
    if (typeof defaultValue !== 'undefined' && defaultValue !== -1 && defaultValue !== null) {
       valorDefecto = defaultValue;
     }
 
+    // Si hay placeholderOption y defaultValue es vacío, respetar el valor vacío
+    if (placeholderOption && defaultValue === '') {
+      valorDefecto = '';
+    }
 
     setValue(valorDefecto);
     setDatos(response.data);
@@ -87,6 +95,11 @@ export default function SelectJS({
           //   defaultValue={1}
           onChange={handleChange}
         >
+          {placeholderOption && (
+            <MenuItem value="" disabled>
+              {placeholderOption}
+            </MenuItem>
+          )}
           {datos.map((dato, index) => {
             return (
               <MenuItem key={index} value={dato.id}>
