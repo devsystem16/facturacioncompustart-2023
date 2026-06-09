@@ -138,10 +138,9 @@ export default function TablaProductos() {
     });
 
     setProductos(nuevoListado);
-    // setProductosDesmontado(nuevoListado);
-    // PARA LA BUSQUED
-    // setProductosTemp(nuevoListado);
-    // setReload(true);
+    setProductosTemp((prevTemp) =>
+      prevTemp.map((item) => (item.id === producto.id ? productoNuevo : item))
+    );
   };
 
   const updateProductoDB = async (producto) => {

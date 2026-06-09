@@ -81,7 +81,7 @@ function Row(props) {
             <Grid item xs>
               <strong style={{ color: '#3f51b5' }}>{item?.nombre}</strong>
               <br></br>
-              {item.descripcion}
+              {item?.proveedor_codigo}
             </Grid>
             <Grid item xs={3}>
               P. Público ${item?.precio_publico}

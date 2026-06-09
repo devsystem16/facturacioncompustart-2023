@@ -113,7 +113,7 @@ function Row(props) {
               {item?.nombre}
             </Typography>
             <Typography className={classes.productDesc} noWrap>
-              {item?.descripcion}
+              {item?.proveedor_codigo}
             </Typography>
             <Typography className={classes.codeText}>
               {item?.codigo_barra}

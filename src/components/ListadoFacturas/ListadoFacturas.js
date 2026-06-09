@@ -414,12 +414,12 @@ function Row(props) {
 
         <TableCell align="right">
           {tienePermiso('facturas.reimprimir') && (
-              <PrintIco
-                title="Reimprimir Factura"
-                onClick={() => imprimirFactura(row.id, row.estado)}
-                style={{ cursor: 'pointer' }}
-              />
-            )}
+            <PrintIco
+              title="Reimprimir Factura"
+              onClick={() => imprimirFactura(row.id, row.estado)}
+              style={{ cursor: 'pointer' }}
+            />
+          )}
           {tienePermiso('facturas.anular') && (
             <PrintIcon
               title="Anular Factura"
