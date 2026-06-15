@@ -625,6 +625,7 @@ const FacturaProvider = (props) => {
     if (esProforma) {
       const responseProforma = await guardarComoProforma();
       setFactura_id(responseProforma?.codigoFac);
+    //  setEsProforma(false);
       return responseProforma;
     }
 
@@ -741,6 +742,7 @@ const FacturaProvider = (props) => {
     if (reloadProforma) {
       obtenerProformas();
       setReloadProforma(false);
+  
     }
   }, [productosFactura, reloadProforma]);
 

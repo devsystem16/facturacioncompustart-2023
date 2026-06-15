@@ -4,8 +4,19 @@ import RowFactura from './rowFactura';
 import TotalesFactura from './TotalesFactura';
 import { FacturaContext } from '../../../context/FacturaContext';
 
-const Factura = () => {
-  const { productosFactura, totales } = useContext(FacturaContext);
+const Factura = ({ esProforma = false }) => {
+  const { productosFactura, totales , setEsProforma} = useContext(FacturaContext);
+
+
+
+
+  
+    useEffect(() => {
+    
+      setEsProforma(esProforma);
+    }, []);
+  
+
 
   return (
     <div>

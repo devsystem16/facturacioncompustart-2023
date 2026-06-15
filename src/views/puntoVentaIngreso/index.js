@@ -63,7 +63,7 @@ const PuntoVenta = () => {
 
         <Grid item xs={12} sm={7}>
           <Paper className={classes.paper}>
-            <Factura />
+            <Factura esProforma={false} />
           </Paper>
         </Grid>
       </Grid>
